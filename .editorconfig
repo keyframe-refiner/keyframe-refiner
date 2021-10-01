@@ -1,0 +1,17 @@
+root = true
+
+[*]
+# 文字コードを UTF-8 に設定
+charset = utf-8
+# 改行のフォマット
+end_of_line = lf
+# ファイルの末尾に改行を入れる
+insert_final_newline = true
+# 行末のホワイトスペースを削除
+trim_trailing_whitespace = true
+
+[*.{js, ts, css, md, svelte}]
+# スペースでインデント
+indent_style = space
+# インデントの大きさを 2 に設定
+indent_size = 2

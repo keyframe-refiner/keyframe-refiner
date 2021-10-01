@@ -1,0 +1,53 @@
+{
+  "name": "genga-mapping",
+  "version": "0.0.1",
+  "description": "",
+  "main": "dist/index.js",
+  "keywords": [],
+  "author": "Nakamura",
+  "license": "UNLICENSED",
+  "scripts": {
+    "serve": "webpack serve --config ./scripts/webpack.config.dev.js --mode development --progress",
+    "check": "svelte-check",
+    "lint": "eslint ./src"
+  },
+  "dependencies": {
+    "@mdi/js": "^5.9.55",
+    "@smui/button": "^4.2.0",
+    "@smui/common": "^4.2.0",
+    "@smui/icon-button": "^4.2.0",
+    "@smui/linear-progress": "^4.2.0",
+    "@smui/select": "^4.2.0",
+    "file-type": "^16.5.3",
+    "tslib": "^2.1.0"
+  },
+  "devDependencies": {
+    "@tsconfig/svelte": "^2.0.1",
+    "@typescript-eslint/eslint-plugin": "^4.29.0",
+    "@typescript-eslint/parser": "^4.29.0",
+    "cross-env": "^7.0.3",
+    "css-loader": "^5.2.6",
+    "eslint": "^7.32.0",
+    "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-import": "^2.23.4",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^5.1.0",
+    "eslint-plugin-svelte3": "^3.2.0",
+    "eslint-webpack-plugin": "^3.0.1",
+    "html-webpack-plugin": "^5.3.1",
+    "mini-css-extract-plugin": "^1.6.2",
+    "rimraf": "^3.0.2",
+    "sass": "~1.32.13",
+    "sass-loader": "^10.2.0",
+    "style-loader": "^2.0.0",
+    "svelte": "^3.38.2",
+    "svelte-check": "^2.1.0",
+    "svelte-loader": "^3.1.2",
+    "svelte-preprocess": "^4.7.3",
+    "ts-loader": "^8.0.18",
+    "typescript": "^4.3.2",
+    "webpack": "^5.38.1",
+    "webpack-cli": "^4.5.0",
+    "webpack-dev-server": "^3.11.2"
+  }
+}
