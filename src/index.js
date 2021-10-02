@@ -143,7 +143,7 @@ grayScaleBtn.addEventListener('click', async () => {
 
         let rect = new cv.Rect(1000, 0, 500, 200);     //(始点x、始点y、横幅、縦幅)
 
-        let cut_img = src.roi(rect);
+        let cut_img = dst.roi(rect);
         let gray_img = convertImageToGray(cut_img);
         cut_img.delete();
 
