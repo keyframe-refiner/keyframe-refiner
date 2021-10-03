@@ -5,7 +5,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const { createPreprocessors } = require('../svelte.config');
 
-const absolutePathTo = path.resolve.bind(path, __dirname, '..');
+const fromRootTo = path.resolve.bind(path, __dirname, '..');
 
 module.exports = {
   resolve: {
@@ -16,7 +16,7 @@ module.exports = {
     },
   },
   devtool: 'cheap-module-source-map',
-  entry: absolutePathTo('src/index.ts'),
+  entry: fromRootTo('src/index.ts'),
   module: {
     rules: [{
       test: /\.svelte$/,
@@ -55,8 +55,8 @@ module.exports = {
             sassOptions: {
               quietDeps: true,
               includePaths: [
-                absolutePathTo('src/theme'),
-                absolutePathTo('node_modules'),
+                fromRootTo('src/theme'),
+                fromRootTo('node_modules'),
               ],
             },
           },
@@ -71,11 +71,11 @@ module.exports = {
     }],
   },
   output: {
-    path: absolutePathTo('dist/renderer'),
+    path: fromRootTo('dist/renderer'),
     filename: '[name].js',
   },
   devServer: {
-    contentBase: absolutePathTo('.'),
+    contentBase: fromRootTo('src'),
     hot: true,
     host: '0.0.0.0',
     port: 3000,
