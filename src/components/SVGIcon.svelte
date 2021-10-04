@@ -18,11 +18,6 @@
     user-select: none;
 
     :global {
-      svg {
-        width: inherit;
-        height: inherit;
-      }
-
       svg:focus {
         outline: none;
       }
