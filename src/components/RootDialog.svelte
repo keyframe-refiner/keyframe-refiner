@@ -11,7 +11,7 @@
   const dispatch = createEventDispatcher();
 
   function onClose() {
-    show = false;
+    open = show = false;
     dispatch('closed');
   }
 </script>
