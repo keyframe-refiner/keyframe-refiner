@@ -11,14 +11,14 @@
   const dispatch = createEventDispatcher();
 
   function onClose() {
-    open = show = false;
+    show = false;
     dispatch('closed');
   }
 </script>
 
 {#if show}
   <Portal target="body">
-    <Dialog {open} on:MDCDialog:closed={onClose} {...$$restProps}>
+    <Dialog bind:open on:MDCDialog:closed={onClose} {...$$restProps}>
       <slot></slot>
     </Dialog>
   </Portal>
