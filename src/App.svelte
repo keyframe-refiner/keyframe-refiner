@@ -52,6 +52,7 @@
   }
 
   #image-viewer {
+    position: relative;
     flex: 1;
   }
 

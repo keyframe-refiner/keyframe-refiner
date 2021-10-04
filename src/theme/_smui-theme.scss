@@ -69,3 +69,8 @@ pre {
     opacity: var(--mdc-ripple-hover-opacity, 0.04) !important;
   }
 }
+
+// reset circular progress immediately
+[aria-valuemin='0'] .mdc-circular-progress__determinate-circle {
+  transition-duration: 0ms;
+}

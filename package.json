@@ -14,6 +14,7 @@
   "dependencies": {
     "@mdi/js": "^5.9.55",
     "@smui/button": "^4.2.0",
+    "@smui/circular-progress": "^4.2.0",
     "@smui/common": "^4.2.0",
     "@smui/data-table": "^4.2.0",
     "@smui/dialog": "^4.2.0",

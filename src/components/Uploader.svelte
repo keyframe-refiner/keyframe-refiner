@@ -1,6 +1,8 @@
 <script lang="ts">
   import { Title, Content, Actions } from '@smui/dialog/styled';
+  import CircularProgress from '@smui/circular-progress/styled';
   import Button from '@smui/button/styled';
+  import Portal from 'svelte-portal';
 
   import RootDialog from './RootDialog.svelte';
   import { ImageCanvas } from '../image-canvas';
@@ -8,6 +10,9 @@
 
   let openDuplicatedDialog = false;
   let openUnsupportDialog = false;
+
+  let isUploading = false;
+  let progress = 0;
 
   let duplicatedFiles: File[] = [];
   let unsupportFiles: File[] = [];
@@ -55,12 +60,20 @@
   }
 
   export async function uploadFiles(files: File[]) {
-    const results = await filterUnsupportFiles(filterDuplicatedFiles(files));
+    isUploading = true;
+    progress = 0;
 
-    for (const f of results) {
-      $inputList.push(await ImageCanvas.fromFile(f));
+    const results = await filterUnsupportFiles(filterDuplicatedFiles(files));
+    const totalCount = results.length;
+
+    for (let i = 0; i < totalCount; i++) {
+      $inputList.push(await ImageCanvas.fromFile(results[i]));
       $inputList = $inputList; // force update
+
+      progress = (i + 1) / totalCount;
     }
+
+    isUploading = false;
   }
 </script>
 
@@ -103,3 +116,19 @@
     }}>閉じる</Button>
   </Actions>
 </RootDialog>
+
+<Portal target="#image-viewer">
+  <CircularProgress class="upload-progress" closed={!isUploading} {progress} />
+</Portal>
+
+<style lang="scss">
+  :global {
+    .upload-progress {
+      position: absolute;
+      left: 20px;
+      top: 20px;
+      width: 50px;
+      height: 50px;
+    }
+  }
+</style>
