@@ -4,9 +4,9 @@
   import Button from '@smui/button/styled';
 
   import { inputList, selectedIndex, selectedImage } from '../store';
-  import RootDialog from './RootDialog.svelte';
-  import Scrollbar from './Scrollbar.svelte';
-  import Thumb from './Thumb.svelte';
+  import RootDialog from '../components/RootDialog.svelte';
+  import Scrollbar from '../components/Scrollbar.svelte';
+  import Thumb from '../components/Thumb.svelte';
 
   let scrollbar: Scrollbar;
   let deleteIndex: number;

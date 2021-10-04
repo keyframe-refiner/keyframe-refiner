@@ -1,6 +1,6 @@
 <script lang="ts">
-  import Track from './components/Track.svelte';
   import DnD from './components/DnD.svelte';
+  import Track from './views/Track.svelte';
   import ImageViewer from './views/ImageViewer.svelte';
   import Property from './views/Property.svelte';
 </script>
