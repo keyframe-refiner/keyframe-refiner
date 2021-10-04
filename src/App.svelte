@@ -1,6 +1,65 @@
 <script lang="ts">
-  export let name = 'world';
+  import Track from './components/Track.svelte';
+  import DnD from './components/DnD.svelte';
 </script>
 
-<h1>hello {name}!</h1>
-<button on:click={() => { name = Math.random().toString(); }}>Randomize</button>
+<main>
+  <header id="header">stepper...</header>
+
+  <article id="gallery">
+    <aside id="track">
+      <Track />
+    </aside>
+
+    <section id="image-viewer">
+    </section>
+
+    <aside id="property">
+    </aside>
+  </article>
+
+  <DnD />
+</main>
+
+<style lang="scss">
+  main {
+    width: 100%;
+    height: 100%;
+  }
+
+  #header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: flex;
+    width: 100%;
+    height: var(--header-height);
+    background: #13191f;
+  }
+
+  #gallery {
+    display: flex;
+    height: 100%;
+    padding-top: var(--header-height);
+  }
+
+  #track {
+    border-right: 1px solid var(--seperator-color);
+  }
+
+  #image-viewer {
+    flex: 1;
+  }
+
+  #property {
+    flex: 0 0 300px;
+    border-left: 1px solid var(--seperator-color);
+
+    :global {
+      table {
+        width: 100%;
+        table-layout: fixed;
+      }
+    }
+  }
+</style>

@@ -2,25 +2,70 @@
 // see: https://sveltematerialui.com/THEMING.md/
 
 @use '@material/theme' as theme with (
-  $primary: #546e7a,
+  $primary: #1976D2,
   $secondary: #37474f,
+  $surface: #e1e2e6,
+  $background: #20262d,
 );
 
 :root {
   --mdc-theme-primary: #{theme.$primary};
   --mdc-theme-secondary: #{theme.$secondary};
+  --mdc-theme-surface: #{theme.$surface};
+  --mdc-theme-background: #{theme.$background};
 
-  @media print {
-    --mdc-theme-secondary: #000;
-  }
+  --header-height: 60px;
+  --scrollbar-width: 8px;
+  --seperator-color: #181c20;
+}
+
+html, body {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
 }
 
 body {
-  color: var(--mdc-theme-secondary);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  color: var(--mdc-theme-surface);
+  background: var(--mdc-theme-background);
+  font-family: 'ヒラギノ角ゴ Pro', 'Hiragino Kaku Gothic Pro', 'メイリオ', Meiryo, 'MS Pゴシック', 'MS PGothic', sans-serif;
 }
 
 pre {
   font-size: 14px;
   font-family: inherit;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.scrollbar-track {
+  background-color: #181c20 !important;
+  width: var(--scrollbar-width) !important;
+}
+
+.scrollbar-thumb {
+  background: #565a64 !important;
+  border-radius: 0 !important;
+}
+
+[data-scrollbar] {
+  padding-right: var(--scrollbar-width);
+}
+
+// remove button focus effect
+.mdc-ripple-upgraded--background-focused {
+  &::before, .mdc-button__ripple::before {
+    opacity: 0 !important;
+  }
+
+  &:hover::before, &:hover .mdc-button__ripple::before {
+    opacity: var(--mdc-ripple-hover-opacity, 0.04) !important;
+  }
 }
