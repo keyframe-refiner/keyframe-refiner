@@ -1,9 +1,12 @@
 <script lang="ts">
   import Scrollbar from 'smooth-scrollbar';
+  import type { ScrollbarOptions } from 'smooth-scrollbar/interfaces';
   import { onMount, onDestroy, afterUpdate } from 'svelte';
 
   let container: HTMLDivElement;
   let scrollbar: Scrollbar;
+
+  export let options: Partial<ScrollbarOptions> = {};
 
   export function getScrollbar() {
     return scrollbar;
@@ -12,6 +15,7 @@
   onMount(() => {
     scrollbar = Scrollbar.init(container, {
       alwaysShowTracks: true,
+      ...options,
     });
   });
 
