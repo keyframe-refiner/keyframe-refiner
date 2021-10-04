@@ -26,10 +26,10 @@
 
     if (target) {
       scrollbar.getScrollbar().scrollIntoView(target, {
-        onlyScrollIfNeeded: true,
         alignToTop: delta === -1,
         offsetTop: 10,
         offsetBottom: targetIndex === $inputList.length - 1 ? 200 : 10,
+        onlyScrollIfNeeded: targetIndex !== 0 && targetIndex !== $inputList.length - 1,
       });
     }
   }
