@@ -84,7 +84,7 @@ module.exports = {
   plugins: [
     new ESLintPlugin(),
     new HtmlWebpackPlugin({
-      title: 'Storyboard',
+      title: '原画位置合わせ',
       meta: {
         'Content-Security-Policy': {
           'http-equiv': 'Content-Security-Policy',
