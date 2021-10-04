@@ -1,7 +1,7 @@
 <script lang="ts">
   import DataTable, { Head, Body, Row, Cell } from '@smui/data-table';
 
-  import Drawer from './Drawer.svelte';
+  import Drawer from '../components/Drawer.svelte';
   import { selectedImage } from '../store';
 
   function valueOrNA(value: any) {

@@ -1,8 +1,8 @@
 <script lang="ts">
   import Track from './components/Track.svelte';
   import DnD from './components/DnD.svelte';
-  import ImageViewer from './components/ImageViewer.svelte';
-  import Property from './components/Property.svelte';
+  import ImageViewer from './views/ImageViewer.svelte';
+  import Property from './views/Property.svelte';
 </script>
 
 <main>
