@@ -1,11 +1,16 @@
 <script lang="ts">
   import clamp from 'lodash-es/clamp';
+  import { Title, Content, Actions } from '@smui/dialog/styled';
+  import Button from '@smui/button/styled';
 
   import { inputList, selectedIndex, selectedImage } from '../store';
+  import RootDialog from './RootDialog.svelte';
   import Scrollbar from './Scrollbar.svelte';
   import Thumb from './Thumb.svelte';
 
   let scrollbar: Scrollbar;
+  let deleteIndex: number;
+  let openDeleteConfirm = false;
 
   function navigate(delta: number) {
     const targetIndex = $selectedIndex + delta;
@@ -45,13 +50,18 @@
     }
   }
 
-  function deleteImage(index: number) {
-    $inputList.splice(index, 1);
+  function deleteImage() {
+    $inputList.splice(deleteIndex, 1);
     $inputList = $inputList; // force update
 
-    if (index === $selectedIndex) {
+    if (deleteIndex === $selectedIndex) {
       $selectedIndex = clamp($selectedIndex, 0, $inputList.length - 1);
     }
+  }
+
+  function requestDelete(index: number) {
+    deleteIndex = index;
+    openDeleteConfirm = true;
   }
 </script>
 
@@ -61,13 +71,33 @@
       type="image"
       {image}
       selected={image === $selectedImage}
-      on:delete={() => deleteImage(i)}
+      on:delete={() => requestDelete(i)}
       on:click={() => { $selectedIndex = i; }}
     />
   {/each}
 
   <Thumb type="uploader" />
 </Scrollbar>
+
+<RootDialog
+  scrimClickAction=""
+  escapeKeyAction=""
+  bind:open={openDeleteConfirm}
+  on:closed={() => { deleteIndex = -1; }}
+>
+  <Title>画像の削除</Title>
+  <Content>“{$inputList[deleteIndex]?.filename}”を削除しますか？</Content>
+  <Actions>
+    <Button on:click={() => {
+      openDeleteConfirm = false;
+    }}>キャンセル</Button>
+
+    <Button color="secondary" on:click={() => {
+      openDeleteConfirm = false;
+      deleteImage();
+    }}>削除</Button>
+  </Actions>
+</RootDialog>
 
 <svelte:window on:keydown={onKeyDown} />
 

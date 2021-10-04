@@ -1,8 +1,8 @@
 <script lang="ts">
-  import Portal from 'svelte-portal';
-  import Dialog, { Title, Content, Actions } from '@smui/dialog/styled';
+  import { Title, Content, Actions } from '@smui/dialog/styled';
   import Button from '@smui/button/styled';
 
+  import RootDialog from './RootDialog.svelte';
   import { ImageCanvas } from '../image-canvas';
   import { inputList } from '../store';
 
@@ -64,44 +64,42 @@
   }
 </script>
 
-<Portal target="body">
-  <Dialog
-    bind:open={openDuplicatedDialog}
-    on:MDCDialog:closed={() => { duplicatedFiles.length = 0; }}
-  >
-    <Title>重複ファイル</Title>
-    <Content>
-      <p>以下のファイルがすでに追加されています。</p>
-      <ul>
-        {#each duplicatedFiles as file}
-          <li>{file.name}</li>
-        {/each}
-      </ul>
-    </Content>
-    <Actions>
-      <Button color="secondary" variant="unelevated" on:click={() => {
-        openDuplicatedDialog = false;
-      }}>閉じる</Button>
-    </Actions>
-  </Dialog>
+<RootDialog
+  bind:open={openDuplicatedDialog}
+  on:closed={() => { duplicatedFiles.length = 0; }}
+>
+  <Title>重複ファイル</Title>
+  <Content>
+    <p>以下のファイルがすでに追加されています。</p>
+    <ul>
+      {#each duplicatedFiles as file}
+        <li>{file.name}</li>
+      {/each}
+    </ul>
+  </Content>
+  <Actions>
+    <Button on:click={() => {
+      openDuplicatedDialog = false;
+    }}>閉じる</Button>
+  </Actions>
+</RootDialog>
 
-  <Dialog
-    bind:open={openUnsupportDialog}
-    on:MDCDialog:closed={() => { unsupportFiles.length = 0; }}
-  >
-    <Title>非サポートファイル</Title>
-    <Content>
-      <p>以下のファイル形式はサポートされていません。</p>
-      <ul>
-        {#each unsupportFiles as file}
-          <li>{file.name}</li>
-        {/each}
-      </ul>
-    </Content>
-    <Actions>
-      <Button color="secondary" variant="unelevated" on:click={() => {
-        openUnsupportDialog = false;
-      }}>閉じる</Button>
-    </Actions>
-  </Dialog>
-</Portal>
+<RootDialog
+  bind:open={openUnsupportDialog}
+  on:closed={() => { unsupportFiles.length = 0; }}
+>
+  <Title>非サポートファイル</Title>
+  <Content>
+    <p>以下のファイル形式はサポートされていません。</p>
+    <ul>
+      {#each unsupportFiles as file}
+        <li>{file.name}</li>
+      {/each}
+    </ul>
+  </Content>
+  <Actions>
+    <Button on:click={() => {
+      openUnsupportDialog = false;
+    }}>閉じる</Button>
+  </Actions>
+</RootDialog>

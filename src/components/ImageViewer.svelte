@@ -1,13 +1,14 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import debounce from 'lodash-es/debounce';
 
   import { selectedImage } from '../store';
+  import type { ImageCanvas } from '../image-canvas';
 
   let canvas: HTMLCanvasElement;
+  let lastPainted: ImageCanvas | null;
 
   function draw() {
-    if (!canvas) {
+    if (!canvas || lastPainted === $selectedImage) {
       return;
     }
 
@@ -16,15 +17,17 @@
     if ($selectedImage) {
       canvas.width = $selectedImage.width;
       canvas.height = $selectedImage.height;
-
       ctx?.drawImage($selectedImage.canvas, 0, 0);
+
+      lastPainted = $selectedImage;
     } else {
       canvas.width = canvas.height = 0;
+      lastPainted = null;
     }
   }
 
   onMount(draw);
-  selectedImage.subscribe(debounce(draw, 300));
+  selectedImage.subscribe(draw);
 </script>
 
 <div class="viewer">
