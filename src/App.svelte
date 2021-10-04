@@ -1,6 +1,8 @@
 <script lang="ts">
   import Track from './components/Track.svelte';
   import DnD from './components/DnD.svelte';
+  import ImageViewer from './components/ImageViewer.svelte';
+  import Property from './components/Property.svelte';
 </script>
 
 <main>
@@ -12,9 +14,11 @@
     </aside>
 
     <section id="image-viewer">
+      <ImageViewer />
     </section>
 
     <aside id="property">
+      <Property />
     </aside>
   </article>
 
