@@ -102,11 +102,15 @@
     const dx = clientX - canvasRect.left;
     const dy = clientY - canvasRect.top;
 
-    // how much `scale` is scaled
-    const n = level / $viewerScale;
+    // memoize previous scale value
+    const prevScale = $viewerScale;
 
     // update `scale`
     $viewerScale = clamp(level, minScale, maxScale);
+
+    // how much `scale` is scaled
+    const n = $viewerScale / prevScale;
+
     $pivotPointViewer.x = clamp($pivotPointViewer.x * n, 0, canvas.clientWidth);
     $pivotPointViewer.y = clamp($pivotPointViewer.y * n, 0, canvas.clientWidth);
 
