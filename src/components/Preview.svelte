@@ -1,6 +1,6 @@
 <script lang="ts">
   import debounce from 'lodash-es/debounce';
-  import { afterUpdate, onDestroy } from 'svelte';
+  import { afterUpdate } from 'svelte';
 
   import { VariableTracker } from '../utils/variable-tracker';
   import type { ImageCanvas } from '../image-canvas';
@@ -14,10 +14,8 @@
   let wrapperHeight: number;
 
   const tracker = new VariableTracker(() => [
-    image, wrapperWidth, wrapperHeight,
+    image, canvas, wrapperWidth, wrapperHeight,
   ]);
-
-  onDestroy(() => tracker.destroy());
 
   function repaint() {
     if (!canvas || !image) {
