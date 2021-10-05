@@ -6,11 +6,12 @@
   import { inputList, selectedIndex, selectedImage } from '../store';
   import RootDialog from '../components/RootDialog.svelte';
   import Scrollbar from '../components/Scrollbar.svelte';
-  import Thumb from '../components/Thumb.svelte';
+  import Thumb from './Thumb.svelte';
 
   let scrollbar: Scrollbar;
   let deleteIndex: number;
   let openDeleteConfirm = false;
+  const thumbs: (Thumb | null)[] = [];
 
   function navigate(delta: number) {
     const targetIndex = $selectedIndex + delta;
@@ -22,7 +23,7 @@
     $selectedIndex = targetIndex;
 
     // TODO: find a better approach
-    const target = document.querySelector(`.thumb:nth-child(${targetIndex + 1})`) as HTMLElement;
+    const target = thumbs[targetIndex]?.getThumbElement();
 
     if (target) {
       scrollbar.getScrollbar().scrollIntoView(target, {
@@ -73,6 +74,7 @@
       selected={image === $selectedImage}
       on:delete={() => requestDelete(i)}
       on:click={() => { $selectedIndex = i; }}
+      bind:this={thumbs[i]}
     />
   {/each}
 

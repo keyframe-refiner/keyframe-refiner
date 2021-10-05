@@ -2,15 +2,21 @@
   import { createEventDispatcher } from 'svelte';
   import { mdiPlus, mdiTrashCanOutline } from '@mdi/js';
 
-  import SVGIcon from './SVGIcon.svelte';
-  import Uploader from './Uploader.svelte';
-  import Preview from './Preview.svelte';
+  import SVGIcon from '../components/SVGIcon.svelte';
+  import Uploader from '../components/Uploader.svelte';
+  import Preview from '../components/Preview.svelte';
 
   import type { ImageCanvas } from '../image-canvas';
 
   export let type: 'image' | 'uploader';
   export let image: ImageCanvas | null = null;
   export let selected = false;
+
+  let thumbElement: HTMLElement;
+
+  export function getThumbElement() {
+    return thumbElement;
+  }
 
   const dispatch = createEventDispatcher();
 
@@ -27,7 +33,7 @@
   }
 </script>
 
-<div class="thumb" class:selected on:click {...$$restProps}>
+<div class="thumb" class:selected on:click bind:this={thumbElement} {...$$restProps}>
   {#if type === 'image' && image}
     <Preview title={image?.filename} {image}>
       <span class="delete" title="この画像を削除" on:click={() => dispatch('delete')}>

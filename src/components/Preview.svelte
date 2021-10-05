@@ -17,7 +17,7 @@
       return;
     }
 
-    // all unchange => no repaint needed
+    // all unchanged => no repaint needed
     if (lastPainted === image &&
         wrapperWidth === wrapper.clientWidth &&
         wrapperHeight === wrapper.clientHeight) {
