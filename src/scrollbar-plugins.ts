@@ -2,11 +2,28 @@ import clamp from 'lodash-es/clamp';
 import Scrollbar, { ScrollbarPlugin } from 'smooth-scrollbar';
 import OverscrollPlugin from 'smooth-scrollbar/plugins/overscroll';
 
+type Delta = {
+  x: number,
+  y: number,
+}
+
 class DisableKeyboardPlugin extends ScrollbarPlugin {
   static pluginName = 'disableKeyboard';
 
-  transformDelta(delta: { x: number, y: number }, fromEvent: Event) {
+  transformDelta(delta: Delta, fromEvent: Event) {
     if (fromEvent.type.startsWith('key')) {
+      return { x: 0, y: 0 };
+    }
+
+    return delta;
+  }
+}
+
+class PreventZoomScrollingPlugin extends ScrollbarPlugin {
+  static pluginName = 'preventZoomScrolling';
+
+  transformDelta(delta: Delta, fromEvent: Event) {
+    if (fromEvent.type.match(/wheel/) && (fromEvent as WheelEvent).ctrlKey) {
       return { x: 0, y: 0 };
     }
 
@@ -104,4 +121,4 @@ class DragPlugin extends ScrollbarPlugin {
   }
 }
 
-Scrollbar.use(DisableKeyboardPlugin, DragPlugin, OverscrollPlugin);
+Scrollbar.use(DisableKeyboardPlugin, PreventZoomScrollingPlugin, DragPlugin, OverscrollPlugin);
