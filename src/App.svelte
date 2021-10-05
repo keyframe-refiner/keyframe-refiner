@@ -1,8 +1,12 @@
 <script lang="ts">
+  import { mdiImageMultiple } from '@mdi/js';
+
   import DnD from './components/DnD.svelte';
+  import SVGIcon from './components/SVGIcon.svelte';
   import Track from './views/Track.svelte';
   import ImageViewer from './views/ImageViewer.svelte';
   import Property from './views/Property.svelte';
+  import { selectedImage } from './store';
 </script>
 
 <main>
@@ -14,7 +18,11 @@
     </aside>
 
     <section id="image-viewer">
-      <ImageViewer />
+      {#if $selectedImage}
+        <ImageViewer />
+      {:else}
+        <SVGIcon id="viewer-placeholder" title="表示できる画像がありません" icon={mdiImageMultiple} />
+      {/if}
     </section>
 
     <aside id="property">
@@ -38,7 +46,7 @@
     display: flex;
     width: 100%;
     height: var(--header-height);
-    background: #13191f;
+    background: var(--background-dimmed);
   }
 
   #gallery {
@@ -48,23 +56,35 @@
   }
 
   #track {
-    border-right: 1px solid var(--seperator-color);
+    border-right: 1px solid var(--background-dimmed);
   }
 
   #image-viewer {
     position: relative;
     flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
   }
 
   #property {
     flex: 0 0 300px;
-    border-left: 1px solid var(--seperator-color);
+    border-left: 1px solid var(--background-dimmed);
 
     :global {
       table {
         width: 100%;
         table-layout: fixed;
       }
+    }
+  }
+
+  :global {
+    #viewer-placeholder {
+      width: 20%;
+      height: 20%;
+      color: var(--placeholder);
     }
   }
 </style>

@@ -15,6 +15,7 @@
   onMount(() => {
     scrollbar = Scrollbar.init(container, {
       alwaysShowTracks: true,
+      continuousScrolling: false,
       ...options,
     });
   });

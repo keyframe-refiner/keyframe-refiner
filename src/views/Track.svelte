@@ -145,13 +145,13 @@
     width: var(--thumb-size);
     height: var(--thumb-size);
     outline: none;
-    color: darken(#565a64, 10);
+    color: var(--placeholder);
     border: 3px solid currentColor;
     border-radius: 3px;
     margin-bottom: 20px;
 
     &:hover {
-      color: lighten(#565a64, 10);
+      color: var(--placeholder-light);
     }
   }
 

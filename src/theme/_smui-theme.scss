@@ -14,9 +14,11 @@
   --mdc-theme-surface: #{theme.$surface};
   --mdc-theme-background: #{theme.$background};
 
+  --background-dimmed: #181c20;
+  --placeholder: #3e4149;
+  --placeholder-light: #6e737f;
   --header-height: 60px;
   --scrollbar-width: 8px;
-  --seperator-color: #181c20;
 }
 
 html, body {
@@ -47,6 +49,13 @@ pre {
 
 .scrollbar-track {
   background-color: #181c20 !important;
+}
+
+.scrollbar-track-x {
+  height: var(--scrollbar-width) !important;
+}
+
+.scrollbar-track-y {
   width: var(--scrollbar-width) !important;
 }
 
@@ -65,9 +74,9 @@ pre {
     opacity: 0 !important;
   }
 
-  &:hover::before, &:hover .mdc-button__ripple::before {
-    opacity: var(--mdc-ripple-hover-opacity, 0.04) !important;
-  }
+  // &:hover::before, &:hover .mdc-button__ripple::before {
+  //   opacity: var(--mdc-ripple-hover-opacity, 0.04) !important;
+  // }
 }
 
 // reset circular progress immediately
