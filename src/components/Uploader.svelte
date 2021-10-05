@@ -21,10 +21,14 @@
     const result: File[] = [];
     const dup: File[] = [];
 
-    for (const f of files) {
-      const existed = $inputList.some(image => image.filename === f.name);
+    const loadedFilenames = {};
 
-      if (existed) {
+    for (const image of $inputList) {
+      loadedFilenames[image.filename] = true;
+    }
+
+    for (const f of files) {
+      if (loadedFilenames[f.name]) {
         dup.push(f);
       } else {
         result.push(f);
@@ -39,7 +43,7 @@
     return result;
   }
 
-  async function filterUnsupportFiles(files: File[]) {
+  function filterUnsupportFiles(files: File[]) {
     const result: File[] = [];
     const unsup: File[] = [];
 
@@ -63,7 +67,7 @@
     isUploading = true;
     progress = 0;
 
-    const results = await filterUnsupportFiles(filterDuplicatedFiles(files));
+    const results = filterUnsupportFiles(filterDuplicatedFiles(files));
     const totalCount = results.length;
 
     for (let i = 0; i < totalCount; i++) {
