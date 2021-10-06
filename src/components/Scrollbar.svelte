@@ -1,7 +1,7 @@
 <script lang="ts">
   import Scrollbar from 'smooth-scrollbar';
   import type { ScrollbarOptions } from 'smooth-scrollbar/interfaces';
-  import { onMount, onDestroy, afterUpdate } from 'svelte';
+  import { onMount, onDestroy, afterUpdate, tick } from 'svelte';
 
   let container: HTMLDivElement;
   let scrollbar: Scrollbar;
@@ -20,7 +20,9 @@
     });
   });
 
-  afterUpdate(() => {
+  afterUpdate(async () => {
+    // await DOM rendering to be finished
+    await tick();
     scrollbar.update();
   });
 
