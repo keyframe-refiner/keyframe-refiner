@@ -1,6 +1,5 @@
 <script lang="ts">
   import clamp from 'lodash-es/clamp';
-  import { beforeUpdate } from 'svelte';
 
   interface CoordTransformer {
     (x: number, y: number): [number, number],
@@ -17,12 +16,10 @@
   export let localXYtoRealXY: CoordTransformer = defaultTransformer;
   export let realXYtoLocalXY: CoordTransformer = defaultTransformer;
 
-  let [localX, localY] = realXYtoLocalXY(x, y);
+  let [localX, localY] = realXYtoLocalXY(x, y); // init values
 
-  beforeUpdate(() => {
-    [localX, localY] = realXYtoLocalXY(x, y);
-    // console.log('update', x, y, localX, localY);
-  });
+  // auto update
+  $: [localX, localY] = realXYtoLocalXY(x, y);
 
   let wrapperEl: HTMLElement;
   $: container = delegateTo || wrapperEl;
@@ -41,10 +38,13 @@
     // TODO: improve performance
     const bounding = container.getBoundingClientRect();
 
-    localX = clamp(pointerPosition.clientX - bounding.left, 0, bounding.width);
-    localY = clamp(pointerPosition.clientY - bounding.top, 0, bounding.height);
+    // assign new values to localX, localY may cause unnecessary component updates
+    // therefore, use local variables instead
+    const lx = clamp(pointerPosition.clientX - bounding.left, 0, bounding.width);
+    const ly = clamp(pointerPosition.clientY - bounding.top, 0, bounding.height);
 
-    [x, y] = localXYtoRealXY(localX, localY);
+    // manually update x, y => component updates => auto update localX, localY
+    [x, y] = localXYtoRealXY(lx, ly);
 
     pollingID = requestAnimationFrame(polling);
   }
