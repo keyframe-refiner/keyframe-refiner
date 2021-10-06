@@ -1,6 +1,5 @@
 <script lang="ts">
   import clamp from 'lodash-es/clamp';
-  import { createEventDispatcher } from 'svelte';
 
   export let x = 0;
   export let y = 0;
@@ -19,15 +18,11 @@
     clientY: 0,
   };
 
-  const dispatch = createEventDispatcher();
-
   function polling() {
     const bounding = container.getBoundingClientRect();
 
     x = clamp(pointerPosition.clientX - bounding.left, 0, bounding.width);
     y = clamp(pointerPosition.clientY - bounding.top, 0, bounding.height);
-
-    dispatch('move', { x, y });
 
     pollingID = requestAnimationFrame(polling);
   }

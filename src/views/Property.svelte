@@ -1,26 +1,19 @@
 <script lang="ts">
-  import DataTable, { Head, Body, Row, Cell } from '@smui/data-table';
+  import DataTable, { Body, Row, Cell } from '@smui/data-table';
 
   import Drawer from '../components/Drawer.svelte';
-  import { selectedImage } from '../store';
+  import { selectedImage, pivotPointReal } from '../store';
 
   function valueOrNA(value: any) {
-    return value || 'N/A';
+    return value ?? 'N/A';
   }
 </script>
 
-<Drawer class="image-info">
+<Drawer class="property-section image-info">
   <span slot="header">画像情報</span>
 
   <div slot="body">
     <DataTable>
-      <Head>
-        <Row>
-          <Cell>プロパティー</Cell>
-          <Cell>値</Cell>
-        </Row>
-      </Head>
-
       <Body>
         <Row>
           <Cell>ファイル名</Cell>
@@ -36,11 +29,41 @@
           <Cell>高さ</Cell>
           <Cell>{valueOrNA($selectedImage?.height)}</Cell>
         </Row>
+
+        <Row>
+          <Cell>メディアタイプ</Cell>
+          <Cell>{valueOrNA($selectedImage?.filetype)}</Cell>
+        </Row>
+      </Body>
+    </DataTable>
+  </div>
+</Drawer>
+
+<Drawer class="property-section pivot-point">
+  <span slot="header">基準位置</span>
+
+  <div slot="body">
+    <DataTable>
+      <Body>
+        <Row>
+          <Cell>x</Cell>
+          <Cell title={valueOrNA($pivotPointReal?.x)}>{valueOrNA($pivotPointReal?.x)}</Cell>
+        </Row>
+
+        <Row>
+          <Cell>y</Cell>
+          <Cell title={valueOrNA($pivotPointReal?.y)}>{valueOrNA($pivotPointReal?.y)}</Cell>
+        </Row>
       </Body>
     </DataTable>
   </div>
 </Drawer>
 
 <style lang="scss">
-
+  :global {
+    .property-section:not(:nth-child(1)) {
+      margin-top: 20px;
+      border-top: 1px solid var(--background-dimmed);
+    }
+  }
 </style>

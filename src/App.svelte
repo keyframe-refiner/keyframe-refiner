@@ -10,7 +10,9 @@
 </script>
 
 <main>
-  <header id="header">stepper...</header>
+  <header id="header">
+    <h1 id="logo">原画位置合わせ</h1>
+  </header>
 
   <article id="gallery">
     <aside id="track">
@@ -47,6 +49,15 @@
     width: 100%;
     height: var(--header-height);
     background: var(--background-dimmed);
+
+    display: flex;
+    align-items: center;
+  }
+
+  #logo {
+    font-size: 24px;
+    margin-left: 0.5em;
+    user-select: none;
   }
 
   #gallery {
@@ -56,7 +67,7 @@
   }
 
   #track {
-    border-right: 1px solid var(--background-dimmed);
+    border-right: 2px solid var(--background-dimmed);
   }
 
   #image-viewer {
@@ -70,7 +81,8 @@
 
   #property {
     flex: 0 0 300px;
-    border-left: 1px solid var(--background-dimmed);
+    border-left: 2px solid var(--background-dimmed);
+    padding: 10px;
 
     :global {
       table {

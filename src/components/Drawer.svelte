@@ -15,5 +15,9 @@
 </section>
 
 <style lang="scss">
-
+  header {
+    font-weight: bold;
+    font-size: 1.1em;
+    padding: 1em 0;
+  }
 </style>
