@@ -30,7 +30,6 @@
   let pollingID: number;
 
   let pressed = false;
-  let pointerMoved = false;
 
   const pointerPosition = {
     clientX: 0,
@@ -38,22 +37,20 @@
   };
 
   function polling() {
-    if (pointerMoved) {
-      const bounding = container.getBoundingClientRect();
+    // real-time updates
+    // TODO: improve performance
+    const bounding = container.getBoundingClientRect();
 
-      localX = clamp(pointerPosition.clientX - bounding.left, 0, bounding.width);
-      localY = clamp(pointerPosition.clientY - bounding.top, 0, bounding.height);
+    localX = clamp(pointerPosition.clientX - bounding.left, 0, bounding.width);
+    localY = clamp(pointerPosition.clientY - bounding.top, 0, bounding.height);
 
-      [x, y] = localXYtoRealXY(localX, localY);
-
-      pointerMoved = false;
-    }
+    [x, y] = localXYtoRealXY(localX, localY);
 
     pollingID = requestAnimationFrame(polling);
   }
 
   function onPointerDown(e: PointerEvent) {
-    pointerMoved = pressed = true;
+    pressed = true;
     cancelAnimationFrame(pollingID);
 
     pointerPosition.clientX = e.clientX;
@@ -68,7 +65,7 @@
   }
 
   function onPointerUp() {
-    pointerMoved = pressed = false;
+    pressed = false;
     cancelAnimationFrame(pollingID);
   }
 
@@ -77,7 +74,6 @@
       return;
     }
 
-    pointerMoved = true;
     pointerPosition.clientX = e.clientX;
     pointerPosition.clientY = e.clientY;
   }
