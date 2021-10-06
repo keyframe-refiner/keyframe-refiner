@@ -35,10 +35,11 @@
   function onPointerDown(e: PointerEvent) {
     pressed = true;
     cancelAnimationFrame(pollingID);
-    pollingID = requestAnimationFrame(polling);
 
     pointerPosition.clientX = e.clientX;
     pointerPosition.clientY = e.clientY;
+
+    polling();
 
     // HACK: enable scrollbar auto-scrolling
     container.dispatchEvent(new CustomEvent('dragstart', {
