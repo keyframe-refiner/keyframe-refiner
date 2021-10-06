@@ -1,10 +1,28 @@
 <script lang="ts">
   import clamp from 'lodash-es/clamp';
+  import { beforeUpdate } from 'svelte';
+
+  interface CoordTransformer {
+    (x: number, y: number): [number, number],
+  }
+
+  function defaultTransformer(x: number, y: number): [number, number] {
+    return [x, y];
+  }
 
   export let x = 0;
   export let y = 0;
   export let fullsize = false;
   export let delegateTo: HTMLElement | null = null;
+  export let localXYtoRealXY: CoordTransformer = defaultTransformer;
+  export let realXYtoLocalXY: CoordTransformer = defaultTransformer;
+
+  let [localX, localY] = realXYtoLocalXY(x, y);
+
+  beforeUpdate(() => {
+    [localX, localY] = realXYtoLocalXY(x, y);
+    // console.log('update', x, y, localX, localY);
+  });
 
   let wrapperEl: HTMLElement;
   $: container = delegateTo || wrapperEl;
@@ -12,6 +30,7 @@
   let pollingID: number;
 
   let pressed = false;
+  let pointerMoved = false;
 
   const pointerPosition = {
     clientX: 0,
@@ -19,16 +38,22 @@
   };
 
   function polling() {
-    const bounding = container.getBoundingClientRect();
+    if (pointerMoved) {
+      const bounding = container.getBoundingClientRect();
 
-    x = clamp(pointerPosition.clientX - bounding.left, 0, bounding.width);
-    y = clamp(pointerPosition.clientY - bounding.top, 0, bounding.height);
+      localX = clamp(pointerPosition.clientX - bounding.left, 0, bounding.width);
+      localY = clamp(pointerPosition.clientY - bounding.top, 0, bounding.height);
+
+      [x, y] = localXYtoRealXY(localX, localY);
+
+      pointerMoved = false;
+    }
 
     pollingID = requestAnimationFrame(polling);
   }
 
   function onPointerDown(e: PointerEvent) {
-    pressed = true;
+    pointerMoved = pressed = true;
     cancelAnimationFrame(pollingID);
 
     pointerPosition.clientX = e.clientX;
@@ -43,7 +68,7 @@
   }
 
   function onPointerUp() {
-    pressed = false;
+    pointerMoved = pressed = false;
     cancelAnimationFrame(pollingID);
   }
 
@@ -52,6 +77,7 @@
       return;
     }
 
+    pointerMoved = true;
     pointerPosition.clientX = e.clientX;
     pointerPosition.clientY = e.clientY;
   }
@@ -62,7 +88,7 @@
   class:fullsize
   bind:this={container}
   on:pointerdown={onPointerDown}
-  style={`--draggable-x: ${x}px; --draggable-y: ${y}px`}
+  style={`--draggable-x: ${localX}px; --draggable-y: ${localY}px`}
 >
   <slot />
 </div>

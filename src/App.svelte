@@ -88,6 +88,7 @@
       table {
         width: 100%;
         table-layout: fixed;
+        text-overflow: ellipsis;
       }
     }
   }

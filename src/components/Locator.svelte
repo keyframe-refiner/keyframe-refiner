@@ -6,7 +6,7 @@
 </script>
 
 <div class="locator">
-  <Draggable bind:x bind:y fullsize>
+  <Draggable bind:x bind:y fullsize {...$$restProps}>
     <div class="locator-line horizontal"></div>
     <div class="locator-line vertical"></div>
     <div class="locator-circle"></div>

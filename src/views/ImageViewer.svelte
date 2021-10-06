@@ -8,9 +8,10 @@
   import Locator from '../components/Locator.svelte';
   import Scrollbar from '../components/Scrollbar.svelte';
   import SVGIcon from '../components/SVGIcon.svelte';
-  import { selectedImage, viewerScale, pivotPointViewer } from '../store';
+  import { selectedImage, pivotPoint } from '../store';
   import { VariableTracker } from '../utils/variable-tracker';
 
+  let scale = 0;
   const minScale = 0.01;
   const maxScale = 3;
   const stepRatio = 1.5;
@@ -49,7 +50,7 @@
     const maxWidth = viewerEl.clientWidth * 0.8;
     const maxHeight = viewerEl.clientHeight * 0.8;
 
-    $viewerScale = Math.min(
+    scale = Math.min(
       1,
       maxWidth / $selectedImage.width,
       maxHeight / $selectedImage.height,
@@ -74,8 +75,8 @@
   }
 
   function adjustViewerOffsets() {
-    displayWidth = $selectedImage.width * $viewerScale;
-    displayHeight = $selectedImage.height * $viewerScale;
+    displayWidth = $selectedImage.width * scale;
+    displayHeight = $selectedImage.height * scale;
 
     if (displayWidth < viewerEl.clientWidth) {
       viewerOffsetX = (viewerEl.clientWidth - displayWidth) / 2;
@@ -104,16 +105,16 @@
     const dy = clientY - canvasRect.top;
 
     // memoize previous scale value
-    const prevScale = $viewerScale;
+    const prevScale = scale;
 
     // update `scale`
-    $viewerScale = clamp(level, minScale, maxScale);
+    scale = clamp(level, minScale, maxScale);
 
     // how much `scale` is scaled
-    const n = $viewerScale / prevScale;
+    const n = scale / prevScale;
 
-    $pivotPointViewer.x = clamp($pivotPointViewer.x * n, 0, canvas.clientWidth);
-    $pivotPointViewer.y = clamp($pivotPointViewer.y * n, 0, canvas.clientWidth);
+    // force locator to update
+    $pivotPoint = $pivotPoint;
 
     // await rendering
     await tick();
@@ -128,11 +129,11 @@
   }
 
   function zoomIn() {
-    zoomAt($viewerScale * stepRatio);
+    zoomAt(scale * stepRatio);
   }
 
   function zoomOut() {
-    zoomAt($viewerScale / stepRatio);
+    zoomAt(scale / stepRatio);
   }
 
   function wheelZoom(e: WheelEvent) {
@@ -145,7 +146,15 @@
 
     // deltaY > 0 => zoomIn, deltaY < 0 => zoomOut
     const delta = e.deltaY / -100;
-    zoomAt($viewerScale + delta, e.clientX, e.clientY);
+    zoomAt(scale + delta, e.clientX, e.clientY);
+  }
+
+  function localXYtoRealXY(x: number, y: number) {
+    return [x / scale, y / scale].map(Math.round);
+  }
+
+  function realXYtoLocalXY(x: number, y: number) {
+    return [x * scale, y * scale].map(Math.round);
   }
 </script>
 
@@ -154,7 +163,7 @@
     <article
       class="viewer-body"
       style={`
-        --viewer-scale: ${$viewerScale};
+        --viewer-scale: ${scale};
         --viewer-offset-x: ${viewerOffsetX}px;
         --viewer-offset-y: ${viewerOffsetY}px;
         --viewer-width: ${displayWidth}px;
@@ -163,18 +172,18 @@
     >
       <div class="viewer-wrapper">
         <canvas class="viewer-canvas" bind:this={canvas}></canvas>
-        <Locator bind:x={$pivotPointViewer.x} bind:y={$pivotPointViewer.y} />
+        <Locator bind:x={$pivotPoint.x} bind:y={$pivotPoint.y} {localXYtoRealXY} {realXYtoLocalXY} />
       </div>
 
     </article>
   </Scrollbar>
 
   <footer class="viewer-zoom">
-    <IconButton title="縮小" on:click={zoomOut} disabled={$viewerScale === minScale}>
+    <IconButton title="縮小" on:click={zoomOut} disabled={scale === minScale}>
       <SVGIcon icon={mdiMagnifyMinusOutline} />
     </IconButton>
 
-    <IconButton title="拡大" on:click={zoomIn} disabled={$viewerScale === maxScale}>
+    <IconButton title="拡大" on:click={zoomIn} disabled={scale === maxScale}>
       <SVGIcon icon={mdiMagnifyPlusOutline} />
     </IconButton>
   </footer>

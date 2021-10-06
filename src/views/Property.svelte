@@ -2,7 +2,7 @@
   import DataTable, { Body, Row, Cell } from '@smui/data-table';
 
   import Drawer from '../components/Drawer.svelte';
-  import { selectedImage, pivotPointReal } from '../store';
+  import { selectedImage, pivotPoint } from '../store';
 
   function valueOrNA(value: any) {
     return value ?? 'N/A';
@@ -47,12 +47,12 @@
       <Body>
         <Row>
           <Cell>x</Cell>
-          <Cell title={valueOrNA($pivotPointReal?.x)}>{valueOrNA($pivotPointReal?.x)}</Cell>
+          <Cell title={valueOrNA($pivotPoint?.x)}>{valueOrNA($pivotPoint?.x)}</Cell>
         </Row>
 
         <Row>
           <Cell>y</Cell>
-          <Cell title={valueOrNA($pivotPointReal?.y)}>{valueOrNA($pivotPointReal?.y)}</Cell>
+          <Cell title={valueOrNA($pivotPoint?.y)}>{valueOrNA($pivotPoint?.y)}</Cell>
         </Row>
       </Body>
     </DataTable>
