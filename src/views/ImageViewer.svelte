@@ -1,5 +1,6 @@
 <script lang="ts">
   import clamp from 'lodash-es/clamp';
+  import debounce from 'lodash-es/debounce';
   import { onMount, afterUpdate, tick } from 'svelte';
   import IconButton from '@smui/icon-button/styled';
   import { mdiMagnifyMinusOutline, mdiMagnifyPlusOutline } from '@mdi/js';
@@ -178,6 +179,8 @@
     </IconButton>
   </footer>
 </div>
+
+<svelte:window on:resize={debounce(adjustViewerOffsets, 100)} />
 
 <style lang="scss">
   .viewer {
