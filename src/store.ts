@@ -17,7 +17,7 @@ export const pivotPoint = writable({
   y: 0,
 });
 
-export const cropRect = writable({
+export const ROI = writable({
   top: 0,
   right: 0,
   bottom: 0,

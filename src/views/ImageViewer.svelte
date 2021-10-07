@@ -8,7 +8,7 @@
   import Locator from '../components/Locator.svelte';
   import Scrollbar from '../components/Scrollbar.svelte';
   import SVGIcon from '../components/SVGIcon.svelte';
-  import { selectedImage, pivotPoint } from '../store';
+  import { selectedImage, pivotPoint, ROI } from '../store';
   import { VariableTracker } from '../utils/variable-tracker';
 
   let scale = 0;
@@ -31,18 +31,7 @@
     canvas,
   ]);
 
-  onMount(initScale);
-
-  afterUpdate(() => {
-    if (!$selectedImage) {
-      return;
-    }
-
-    repaint();
-    adjustViewerOffsets();
-  });
-
-  function initScale() {
+  onMount(() => {
     if (!$selectedImage) {
       return;
     }
@@ -55,7 +44,20 @@
       maxWidth / $selectedImage.width,
       maxHeight / $selectedImage.height,
     );
-  }
+  });
+
+  afterUpdate(() => {
+    if (!$selectedImage) {
+      return;
+    }
+
+    repaint();
+    adjustViewerOffsets();
+
+    // force locator and cropper to update
+    $pivotPoint = $pivotPoint;
+    $ROI = $ROI;
+  });
 
   function repaint() {
     if (!tracker.stale()) {
@@ -112,9 +114,6 @@
 
     // how much `scale` is scaled
     const n = scale / prevScale;
-
-    // force locator to update
-    $pivotPoint = $pivotPoint;
 
     // await rendering
     await tick();
@@ -174,7 +173,7 @@
     >
       <div class="viewer-wrapper">
         <canvas class="viewer-canvas" bind:this={canvas}></canvas>
-        <Locator bind:x={$pivotPoint.x} bind:y={$pivotPoint.y} {localXYtoRealXY} {realXYtoLocalXY} />
+        <Locator bind:point={$pivotPoint} {localXYtoRealXY} {realXYtoLocalXY} />
       </div>
 
     </article>
