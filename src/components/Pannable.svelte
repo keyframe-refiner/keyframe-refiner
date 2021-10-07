@@ -13,7 +13,7 @@
 
   export let x = 0;
   export let y = 0;
-  export let fullsize = false;
+  export let overlay = false;
   export let delegateTo: HTMLElement | null = null;
   export let localXYtoRealXY: CoordTransformer = defaultTransformer;
   export let realXYtoLocalXY: CoordTransformer = defaultTransformer;
@@ -98,7 +98,7 @@
 
 <div
   class="draggable"
-  class:fullsize
+  class:overlay
   bind:this={container}
   on:pointerdown={onPointerDown}
   style={`--draggable-x: ${localX}px; --draggable-y: ${localY}px`}
@@ -116,7 +116,7 @@
   .draggable {
     user-select: none;
 
-    &.fullsize {
+    &.overlay {
       position: absolute;
       top: 0;
       right: 0;

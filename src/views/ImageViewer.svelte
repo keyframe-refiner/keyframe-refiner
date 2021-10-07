@@ -14,7 +14,7 @@
   let scale = 0;
   const minScale = 0.01;
   const maxScale = 3;
-  const stepRatio = 1.5;
+  const stepRatio = 1.25;
 
   let scrollbar: Scrollbar;
   let viewerEl: HTMLElement;
@@ -181,11 +181,11 @@
   </Scrollbar>
 
   <footer class="viewer-zoom">
-    <IconButton title="縮小" on:click={zoomOut} disabled={scale === minScale}>
+    <IconButton title="縮小" on:pointerdown={zoomOut} disabled={scale === minScale}>
       <SVGIcon icon={mdiMagnifyMinusOutline} />
     </IconButton>
 
-    <IconButton title="拡大" on:click={zoomIn} disabled={scale === maxScale}>
+    <IconButton title="拡大" on:pointerdown={zoomIn} disabled={scale === maxScale}>
       <SVGIcon icon={mdiMagnifyPlusOutline} />
     </IconButton>
   </footer>

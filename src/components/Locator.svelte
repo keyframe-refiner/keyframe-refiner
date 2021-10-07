@@ -6,7 +6,7 @@
 </script>
 
 <div class="locator">
-  <Pannable bind:x bind:y fullsize {...$$restProps}>
+  <Pannable bind:x bind:y overlay {...$$restProps}>
     <div class="locator-line horizontal"></div>
     <div class="locator-line vertical"></div>
     <div class="locator-circle"></div>
