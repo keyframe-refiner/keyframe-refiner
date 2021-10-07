@@ -78,17 +78,17 @@
   }
 
   function adjustViewerOffsets() {
-    displayWidth = $selectedImage.width * scale;
-    displayHeight = $selectedImage.height * scale;
+    displayWidth = Math.round($selectedImage.width * scale);
+    displayHeight = Math.round($selectedImage.height * scale);
 
     if (displayWidth < viewerEl.clientWidth) {
-      viewerOffsetX = (viewerEl.clientWidth - displayWidth) / 2;
+      viewerOffsetX = Math.round((viewerEl.clientWidth - displayWidth) / 2);
     } else {
       viewerOffsetX = 0;
     }
 
     if (displayHeight < viewerEl.clientHeight) {
-      viewerOffsetY = (viewerEl.clientHeight - displayHeight) / 2;
+      viewerOffsetY = Math.round((viewerEl.clientHeight - displayHeight) / 2);
     } else {
       viewerOffsetY = 0;
     }
