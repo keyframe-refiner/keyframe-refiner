@@ -94,9 +94,15 @@
   on:pointerdown={onPointerDown}
   style={`--locator-x: ${localX}px; --locator-y: ${localY}px`}
 >
-  <div class="locator-line horizontal"></div>
-  <div class="locator-line vertical"></div>
-  <div class="locator-circle"></div>
+  <svg class="locator-line horizontal">
+    <line x1="0" y1="0" x2="100%" y2="0" />
+  </svg>
+  <svg class="locator-line vertical">
+    <line x1="0" y1="0" x2="0" y2="100%" />
+  </svg>
+  <svg class="locator-circle">
+    <circle cx="50%" cy="50%" style="r: calc(var(--locator-radius) - var(--locator-line-width))" />
+  </svg>
 </div>
 
 <svelte:window
@@ -106,21 +112,15 @@
 />
 
 <style lang="scss">
-  @keyframes locator-line-spinner {
+  @keyframes locator-spinner {
     to {
-      background-position: 10px 0, 0 10px;
-    }
-  }
-
-  @keyframes locator-circle-spinner {
-    to {
-      transform: rotateZ(360deg);
+      stroke-dashoffset: -16;
     }
   }
 
   .locator {
     --locator-line-width: 2px;
-    --locator-radius: 12px;
+    --locator-radius: 15px;
     --locator-color: var(--mdc-theme-secondary);
 
     position: absolute;
@@ -131,6 +131,14 @@
     user-select: none;
   }
 
+  .locator-circle,
+  .locator-line {
+    stroke-dasharray: 8 8;
+    fill: none;
+    stroke: var(--locator-color);
+    animation: locator-spinner 0.5s linear infinite;
+  }
+
   .locator-circle {
     position: absolute;
     top: var(--locator-y);
@@ -139,22 +147,16 @@
     height: calc(var(--locator-radius) * 2);
     margin-top: calc(var(--locator-radius) * -1);
     margin-left: calc(var(--locator-radius) * -1);
-    border-radius: 50%;
-    border: calc(var(--locator-line-width) * 1.5) dashed var(--locator-color);
     cursor: move;
-    animation: locator-circle-spinner 5s linear infinite;
+    stroke-width: calc(var(--locator-line-width) * 1.5);
   }
 
   .locator-line {
     position: absolute;
     top: 0;
     left: 0;
-    background: linear-gradient(90deg, var(--locator-color) 50%, transparent 50%),
-              linear-gradient(0deg, var(--locator-color) 50%, transparent 50%);
-    background-size: 10px var(--locator-line-width), var(--locator-line-width) 10px;
-    background-repeat: repeat-x, repeat-y;
-    background-position: 0 0, 0 0;
-    animation: locator-line-spinner 0.5s linear infinite;
+    fill: none;
+    stroke-width: 100%;
 
     &.horizontal {
       width: 100%;

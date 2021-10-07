@@ -238,6 +238,11 @@
     class:grabbing={cropping && direction === Direction.ALL}
     on:pointerdown={onPointerDown(Direction.ALL)}
   >
+    <svg class="cropper-border">
+      <rect class="cropper-border-black" x="0" y="0" width="100%" height="100%" />
+      <rect class="cropper-border-white" x="0" y="0" width="100%" height="100%" />
+    </svg>
+
     <div class="cropper-handle handle-n" on:pointerdown={onPointerDown(Direction.N)}></div>
     <div class="cropper-handle handle-s" on:pointerdown={onPointerDown(Direction.S)}></div>
     <div class="cropper-handle handle-w" on:pointerdown={onPointerDown(Direction.W)}></div>
@@ -263,7 +268,7 @@
 <style lang="scss">
   @keyframes border-spiner {
     to {
-      background-position: 10px 0, -10px 100%, 0 -10px, 100% 10px;
+      stroke-dashoffset: 12;
     }
   }
 
@@ -288,20 +293,25 @@
     height: calc(var(--cropper-y2) - var(--cropper-y1));
     cursor: grab;
 
-    background: linear-gradient(90deg, black 50%, white 50%),
-                linear-gradient(90deg, black 50%, white 50%),
-                linear-gradient(0deg, black 50%, white 50%),
-                linear-gradient(0deg, black 50%, white 50%);
-    background-size: 10px 1px,
-                      10px 1px,
-                      1px 10px,
-                      1px 10px;
-    background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
-    background-position: 0 0, 0 100%, 0 0, 100% 0;
-    animation: border-spiner 0.5s linear infinite;
-
     &.grabbing {
       cursor: grabbing;
+    }
+  }
+
+  .cropper-border {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: black;
+    stroke-width: 2px;
+
+    .cropper-border-white {
+      stroke: white;
+      stroke-dasharray: 6 6;
+      animation: border-spiner 0.5s linear infinite;
     }
   }
 
