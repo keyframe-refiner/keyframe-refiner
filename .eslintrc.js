@@ -1,8 +1,7 @@
-// コーディングスタイルの設定
-
 const overrideRules = {
   semi: ['error', 'always'],
   'no-undef': 'off',
+  'no-unused-vars': 'off',
   'comma-dangle': ['error', 'always-multiline'],
   'space-before-function-paren': ['error', {
     named: 'never',
