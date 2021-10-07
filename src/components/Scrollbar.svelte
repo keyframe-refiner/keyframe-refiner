@@ -1,16 +1,22 @@
 <script lang="ts">
   import Scrollbar from 'smooth-scrollbar';
   import type { ScrollbarOptions } from 'smooth-scrollbar/interfaces';
-  import { onMount, onDestroy, afterUpdate, tick } from 'svelte';
+  import { onMount, onDestroy, afterUpdate, tick, setContext } from 'svelte';
+
+  import { Defer } from '../utils/defer';
 
   let container: HTMLDivElement;
   let scrollbar: Scrollbar;
 
+  const defer = new Defer<Scrollbar>();
+
   export let options: Partial<ScrollbarOptions> = {};
 
   export function getScrollbar() {
-    return scrollbar;
+    return defer.promise;
   }
+
+  setContext('getScrollbar', getScrollbar);
 
   onMount(() => {
     scrollbar = Scrollbar.init(container, {
@@ -18,6 +24,8 @@
       continuousScrolling: false,
       ...options,
     });
+
+    defer.resolve(scrollbar);
   });
 
   afterUpdate(async () => {

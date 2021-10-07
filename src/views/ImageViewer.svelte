@@ -122,7 +122,9 @@
     // update scrollbar position
     // `dx * n` => the new distance between the scaled canvas and the pointer
     // `clientX - viewerRect.left` => the distance between the pointer and the left-top cornor of the viewer
-    scrollbar.getScrollbar().setPosition(
+    const s = await scrollbar.getScrollbar();
+
+    s.setPosition(
       dx * n - (clientX - viewerRect.left),
       dy * n - (clientY - viewerRect.top),
     );

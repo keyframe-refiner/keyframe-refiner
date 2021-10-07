@@ -1,5 +1,7 @@
 <script lang="ts">
   import clamp from 'lodash-es/clamp';
+  import { getContext, hasContext, onMount } from 'svelte';
+  import type Scrollbar from 'smooth-scrollbar';
 
   interface CoordTransformer {
     (x: number, y: number): [number, number],
@@ -24,8 +26,6 @@
   let wrapperEl: HTMLElement;
   $: container = delegateTo || wrapperEl;
 
-  let pollingID: number;
-
   let pressed = false;
 
   const pointerPosition = {
@@ -33,9 +33,25 @@
     clientY: 0,
   };
 
-  function polling() {
-    // real-time updates
-    // TODO: improve performance
+  let getScrollbar: () => Promise<Scrollbar>;
+
+  if (hasContext('getScrollbar')) {
+    getScrollbar = getContext('getScrollbar');
+  }
+
+  onMount(async () => {
+    if (getScrollbar) {
+      const scrollbar = await getScrollbar();
+
+      scrollbar.addListener(() => {
+        if (pressed) {
+          update();
+        }
+      });
+    }
+  });
+
+  function update() {
     const bounding = container.getBoundingClientRect();
 
     // assign new values to localX, localY may cause unnecessary component updates
@@ -43,20 +59,17 @@
     const lx = clamp(pointerPosition.clientX - bounding.left, 0, bounding.width);
     const ly = clamp(pointerPosition.clientY - bounding.top, 0, bounding.height);
 
-    // manually update x, y => component updates => auto update localX, localY
+    // manually update x, y => component updates => auto update localX, localY (subscription)
     [x, y] = localXYtoRealXY(lx, ly);
-
-    pollingID = requestAnimationFrame(polling);
   }
 
   function onPointerDown(e: PointerEvent) {
     pressed = true;
-    cancelAnimationFrame(pollingID);
 
     pointerPosition.clientX = e.clientX;
     pointerPosition.clientY = e.clientY;
 
-    polling();
+    update();
 
     // HACK: enable scrollbar auto-scrolling
     container.dispatchEvent(new CustomEvent('dragstart', {
@@ -66,7 +79,6 @@
 
   function onPointerUp() {
     pressed = false;
-    cancelAnimationFrame(pollingID);
   }
 
   function onPointerMove(e: PointerEvent) {
@@ -76,6 +88,8 @@
 
     pointerPosition.clientX = e.clientX;
     pointerPosition.clientY = e.clientY;
+
+    update();
   }
 </script>
 
