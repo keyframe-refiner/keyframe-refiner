@@ -2,7 +2,7 @@
   import DataTable, { Body, Row, Cell } from '@smui/data-table';
 
   import Drawer from '../components/Drawer.svelte';
-  import { selectedImage, pivotPoint } from '../store';
+  import { selectedImage, pivotPoint, ROI } from '../store';
 
   function valueOrNA(value: any) {
     return value ?? 'N/A';
@@ -33,6 +33,36 @@
         <Row>
           <Cell>メディアタイプ</Cell>
           <Cell>{valueOrNA($selectedImage?.filetype)}</Cell>
+        </Row>
+      </Body>
+    </DataTable>
+  </div>
+</Drawer>
+
+<Drawer class="property-section roi">
+  <span slot="header">対象領域</span>
+
+  <div slot="body">
+    <DataTable>
+      <Body>
+        <Row>
+          <Cell>left</Cell>
+          <Cell>{$ROI.x1}</Cell>
+        </Row>
+
+        <Row>
+          <Cell>top</Cell>
+          <Cell>{$ROI.y1}</Cell>
+        </Row>
+
+        <Row>
+          <Cell>right</Cell>
+          <Cell>{$ROI.x2}</Cell>
+        </Row>
+
+        <Row>
+          <Cell>bottom</Cell>
+          <Cell>{$ROI.y2}</Cell>
         </Row>
       </Body>
     </DataTable>

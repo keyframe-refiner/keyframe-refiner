@@ -18,8 +18,8 @@ export const pivotPoint = writable({
 });
 
 export const ROI = writable({
-  top: 0,
-  right: 0,
-  bottom: 0,
-  left: 0,
+  x1: 0,
+  y1: 0,
+  x2: 0,
+  y2: 0,
 });

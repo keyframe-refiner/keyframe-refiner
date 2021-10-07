@@ -6,6 +6,7 @@
   import { mdiMagnifyMinusOutline, mdiMagnifyPlusOutline } from '@mdi/js';
 
   import Locator from '../components/Locator.svelte';
+  import Cropper from '../components/Cropper.svelte';
   import Scrollbar from '../components/Scrollbar.svelte';
   import SVGIcon from '../components/SVGIcon.svelte';
   import { selectedImage, pivotPoint, ROI } from '../store';
@@ -174,6 +175,7 @@
       <div class="viewer-wrapper">
         <canvas class="viewer-canvas" bind:this={canvas}></canvas>
         <Locator bind:point={$pivotPoint} {localXYtoRealXY} {realXYtoLocalXY} />
+        <Cropper bind:cropRect={$ROI} {localXYtoRealXY} {realXYtoLocalXY} />
       </div>
 
     </article>
@@ -230,8 +232,7 @@
   }
 
   .viewer-wrapper {
-    display: inline-block;
-    font-size: 0;
+    display: inline-flex;
     transform: translate(var(--viewer-offset-x), var(--viewer-offset-y));
   }
 </style>

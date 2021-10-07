@@ -17,7 +17,7 @@
 
   $: [localX, localY] = realXYtoLocalXY(point.x, point.y);
 
-  let pressed = false;
+  let moving = false;
 
   const pointerPosition = {
     clientX: 0,
@@ -35,7 +35,7 @@
       const scrollbar = await getScrollbar();
 
       scrollbar.addListener(() => {
-        if (pressed) {
+        if (moving) {
           update();
         }
       });
@@ -64,7 +64,7 @@
   }
 
   function onPointerDown(e: PointerEvent) {
-    pressed = true;
+    moving = true;
 
     pointerPosition.clientX = e.clientX;
     pointerPosition.clientY = e.clientY;
@@ -73,11 +73,11 @@
   }
 
   function onPointerUp() {
-    pressed = false;
+    moving = false;
   }
 
   function onPointerMove(e: PointerEvent) {
-    if (!pressed) {
+    if (!moving) {
       return;
     }
 
