@@ -1,16 +1,9 @@
-import { onDestroy } from 'svelte';
-
 export class VariableTracker {
-  #lastVars: any[] | null;
-  #varGetter: () => any[] | null;
+  #lastVars: any[] | undefined;
+  #varGetter: () => any[];
 
   constructor(varGetter: () => any[]) {
     this.#varGetter = varGetter;
-
-    onDestroy(() => {
-      this.#lastVars = null;
-      this.#lastVars = null;
-    });
   }
 
   stale() {
@@ -20,7 +13,7 @@ export class VariableTracker {
     }
 
     const vars = this.#varGetter();
-    const result = this.#lastVars?.some((v, i) => v !== vars?.[i]);
+    const result = this.#lastVars.some((v, i) => v !== vars[i]);
 
     this.#lastVars = vars;
 
