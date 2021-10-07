@@ -1,16 +1,16 @@
 <script lang="ts">
-  import Draggable from './Draggable.svelte';
+  import Pannable from './Pannable.svelte';
 
   export let x = 0;
   export let y = 0;
 </script>
 
 <div class="locator">
-  <Draggable bind:x bind:y fullsize {...$$restProps}>
+  <Pannable bind:x bind:y fullsize {...$$restProps}>
     <div class="locator-line horizontal"></div>
     <div class="locator-line vertical"></div>
     <div class="locator-circle"></div>
-  </Draggable>
+  </Pannable>
 </div>
 
 <style lang="scss">

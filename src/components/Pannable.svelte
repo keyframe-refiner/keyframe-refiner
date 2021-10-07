@@ -21,7 +21,10 @@
   let [localX, localY] = realXYtoLocalXY(x, y); // init values
 
   // auto update
-  $: [localX, localY] = realXYtoLocalXY(x, y);
+  $: {
+    // console.log('update', x, y, localX, localY);
+    [localX, localY] = realXYtoLocalXY(x, y);
+  }
 
   let wrapperEl: HTMLElement;
   $: container = delegateTo || wrapperEl;
