@@ -106,9 +106,21 @@
 />
 
 <style lang="scss">
+  @keyframes locator-line-spinner {
+    to {
+      background-position: 10px 0, 0 10px;
+    }
+  }
+
+  @keyframes locator-circle-spinner {
+    to {
+      transform: rotateZ(360deg);
+    }
+  }
+
   .locator {
     --locator-line-width: 2px;
-    --locator-radius: 10px;
+    --locator-radius: 12px;
     --locator-color: var(--mdc-theme-secondary);
 
     position: absolute;
@@ -121,30 +133,38 @@
 
   .locator-circle {
     position: absolute;
-    top: 0;
-    left: 0;
+    top: var(--locator-y);
+    left: var(--locator-x);
     width: calc(var(--locator-radius) * 2);
     height: calc(var(--locator-radius) * 2);
+    margin-top: calc(var(--locator-radius) * -1);
+    margin-left: calc(var(--locator-radius) * -1);
     border-radius: 50%;
-    border: calc(var(--locator-line-width) * 1.5) solid var(--locator-color);
-    transform: translate3d(calc(var(--locator-x) - 50%), calc(var(--locator-y) - 50%), 0);
+    border: calc(var(--locator-line-width) * 1.5) dashed var(--locator-color);
     cursor: move;
+    animation: locator-circle-spinner 5s linear infinite;
   }
 
   .locator-line {
     position: absolute;
     top: 0;
     left: 0;
+    background: linear-gradient(90deg, var(--locator-color) 50%, transparent 50%),
+              linear-gradient(0deg, var(--locator-color) 50%, transparent 50%);
+    background-size: 10px var(--locator-line-width), var(--locator-line-width) 10px;
+    background-repeat: repeat-x, repeat-y;
+    background-position: 0 0, 0 0;
+    animation: locator-line-spinner 0.5s linear infinite;
 
     &.horizontal {
       width: 100%;
-      border-top: var(--locator-line-width) dashed var(--locator-color);
+      height: var(--locator-line-width);
       transform: translate3d(0, calc(var(--locator-y) - 50%), 0);
     }
 
     &.vertical {
       height: 100%;
-      border-right: var(--locator-line-width) dashed var(--locator-color);
+      width: var(--locator-line-width);
       transform: translate3d(calc(var(--locator-x) - 50%), 0, 0);
     }
   }

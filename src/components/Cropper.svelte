@@ -298,7 +298,7 @@
                       1px 10px;
     background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
     background-position: 0 0, 0 100%, 0 0, 100% 0;
-    // animation: border-spiner 0.5s linear infinite;
+    animation: border-spiner 0.5s linear infinite;
 
     &.grabbing {
       cursor: grabbing;
