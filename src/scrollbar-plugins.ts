@@ -32,93 +32,61 @@ class PreventZoomScrollingPlugin extends ScrollbarPlugin {
 }
 
 // adapted from https://github.com/idiotWu/smooth-scrollbar/blob/develop/src/events/select.ts
-class DragPlugin extends ScrollbarPlugin {
-  static pluginName = 'drag';
+class PannablePlugin extends ScrollbarPlugin {
+  static pluginName = 'pannable';
 
-  #animationID: number;
-  #started: boolean;
+  #xAxisTrackHeight: number;
+  #yAxisTrackWidth: number;
 
-  #onDragstart = (e: DragEvent) => {
-    e.stopPropagation();
-    cancelAnimationFrame(this.#animationID);
-    this.#started = true;
-  }
+  #onPanMove = (e: CustomEvent) => {
+    const { offset, limit } = this.scrollbar;
+    const { top, right, bottom, left } = this.scrollbar.bounding;
+    const pointerX: number = e.detail.pointerX;
+    const pointerY: number = e.detail.pointerY;
 
-  #onPointerMove = (e: PointerEvent) => {
-    if (!this.#started) {
-      return;
+    let deltaX = 0;
+    let deltaY = 0;
+
+    let rightOffset = 0;
+    let bottomOffset = 0;
+
+    if (this.scrollbar.options.alwaysShowTracks) {
+      rightOffset = this.#yAxisTrackWidth;
+      bottomOffset = this.#xAxisTrackHeight;
     }
 
-    cancelAnimationFrame(this.#animationID);
+    if (pointerX >= right - rightOffset) {
+      deltaX = 10;
+    } else if (pointerX <= left) {
+      deltaX = -10;
+    }
 
-    const delta = this.#calcDelta(e);
-    this.#scroll(delta);
-  }
+    if (pointerY >= bottom - bottomOffset) {
+      deltaY = 10;
+    } else if (pointerY <= top) {
+      deltaY = -10;
+    }
 
-  #onPointerUp = () => {
-    cancelAnimationFrame(this.#animationID);
-    this.#started = false;
+    this.scrollbar.setMomentum(
+      clamp(offset.x + deltaX, 0, limit.x) - offset.x,
+      clamp(offset.y + deltaY, 0, limit.y) - offset.y,
+    );
   }
 
   onInit() {
-    const { containerEl } = this.scrollbar;
+    this.scrollbar.containerEl.addEventListener('pan-move', this.#onPanMove);
+  }
 
-    containerEl.addEventListener('dragstart', this.#onDragstart);
-    window.addEventListener('pointermove', this.#onPointerMove);
-    window.addEventListener('pointerup', this.#onPointerUp);
-    window.addEventListener('blur', this.#onPointerUp);
+  onUpdate() {
+    this.#yAxisTrackWidth = this.scrollbar.track.yAxis.element.clientWidth;
+    this.#xAxisTrackHeight = this.scrollbar.track.xAxis.element.clientHeight;
   }
 
   onDestroy() {
-    cancelAnimationFrame(this.#animationID);
-
-    const { containerEl } = this.scrollbar;
-
-    containerEl.removeEventListener('dragstart', this.#onDragstart);
-    window.removeEventListener('pointermove', this.#onPointerMove);
-    window.removeEventListener('pointerup', this.#onPointerUp);
-    window.removeEventListener('blur', this.#onPointerUp);
-  }
-
-  #scroll({ x, y }) {
-    if (!x && !y) return;
-
-    const { offset, limit } = this.scrollbar;
-
-    this.scrollbar.setMomentum(
-      clamp(offset.x + x, 0, limit.x) - offset.x,
-      clamp(offset.y + y, 0, limit.y) - offset.y,
-    );
-
-    this.#animationID = requestAnimationFrame(() => {
-      this.#scroll({ x, y });
-    });
-  }
-
-  #calcDelta(e: PointerEvent) {
-    const { top, right, bottom, left } = this.scrollbar.bounding;
-    const x = e.clientX;
-    const y = e.clientY;
-
-    const delta = {
-      x: 0,
-      y: 0,
-    };
-
-    if (x > right) {
-      delta.x = 10;
-    } else if (x < left) {
-      delta.x = -10;
-    }
-
-    if (y > bottom) {
-      delta.y = 10;
-    } else if (y < top) {
-      delta.y = -10;
-    }
-
-    return delta;
+    this.scrollbar.containerEl.removeEventListener('pan-move', this.#onPanMove);
   }
 }
 
-Scrollbar.use(DisableKeyboardPlugin, PreventZoomScrollingPlugin, DragPlugin, OverscrollPlugin);
+Scrollbar.use(DisableKeyboardPlugin, PreventZoomScrollingPlugin, PannablePlugin, OverscrollPlugin);
+
+(window as any).Scrollbar = Scrollbar;

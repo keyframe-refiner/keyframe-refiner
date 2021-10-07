@@ -14,7 +14,6 @@
   export let x = 0;
   export let y = 0;
   export let overlay = false;
-  export let delegateTo: HTMLElement | null = null;
   export let localXYtoRealXY: CoordTransformer = defaultTransformer;
   export let realXYtoLocalXY: CoordTransformer = defaultTransformer;
 
@@ -26,8 +25,7 @@
     [localX, localY] = realXYtoLocalXY(x, y);
   }
 
-  let wrapperEl: HTMLElement;
-  $: container = delegateTo || wrapperEl;
+  let container: HTMLElement;
 
   let pressed = false;
 
@@ -64,6 +62,15 @@
 
     // manually update x, y => component updates => auto update localX, localY (subscription)
     [x, y] = localXYtoRealXY(lx, ly);
+
+    // HACK: enable scrollbar auto-scrolling
+    container.dispatchEvent(new CustomEvent('pan-move', {
+      bubbles: true,
+      detail: {
+        pointerX: pointerPosition.clientX,
+        pointerY: pointerPosition.clientY,
+      },
+    }));
   }
 
   function onPointerDown(e: PointerEvent) {
@@ -73,11 +80,6 @@
     pointerPosition.clientY = e.clientY;
 
     update();
-
-    // HACK: enable scrollbar auto-scrolling
-    container.dispatchEvent(new CustomEvent('dragstart', {
-      bubbles: true,
-    }));
   }
 
   function onPointerUp() {
@@ -97,11 +99,11 @@
 </script>
 
 <div
-  class="draggable"
+  class="pannable"
   class:overlay
   bind:this={container}
   on:pointerdown={onPointerDown}
-  style={`--draggable-x: ${localX}px; --draggable-y: ${localY}px`}
+  style={`--pannable-x: ${localX}px; --pannable-y: ${localY}px`}
 >
   <slot />
 </div>
@@ -113,7 +115,7 @@
 />
 
 <style lang="scss">
-  .draggable {
+  .pannable {
     user-select: none;
 
     &.overlay {
