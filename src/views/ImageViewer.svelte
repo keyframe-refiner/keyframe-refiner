@@ -158,6 +158,7 @@
             on:mousedown|preventDefault
           />
         {/await}
+        <div class="viewer-placeholder"></div>
         <Cropper bind:cropRect={$ROI} {localXYtoRealXY} {realXYtoLocalXY} />
         <Locator bind:point={$pivotPoint} limits={$ROI} {localXYtoRealXY} {realXYtoLocalXY} />
       </div>
@@ -208,13 +209,20 @@
   }
 
   .viewer-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: scale3d(var(--viewer-scale), var(--viewer-scale), 1);
+    transform-origin: 0 0;
+  }
+
+  .viewer-placeholder {
     width: var(--viewer-width);
     height: var(--viewer-height);
-    // using scale will break scrollbars
-    // transform: scale(var(--viewer-scale));
   }
 
   .viewer-wrapper {
+    position: relative;
     display: inline-flex;
     transform: translate(var(--viewer-offset-x), var(--viewer-offset-y));
   }
