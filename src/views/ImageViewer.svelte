@@ -10,7 +10,6 @@
   import Scrollbar from '../components/Scrollbar.svelte';
   import SVGIcon from '../components/SVGIcon.svelte';
   import { selectedImage, pivotPoint, ROI } from '../store';
-  import { VariableTracker } from '../utils/variable-tracker';
 
   let scale = 0;
   const minScale = 0.01;
@@ -19,18 +18,13 @@
 
   let scrollbar: Scrollbar;
   let viewerEl: HTMLElement;
-  let canvas: HTMLCanvasElement;
+  let imgEl: HTMLImageElement;
 
   let viewerOffsetX = 0;
   let viewerOffsetY = 0;
 
   let displayWidth: number;
   let displayHeight: number;
-
-  const tracker = new VariableTracker(() => [
-    $selectedImage,
-    canvas,
-  ]);
 
   onMount(() => {
     if (!$selectedImage) {
@@ -52,30 +46,12 @@
       return;
     }
 
-    repaint();
     adjustViewerOffsets();
 
     // force locator and cropper to update
     $pivotPoint = $pivotPoint;
     $ROI = $ROI;
   });
-
-  function repaint() {
-    if (!tracker.stale()) {
-      return;
-    }
-
-    const ctx = canvas.getContext('2d')!;
-
-    canvas.width = $selectedImage.width;
-    canvas.height = $selectedImage.height;
-
-    ctx.drawImage(
-      $selectedImage.canvas,
-      0, 0, $selectedImage.width, $selectedImage.height,
-      0, 0, $selectedImage.width, $selectedImage.height,
-    );
-  }
 
   function adjustViewerOffsets() {
     displayWidth = Math.round($selectedImage.width * scale);
@@ -101,11 +77,11 @@
     }
 
     const viewerRect = viewerEl.getBoundingClientRect();
-    const canvasRect = canvas.getBoundingClientRect();
+    const imgRect = imgEl.getBoundingClientRect();
 
     // calculate the distance between the pointer and the left-top cornor of the canvas
-    const dx = clientX - canvasRect.left;
-    const dy = clientY - canvasRect.top;
+    const dx = clientX - imgRect.left;
+    const dy = clientY - imgRect.top;
 
     // memoize previous scale value
     const prevScale = scale;
@@ -173,7 +149,15 @@
       }
     >
       <div class="viewer-wrapper">
-        <canvas class="viewer-canvas" bind:this={canvas}></canvas>
+        {#await $selectedImage.getBlobURL() then url}
+          <img
+            class="viewer-image"
+            src={url}
+            alt={$selectedImage.filename}
+            bind:this={imgEl}
+            on:mousedown|preventDefault
+          />
+        {/await}
         <Cropper bind:cropRect={$ROI} {localXYtoRealXY} {realXYtoLocalXY} />
         <Locator bind:point={$pivotPoint} limits={$ROI} {localXYtoRealXY} {realXYtoLocalXY} />
       </div>
@@ -197,8 +181,6 @@
 <style lang="scss">
   .viewer {
     position: relative;
-    display: flex;
-    flex-direction: column;
     width: 100%;
     height: 100%;
     user-select: none;
@@ -222,13 +204,14 @@
   }
 
   .viewer-body {
-    flex: 1;
     height: calc(100vh - var(--header-height));
   }
 
-  .viewer-canvas {
+  .viewer-image {
     width: var(--viewer-width);
     height: var(--viewer-height);
+    // using scale will break scrollbars
+    // transform: scale(var(--viewer-scale));
   }
 
   .viewer-wrapper {
