@@ -7,7 +7,9 @@
 
   let container: HTMLDivElement;
   let scrollbar: Scrollbar;
+  let observer: ResizeObserver | undefined;
 
+  const supportResizeObserver = typeof ResizeObserver === 'function';
   const defer = new Defer<Scrollbar>();
 
   export let options: Partial<ScrollbarOptions> = {};
@@ -26,16 +28,27 @@
     });
 
     defer.resolve(scrollbar);
+
+    if (supportResizeObserver) {
+      observer = new ResizeObserver(() => {
+        scrollbar.update();
+      });
+
+      observer.observe(scrollbar.contentEl);
+    }
   });
 
-  afterUpdate(async () => {
-    // await DOM rendering to be finished
-    await tick();
-    scrollbar.update();
-  });
+  if (!supportResizeObserver) {
+    afterUpdate(async () => {
+      // await DOM rendering to be finished
+      await tick();
+      scrollbar.update();
+    });
+  }
 
   onDestroy(() => {
     scrollbar.destroy();
+    observer?.disconnect();
   });
 </script>
 
