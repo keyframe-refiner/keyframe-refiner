@@ -3,7 +3,7 @@
   import { onMount, afterUpdate, tick } from 'svelte';
   import Button from '@smui/button/styled';
   import { Title, Content, Actions } from '@smui/dialog/styled';
-  import { mdiPlus, mdiTrashCanOutline } from '@mdi/js';
+  import { mdiPlus, mdiTrashCanOutline, mdiDeleteSweep } from '@mdi/js';
 
   import { inputList, selectedIndex, selectedImage } from '../store';
   import SVGIcon from '../components/SVGIcon.svelte';
@@ -18,9 +18,10 @@
   let uploader: Uploader;
   let scrollbar: Scrollbar;
   let deleteIndex: number;
+  let deleteFilename: string;
   let openDeleteConfirm = false;
+  let openClearConfirm = false;
   let fileInput: HTMLInputElement;
-  const thumbs: (HTMLElement | null)[] = [];
 
   let startIndex = 0;
   let endIndex = 0;
@@ -56,7 +57,7 @@
   }
 
   async function navigate(delta: number) {
-    if (openDeleteConfirm) {
+    if (openDeleteConfirm || openClearConfirm) {
       return;
     }
 
@@ -128,6 +129,20 @@
   function requestDelete(index: number) {
     deleteIndex = index;
     openDeleteConfirm = true;
+    deleteFilename = $inputList[deleteIndex].filename;
+  }
+
+  async function clearAll() {
+    const currentList = $inputList;
+    $inputList = [];
+    $selectedIndex = 0;
+
+    await tick();
+    currentList.forEach(image => image.destory());
+  }
+
+  function requestClear() {
+    openClearConfirm = true;
   }
 
   function upload() {
@@ -158,11 +173,10 @@
         class="thumb"
         class:selected={image === $selectedImage}
         on:click={() => { $selectedIndex = startIndex + i; }}
-        bind:this={thumbs[i]}
       >
         <img src={image.blobURL} alt={image.filename} title={image.filename} on:mousedown|preventDefault />
-        <span class="delete" title="この画像を削除" on:click={() => requestDelete(i)}>
-          <SVGIcon icon={mdiTrashCanOutline}/>
+        <span class="delete" title="この画像を削除" on:click={() => requestDelete(startIndex + i)}>
+          <SVGIcon icon={mdiTrashCanOutline} />
         </span>
       </div>
     {/each}
@@ -179,6 +193,12 @@
       </span>
       <input type="file" accept="image/*" multiple bind:this={fileInput} on:change={upload}>
     </div>
+
+    {#if $inputList.length !== 0}
+      <Button class="clear-all" title="すべての画像を削除" color="secondary" variant="outlined" on:click={requestClear}>
+        <SVGIcon icon={mdiDeleteSweep} />
+      </Button>
+    {/if}
   </Scrollbar>
 </div>
 
@@ -186,19 +206,25 @@
   scrimClickAction=""
   escapeKeyAction=""
   bind:open={openDeleteConfirm}
-  on:closed={() => { deleteIndex = -1; }}
 >
   <Title>画像の削除</Title>
-  <Content>“{$inputList[deleteIndex]?.filename}”を削除しますか？</Content>
+  <Content>“{deleteFilename}”を削除しますか？</Content>
   <Actions>
-    <Button on:click={() => {
-      openDeleteConfirm = false;
-    }}>キャンセル</Button>
+    <Button>キャンセル</Button>
+    <Button color="secondary" on:click={deleteImage}>削除</Button>
+  </Actions>
+</RootDialog>
 
-    <Button color="secondary" on:click={() => {
-      openDeleteConfirm = false;
-      deleteImage();
-    }}>削除</Button>
+<RootDialog
+  scrimClickAction=""
+  escapeKeyAction=""
+  bind:open={openClearConfirm}
+>
+  <Title>画像の削除</Title>
+  <Content>すべての画像を削除しますか？</Content>
+  <Actions>
+    <Button>キャンセル</Button>
+    <Button color="secondary" on:click={clearAll}>削除</Button>
   </Actions>
 </RootDialog>
 
@@ -298,6 +324,24 @@
 
     &:hover {
       color: var(--mdc-theme-surface);
+    }
+  }
+
+  :global(.clear-all) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.25;
+    width: var(--thumb-size);
+    transition: opacity 0.3s;
+
+    &:hover {
+      opacity: 1;
+    }
+
+    :global(svg) {
+      width: 24px !important;
+      height: 24px !important;
     }
   }
 </style>
