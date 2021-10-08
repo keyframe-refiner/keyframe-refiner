@@ -71,8 +71,7 @@
     const totalCount = results.length;
 
     for (let i = 0; i < totalCount; i++) {
-      $inputList.push(await ImageCanvas.fromFile(results[i]));
-      $inputList = $inputList; // force update
+      $inputList = $inputList.push(await ImageCanvas.fromFile(results[i]));
 
       progress = (i + 1) / totalCount;
     }

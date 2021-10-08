@@ -1,7 +1,7 @@
 <script lang="ts">
   import clamp from 'lodash-es/clamp';
   import debounce from 'lodash-es/debounce';
-  import { onMount, afterUpdate, tick } from 'svelte';
+  import { afterUpdate, tick } from 'svelte';
   import IconButton from '@smui/icon-button/styled';
   import { mdiMagnifyMinusOutline, mdiMagnifyPlusOutline } from '@mdi/js';
 
@@ -11,6 +11,7 @@
   import SVGIcon from '../components/SVGIcon.svelte';
   import { selectedImage, pivotPoint, ROI } from '../store';
   import { VariableTracker } from '../utils/variable-tracker';
+  import { Point } from '../record-factory';
 
   let scale = 0;
   const minScale = 0.01;
@@ -27,35 +28,37 @@
   let displayWidth: number;
   let displayHeight: number;
 
-  const tracker = new VariableTracker(() => [
+  const selectedImageTracker = new VariableTracker(() => [
     $selectedImage,
   ]);
 
-  onMount(() => {
-    if (!$selectedImage) {
-      return;
-    }
-
-    resetScale();
-  });
+  const scaleTracker = new VariableTracker(() => [
+    scale,
+  ]);
 
   afterUpdate(() => {
-    if (!$selectedImage) {
+    if (!$selectedImage || !viewerEl) {
       return;
     }
 
-    if (tracker.stale()) {
+    if (selectedImageTracker.stale()) {
       resetScale();
     }
 
-    adjustViewerOffsets();
+    if (scaleTracker.stale()) {
+      // scale changed => force locator and cropper to update
+      $pivotPoint = $pivotPoint.clone();
+      $ROI = $ROI.clone();
+    }
 
-    // force locator and cropper to update
-    $pivotPoint = $pivotPoint;
-    $ROI = $ROI;
+    adjustViewerOffsets();
   });
 
   function resetScale() {
+    if (!$selectedImage) {
+      return;
+    }
+
     const maxWidth = viewerEl.clientWidth * 0.8;
     const maxHeight = viewerEl.clientHeight * 0.8;
 
@@ -67,6 +70,10 @@
   }
 
   function adjustViewerOffsets() {
+    if (!$selectedImage) {
+      return;
+    }
+
     displayWidth = Math.round($selectedImage.width * scale);
     displayHeight = Math.round($selectedImage.height * scale);
 
@@ -140,12 +147,18 @@
     zoomAt(scale + delta, e.clientX, e.clientY);
   }
 
-  function localXYtoRealXY(x: number, y: number) {
-    return [x / scale, y / scale].map(Math.round);
+  function localToReal(p: Point) {
+    return new Point({
+      x: Math.round(p.x / scale),
+      y: Math.round(p.y / scale),
+    });
   }
 
-  function realXYtoLocalXY(x: number, y: number) {
-    return [x * scale, y * scale].map(Math.round);
+  function realToLocal(p: Point) {
+    return new Point({
+      x: Math.round(p.x * scale),
+      y: Math.round(p.y * scale),
+    });
   }
 </script>
 
@@ -164,14 +177,14 @@
       <div class="viewer-wrapper">
         <img
             class="viewer-image"
-            src={$selectedImage.blobURL}
-            alt={$selectedImage.filename}
+            src={$selectedImage?.blobURL}
+            alt={$selectedImage?.filename}
             bind:this={imgEl}
             on:mousedown|preventDefault
         />
         <div class="viewer-placeholder"></div>
-        <Cropper bind:cropRect={$ROI} {localXYtoRealXY} {realXYtoLocalXY} />
-        <Locator bind:point={$pivotPoint} limits={$ROI} {localXYtoRealXY} {realXYtoLocalXY} />
+        <Cropper bind:cropRect={$ROI} {localToReal} {realToLocal} />
+        <Locator bind:point={$pivotPoint} limits={$ROI} {localToReal} {realToLocal} />
       </div>
 
     </article>

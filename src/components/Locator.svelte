@@ -4,32 +4,30 @@
   import type Scrollbar from 'smooth-scrollbar';
 
   import { defaultTransformer } from '../utils/coord-transformer';
+  import { Point, Rect } from '../record-factory';
 
-  export let point = {
-    x: 0,
-    y: 0,
-  };
+  export let point = new Point();
 
-  export let limits = {
+  export let limits = new Rect({
     x1: -Infinity,
     y1: -Infinity,
     x2: Infinity,
     y2: Infinity,
-  };
+  });
 
-  export let localXYtoRealXY = defaultTransformer;
-  export let realXYtoLocalXY = defaultTransformer;
+  export let localToReal = defaultTransformer;
+  export let realToLocal = defaultTransformer;
 
   let container: HTMLElement;
 
-  $: [localX, localY] = realXYtoLocalXY(point.x, point.y);
+  $: localPoint = realToLocal(point);
 
   let moving = false;
 
-  const pointerPosition = {
-    clientX: 0,
-    clientY: 0,
-  };
+  let pointerPosition = new Point({
+    x: 0,
+    y: 0,
+  });
 
   let getScrollbar: () => Promise<Scrollbar>;
 
@@ -55,19 +53,21 @@
   function update() {
     const bounding = container.getBoundingClientRect();
 
-    const [px, py] = localXYtoRealXY(
-      clamp(pointerPosition.clientX - bounding.left, 0, bounding.width),
-      clamp(pointerPosition.clientY - bounding.top, 0, bounding.height),
-    );
+    const p = localToReal(new Point({
+      x: clamp(pointerPosition.x - bounding.left, 0, bounding.width),
+      y: clamp(pointerPosition.y - bounding.top, 0, bounding.height),
+    }));
 
-    point.x = clamp(px, limits.x1, limits.x2);
-    point.y = clamp(py, limits.y1, limits.y2);
+    point = new Point({
+      x: clamp(p.x, limits.x1, limits.x2),
+      y: clamp(p.y, limits.y1, limits.y2),
+    });
 
     container.dispatchEvent(new CustomEvent('pan-move', {
       bubbles: true,
       detail: {
-        pointerX: pointerPosition.clientX,
-        pointerY: pointerPosition.clientY,
+        pointerX: pointerPosition.x,
+        pointerY: pointerPosition.y,
       },
     }));
   }
@@ -75,8 +75,10 @@
   function onPointerDown(e: PointerEvent) {
     moving = true;
 
-    pointerPosition.clientX = e.clientX;
-    pointerPosition.clientY = e.clientY;
+    pointerPosition = new Point({
+      x: e.clientX,
+      y: e.clientY,
+    });
 
     update();
   }
@@ -90,8 +92,10 @@
       return;
     }
 
-    pointerPosition.clientX = e.clientX;
-    pointerPosition.clientY = e.clientY;
+    pointerPosition = new Point({
+      x: e.clientX,
+      y: e.clientY,
+    });
 
     update();
   }
@@ -101,7 +105,7 @@
   class="locator"
   bind:this={container}
   on:pointerdown={onPointerDown}
-  style={`--locator-x: ${localX}px; --locator-y: ${localY}px`}
+  style={`--locator-x: ${localPoint.x}px; --locator-y: ${localPoint.y}px`}
 >
   <svg class="locator-line horizontal">
     <line x1="0" y1="0" x2="100%" y2="0" />

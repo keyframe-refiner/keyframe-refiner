@@ -4,21 +4,28 @@
   import type Scrollbar from 'smooth-scrollbar';
 
   import { defaultTransformer } from '../utils/coord-transformer';
+  import { Rect } from '../record-factory';
 
-  export let cropRect = {
-    // (left, top)
-    x1: 0,
-    y1: 0,
-    // (right, bottom)
-    x2: 0,
-    y2: 0,
-  };
+  export let cropRect = new Rect();
 
-  export let localXYtoRealXY = defaultTransformer;
-  export let realXYtoLocalXY = defaultTransformer;
+  export let localToReal = defaultTransformer;
+  export let realToLocal = defaultTransformer;
 
-  $: [localX1, localY1] = realXYtoLocalXY(cropRect.x1, cropRect.y1);
-  $: [localX2, localY2] = realXYtoLocalXY(cropRect.x2, cropRect.y2);
+  function localRectToRealRect(localRect: Rect) {
+    const x1y1 = localToReal(localRect.x1y1);
+    const x2y2 = localToReal(localRect.x2y2);
+
+    return x1y1.formRectWith(x2y2);
+  }
+
+  function realRectToLocalRect(realRect: Rect) {
+    const x1y1 = realToLocal(realRect.x1y1);
+    const x2y2 = realToLocal(realRect.x2y2);
+
+    return x1y1.formRectWith(x2y2);
+  }
+
+  $: localRect = realRectToLocalRect(cropRect);
 
   let container: HTMLElement;
   let cropping = false;
@@ -93,8 +100,7 @@
     const x2 = x1 + cropWidth;
     const y2 = y1 + cropHeight;
 
-    [cropRect.x1, cropRect.y1] = localXYtoRealXY(x1, y1);
-    [cropRect.x2, cropRect.y2] = localXYtoRealXY(x2, y2);
+    cropRect = localRectToRealRect(new Rect({ x1, y1, x2, y2 }));
 
     dispatchEvent();
   }
@@ -114,9 +120,7 @@
     const lx = clamp(pointerPosition.clientX - bounding.left, 0, bounding.width);
     const ly = clamp(pointerPosition.clientY - bounding.top, 0, bounding.height);
 
-    // assign new values to localX1, localY2... may cause unnecessary component updates
-    // therefore, use local variables instead
-    let [x1, y1, x2, y2] = [localX1, localY1, localX2, localY2];
+    let { x1, y1, x2, y2 } = localRect;
 
     if (direction & Direction.N) {
       if (ly < y2) {
@@ -159,9 +163,8 @@
       }
     }
 
-    // manually update cropRect => component updates => auto update localX1, localY1... (subscription)
-    [cropRect.x1, cropRect.y1] = localXYtoRealXY(x1, y1);
-    [cropRect.x2, cropRect.y2] = localXYtoRealXY(x2, y2);
+    // manually update cropRect => component updates => auto update localRect (subscription)
+    cropRect = localRectToRealRect(new Rect({ x1, y1, x2, y2 }));
 
     dispatchEvent();
   }
@@ -181,10 +184,10 @@
         const px = e.clientX - bounding.left;
         const py = e.clientY - bounding.top;
 
-        pointerOffset.x1 = px - localX1;
-        pointerOffset.y1 = py - localY1;
-        pointerOffset.x2 = px - localX2;
-        pointerOffset.y2 = py - localY2;
+        pointerOffset.x1 = px - localRect.x1;
+        pointerOffset.y1 = py - localRect.y1;
+        pointerOffset.x2 = px - localRect.x2;
+        pointerOffset.y2 = py - localRect.y2;
       }
     };
   }
@@ -216,7 +219,12 @@
     pointerPosition.clientX = e.clientX;
     pointerPosition.clientY = e.clientY;
 
-    [cropRect.x1, cropRect.y1] = [cropRect.x2, cropRect.y2] = localXYtoRealXY(px, py);
+    localRect = localRectToRealRect(new Rect({
+      x1: px,
+      y1: py,
+      x2: px,
+      y2: py,
+    }));
   }
 </script>
 
@@ -224,10 +232,10 @@
   class="cropper"
   bind:this={container}
   style={`
-    --cropper-x1: ${localX1}px;
-    --cropper-y1: ${localY1}px;
-    --cropper-x2: ${localX2}px;
-    --cropper-y2: ${localY2}px;
+    --cropper-x1: ${localRect.x1}px;
+    --cropper-y1: ${localRect.y1}px;
+    --cropper-x2: ${localRect.x2}px;
+    --cropper-y2: ${localRect.y2}px;
   `}
 >
   <div class="cropper-mask-wrapper" on:pointerdown={startNew}>
@@ -258,7 +266,7 @@
     <div class="cropper-handle handle-se" on:pointerdown={onPointerDown(Direction.SE)}></div>
 
     <div class="cropper-info" class:show={cropping && direction !== Direction.ALL}>
-      {localX2 - localX1} x {localY2 - localY1}
+      {localRect.width} x {localRect.height}
     </div>
   </div>
 </div>

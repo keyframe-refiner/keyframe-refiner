@@ -18,7 +18,7 @@
   let uploader: Uploader;
   let scrollbar: Scrollbar;
   let deleteIndex: number;
-  let deleteFilename: string;
+  let deleteFilename: string | undefined;
   let openDeleteConfirm = false;
   let openClearConfirm = false;
   let fileInput: HTMLInputElement;
@@ -28,7 +28,7 @@
 
   $: [beforeHeight, afterHeight] = [
     startIndex * thumbHeight,
-    ($inputList.length - endIndex - 1) * thumbHeight - thumbSpacing,
+    ($inputList.size - endIndex - 1) * thumbHeight - thumbSpacing,
   ];
 
   onMount(async () => {
@@ -53,7 +53,7 @@
     const extraCount = Math.floor((end - start + 1) / 2);
 
     startIndex = Math.max(0, start - extraCount);
-    endIndex = Math.min($inputList.length - 1, end + extraCount);
+    endIndex = Math.min($inputList.size - 1, end + extraCount);
   }
 
   async function navigate(delta: number) {
@@ -63,7 +63,7 @@
 
     const targetIndex = $selectedIndex + delta;
 
-    if (targetIndex < 0 || targetIndex > $inputList.length - 1) {
+    if (targetIndex < 0 || targetIndex > $inputList.size - 1) {
       return;
     }
 
@@ -76,7 +76,7 @@
 
     if (targetIndex === 0) {
       s.setMomentum(0, -s.scrollTop);
-    } else if (targetIndex === $inputList.length - 1) {
+    } else if (targetIndex === $inputList.size - 1) {
       s.setMomentum(0, s.limit.y - s.scrollTop);
     } else {
       const offsetTop = top - s.scrollTop - 10;
@@ -111,12 +111,11 @@
   }
 
   async function deleteImage() {
-    const [image] = $inputList.splice(deleteIndex, 1);
-
-    $inputList = $inputList; // force update
+    const image = $inputList.get(deleteIndex);
+    $inputList = $inputList.remove(deleteIndex);
 
     if (deleteIndex === $selectedIndex) {
-      $selectedIndex = clamp($selectedIndex, 0, $inputList.length - 1);
+      $selectedIndex = clamp($selectedIndex, 0, $inputList.size - 1);
     }
 
     if (image) {
@@ -129,12 +128,12 @@
   function requestDelete(index: number) {
     deleteIndex = index;
     openDeleteConfirm = true;
-    deleteFilename = $inputList[deleteIndex].filename;
+    deleteFilename = $inputList.get(deleteIndex)?.filename;
   }
 
   async function clearAll() {
     const currentList = $inputList;
-    $inputList = [];
+    $inputList = $inputList.clear();
     $selectedIndex = 0;
 
     await tick();
@@ -168,7 +167,7 @@
       style={`height: ${beforeHeight}px`}
     ></div>
 
-    {#each $inputList.slice(startIndex, endIndex + 1) as image, i (image.filename)}
+    {#each $inputList.slice(startIndex, endIndex + 1).toArray() as image, i (image.filename)}
       <div
         class="thumb"
         class:selected={image === $selectedImage}
@@ -194,7 +193,7 @@
       <input type="file" accept="image/*" multiple bind:this={fileInput} on:change={upload}>
     </div>
 
-    {#if $inputList.length !== 0}
+    {#if $inputList.size !== 0}
       <Button class="clear-all" title="すべての画像を削除" color="secondary" variant="outlined" on:click={requestClear}>
         <SVGIcon icon={mdiDeleteSweep} />
       </Button>

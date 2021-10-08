@@ -19,15 +19,33 @@ module.exports = {
   entry: fromRootTo('src/index.ts'),
   module: {
     rules: [{
+      // FIXME: immutable breaks @smui/dialog
       test: /\.svelte$/,
+      include: [fromRootTo('src')],
+      use: {
+        loader: 'svelte-loader',
+        options: {
+          compilerOptions: {
+            dev: true,
+            immutable: true,
+            hydratable: true,
+          },
+          // NOTE emitCss: true is currently not supported with HMR
+          // Enable it for production to output separate css file
+          emitCss: false,
+          hotReload: true,
+          preprocess: createPreprocessors(true),
+        },
+      },
+    }, {
+      test: /\.svelte$/,
+      include: [fromRootTo('node_modules')],
       use: {
         loader: 'svelte-loader',
         options: {
           compilerOptions: {
             dev: true,
           },
-          // NOTE emitCss: true is currently not supported with HMR
-          // Enable it for production to output separate css file
           emitCss: false,
           hotReload: true,
           preprocess: createPreprocessors(true),
