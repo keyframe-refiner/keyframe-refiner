@@ -10,6 +10,7 @@
   import Scrollbar from '../components/Scrollbar.svelte';
   import SVGIcon from '../components/SVGIcon.svelte';
   import { selectedImage, pivotPoint, ROI } from '../store';
+  import { VariableTracker } from '../utils/variable-tracker';
 
   let scale = 0;
   const minScale = 0.01;
@@ -26,24 +27,25 @@
   let displayWidth: number;
   let displayHeight: number;
 
+  const tracker = new VariableTracker(() => [
+    $selectedImage,
+  ]);
+
   onMount(() => {
     if (!$selectedImage) {
       return;
     }
 
-    const maxWidth = viewerEl.clientWidth * 0.8;
-    const maxHeight = viewerEl.clientHeight * 0.8;
-
-    scale = Math.min(
-      1,
-      maxWidth / $selectedImage.width,
-      maxHeight / $selectedImage.height,
-    );
+    resetScale();
   });
 
   afterUpdate(() => {
     if (!$selectedImage) {
       return;
+    }
+
+    if (tracker.stale()) {
+      resetScale();
     }
 
     adjustViewerOffsets();
@@ -52,6 +54,17 @@
     $pivotPoint = $pivotPoint;
     $ROI = $ROI;
   });
+
+  function resetScale() {
+    const maxWidth = viewerEl.clientWidth * 0.8;
+    const maxHeight = viewerEl.clientHeight * 0.8;
+
+    scale = Math.min(
+      1,
+      maxWidth / $selectedImage.width,
+      maxHeight / $selectedImage.height,
+    );
+  }
 
   function adjustViewerOffsets() {
     displayWidth = Math.round($selectedImage.width * scale);
@@ -157,8 +170,8 @@
             on:mousedown|preventDefault
         />
         <div class="viewer-placeholder"></div>
-        <!-- <Cropper bind:cropRect={$ROI} {localXYtoRealXY} {realXYtoLocalXY} /> -->
-        <!-- <Locator bind:point={$pivotPoint} limits={$ROI} {localXYtoRealXY} {realXYtoLocalXY} /> -->
+        <Cropper bind:cropRect={$ROI} {localXYtoRealXY} {realXYtoLocalXY} />
+        <Locator bind:point={$pivotPoint} limits={$ROI} {localXYtoRealXY} {realXYtoLocalXY} />
       </div>
 
     </article>

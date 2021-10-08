@@ -89,6 +89,7 @@
         width: 100%;
         table-layout: fixed;
         text-overflow: ellipsis;
+        word-break: break-all;
       }
     }
   }
