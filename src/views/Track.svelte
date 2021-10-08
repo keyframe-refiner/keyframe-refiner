@@ -56,6 +56,10 @@
   }
 
   async function navigate(delta: number) {
+    if (openDeleteConfirm) {
+      return;
+    }
+
     const targetIndex = $selectedIndex + delta;
 
     if (targetIndex < 0 || targetIndex > $inputList.length - 1) {
@@ -89,6 +93,10 @@
     e.stopPropagation();
 
     switch (e.key) {
+      case 'Delete':
+        requestDelete($selectedIndex);
+        break;
+
       case 'ArrowUp':
       case 'ArrowLeft':
         navigate(-1);
@@ -152,7 +160,7 @@
         on:click={() => { $selectedIndex = startIndex + i; }}
         bind:this={thumbs[i]}
       >
-        <img src={image.blobURL} alt={image.filename} title={image.filename} />
+        <img src={image.blobURL} alt={image.filename} title={image.filename} on:mousedown|preventDefault />
         <span class="delete" title="この画像を削除" on:click={() => requestDelete(i)}>
           <SVGIcon icon={mdiTrashCanOutline}/>
         </span>
