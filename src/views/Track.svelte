@@ -18,7 +18,7 @@
   let fileInput: HTMLInputElement;
   const thumbs: (HTMLElement | null)[] = [];
 
-  function navigate(delta: number) {
+  async function navigate(delta: number) {
     const targetIndex = $selectedIndex + delta;
 
     if (targetIndex < 0 || targetIndex > $inputList.length - 1) {
@@ -31,7 +31,9 @@
     const target = thumbs[targetIndex];
 
     if (target) {
-      scrollbar.getScrollbar().scrollIntoView(target, {
+      const s = await scrollbar.getScrollbar();
+
+      s.scrollIntoView(target, {
         alignToTop: delta === -1,
         offsetTop: 10,
         offsetBottom: targetIndex === $inputList.length - 1 ? 200 : 10,
