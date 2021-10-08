@@ -287,11 +287,12 @@
 
   .cropper-box {
     position: absolute;
-    top: var(--cropper-y1);
-    left: var(--cropper-x1);
+    top: 0;
+    left: 0;
     width: calc(var(--cropper-x2) - var(--cropper-x1));
     height: calc(var(--cropper-y2) - var(--cropper-y1));
     cursor: grab;
+    transform: translate3d(var(--cropper-x1), var(--cropper-y1), 0);
 
     &.grabbing {
       cursor: grabbing;
@@ -319,11 +320,10 @@
     position: absolute;
     width: var(--handle-size);
     height: var(--handle-size);
-    margin-top: calc(var(--handle-size) / -2);
-    margin-left: calc(var(--handle-size) / -2);
     background-color: var(--handle-color);
     border-radius: 50%;
     border: 1px solid #fff;
+    transform: translate(-50%, -50%);
   }
 
   .cropper-mask {
@@ -405,30 +405,26 @@
   }
 
   .mask-left {
-    top: 0;
-    left: 0;
     width: var(--cropper-x1);
     height: 100%;
+    transform: translate3d(0, 0, 0);
   }
 
   .mask-top {
-    top: 0;
-    left: var(--cropper-x1);
     width: calc(var(--cropper-x2) - var(--cropper-x1));
     height: var(--cropper-y1);
+    transform: translate3d(var(--cropper-x1), 0, 0);
   }
 
   .mask-bottom {
-    top: var(--cropper-y2);
-    left: var(--cropper-x1);
     width: calc(var(--cropper-x2) - var(--cropper-x1));
     height: calc(100% - var(--cropper-y2));
+    transform: translate3d(var(--cropper-x1), var(--cropper-y2), 0);
   }
 
   .mask-right {
-    top: 0;
-    left: var(--cropper-x2);
     width: calc(100% - var(--cropper-x2));
     height: 100%;
+    transform: translate3d(var(--cropper-x2), 0, 0);
   }
 </style>
