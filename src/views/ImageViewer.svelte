@@ -174,8 +174,8 @@
     >
       <div class="viewer-wrapper">
         <canvas class="viewer-canvas" bind:this={canvas}></canvas>
-        <Locator bind:point={$pivotPoint} {localXYtoRealXY} {realXYtoLocalXY} />
         <Cropper bind:cropRect={$ROI} {localXYtoRealXY} {realXYtoLocalXY} />
+        <Locator bind:point={$pivotPoint} limits={$ROI} {localXYtoRealXY} {realXYtoLocalXY} />
       </div>
 
     </article>

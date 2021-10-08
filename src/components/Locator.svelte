@@ -10,6 +10,13 @@
     y: 0,
   };
 
+  export let limits = {
+    x1: -Infinity,
+    y1: -Infinity,
+    x2: Infinity,
+    y2: Infinity,
+  };
+
   export let localXYtoRealXY = defaultTransformer;
   export let realXYtoLocalXY = defaultTransformer;
 
@@ -40,20 +47,22 @@
         }
       });
     }
+
+    // calibrate position
+    update();
   });
 
   function update() {
     const bounding = container.getBoundingClientRect();
 
-    // assign new values to localX, localY may cause unnecessary component updates
-    // therefore, use local variables instead
-    const lx = clamp(pointerPosition.clientX - bounding.left, 0, bounding.width);
-    const ly = clamp(pointerPosition.clientY - bounding.top, 0, bounding.height);
+    const [px, py] = localXYtoRealXY(
+      clamp(pointerPosition.clientX - bounding.left, 0, bounding.width),
+      clamp(pointerPosition.clientY - bounding.top, 0, bounding.height),
+    );
 
-    // manually update x, y => component updates => auto update localX, localY (subscription)
-    [point.x, point.y] = localXYtoRealXY(lx, ly);
+    point.x = clamp(px, limits.x1, limits.x2);
+    point.y = clamp(py, limits.y1, limits.y2);
 
-    // HACK: enable scrollbar auto-scrolling
     container.dispatchEvent(new CustomEvent('pan-move', {
       bubbles: true,
       detail: {
