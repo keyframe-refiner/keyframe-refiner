@@ -69,6 +69,7 @@
   });
 
   function dispatchEvent() {
+    // HACK: enable scrollbar auto-scrolling
     container.dispatchEvent(new CustomEvent('pan-move', {
       bubbles: true,
       detail: {
@@ -113,6 +114,8 @@
     const lx = clamp(pointerPosition.clientX - bounding.left, 0, bounding.width);
     const ly = clamp(pointerPosition.clientY - bounding.top, 0, bounding.height);
 
+    // assign new values to localX1, localY2... may cause unnecessary component updates
+    // therefore, use local variables instead
     let [x1, y1, x2, y2] = [localX1, localY1, localX2, localY2];
 
     if (direction & Direction.N) {
@@ -156,6 +159,7 @@
       }
     }
 
+    // manually update cropRect => component updates => auto update localX1, localY1... (subscription)
     [cropRect.x1, cropRect.y1] = localXYtoRealXY(x1, y1);
     [cropRect.x2, cropRect.y2] = localXYtoRealXY(x2, y2);
 
