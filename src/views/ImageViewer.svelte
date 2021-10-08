@@ -149,18 +149,16 @@
       }
     >
       <div class="viewer-wrapper">
-        {#await $selectedImage.getBlobURL() then url}
-          <img
+        <img
             class="viewer-image"
-            src={url}
+            src={$selectedImage.blobURL}
             alt={$selectedImage.filename}
             bind:this={imgEl}
             on:mousedown|preventDefault
-          />
-        {/await}
+        />
         <div class="viewer-placeholder"></div>
-        <Cropper bind:cropRect={$ROI} {localXYtoRealXY} {realXYtoLocalXY} />
-        <Locator bind:point={$pivotPoint} limits={$ROI} {localXYtoRealXY} {realXYtoLocalXY} />
+        <!-- <Cropper bind:cropRect={$ROI} {localXYtoRealXY} {realXYtoLocalXY} /> -->
+        <!-- <Locator bind:point={$pivotPoint} limits={$ROI} {localXYtoRealXY} {realXYtoLocalXY} /> -->
       </div>
 
     </article>

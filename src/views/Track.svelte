@@ -1,15 +1,19 @@
 <script lang="ts">
   import clamp from 'lodash-es/clamp';
+  import { onMount, afterUpdate, tick } from 'svelte';
   import Button from '@smui/button/styled';
   import { Title, Content, Actions } from '@smui/dialog/styled';
   import { mdiPlus, mdiTrashCanOutline } from '@mdi/js';
 
-  import { inputList, selectedIndex } from '../store';
+  import { inputList, selectedIndex, selectedImage } from '../store';
   import SVGIcon from '../components/SVGIcon.svelte';
   import Uploader from '../components/Uploader.svelte';
-  import Preview from '../components/Preview.svelte';
   import RootDialog from '../components/RootDialog.svelte';
   import Scrollbar from '../components/Scrollbar.svelte';
+
+  export let thumbSize = 150;
+  export let thumbSpacing = 20;
+  $: thumbHeight = thumbSize + thumbSpacing;
 
   let uploader: Uploader;
   let scrollbar: Scrollbar;
@@ -17,6 +21,39 @@
   let openDeleteConfirm = false;
   let fileInput: HTMLInputElement;
   const thumbs: (HTMLElement | null)[] = [];
+
+  let startIndex = 0;
+  let endIndex = 0;
+
+  $: [beforeHeight, afterHeight] = [
+    startIndex * thumbHeight,
+    ($inputList.length - endIndex - 1) * thumbHeight - thumbSpacing,
+  ];
+
+  onMount(async () => {
+    const s = await scrollbar.getScrollbar();
+
+    s.addListener(sliceItem);
+  });
+
+  afterUpdate(() => {
+    sliceItem();
+  });
+
+  async function sliceItem() {
+    const s = await scrollbar.getScrollbar();
+
+    // visible area: [scrollTop, scrollTop + containerHeight]
+    const top = s.scrollTop;
+    const bottom = top + s.size.container.height;
+
+    const start = Math.floor(top / thumbHeight);
+    const end = Math.ceil(bottom / thumbHeight);
+    const extraCount = Math.floor((end - start + 1) / 2);
+
+    startIndex = Math.max(0, start - extraCount);
+    endIndex = Math.min($inputList.length - 1, end + extraCount);
+  }
 
   async function navigate(delta: number) {
     const targetIndex = $selectedIndex + delta;
@@ -27,18 +64,24 @@
 
     $selectedIndex = targetIndex;
 
-    // TODO: find a better approach
-    const target = thumbs[targetIndex];
+    const top = targetIndex * thumbHeight;
+    const bottom = top + thumbHeight;
 
-    if (target) {
-      const s = await scrollbar.getScrollbar();
+    const s = await scrollbar.getScrollbar();
 
-      s.scrollIntoView(target, {
-        alignToTop: delta === -1,
-        offsetTop: 10,
-        offsetBottom: targetIndex === $inputList.length - 1 ? 200 : 10,
-        onlyScrollIfNeeded: targetIndex !== 0 && targetIndex !== $inputList.length - 1,
-      });
+    if (targetIndex === 0) {
+      s.setMomentum(0, -s.scrollTop);
+    } else if (targetIndex === $inputList.length - 1) {
+      s.setMomentum(0, s.limit.y - s.scrollTop);
+    } else {
+      const offsetTop = top - s.scrollTop - 10;
+      const offsetBottom = bottom - (s.scrollTop + s.size.container.height) + 10;
+
+      if (offsetTop < 0) {
+        s.setMomentum(0, offsetTop);
+      } else if (offsetBottom > 0) {
+        s.setMomentum(0, offsetBottom);
+      }
     }
   }
 
@@ -58,12 +101,19 @@
     }
   }
 
-  function deleteImage() {
-    $inputList.splice(deleteIndex, 1);
+  async function deleteImage() {
+    const [image] = $inputList.splice(deleteIndex, 1);
+
     $inputList = $inputList; // force update
 
     if (deleteIndex === $selectedIndex) {
       $selectedIndex = clamp($selectedIndex, 0, $inputList.length - 1);
+    }
+
+    if (image) {
+      // revoke object url after image is removed from DOM
+      await tick();
+      image.destory();
     }
   }
 
@@ -82,29 +132,47 @@
   }
 </script>
 
-<Scrollbar class="image-track" bind:this={scrollbar}>
-  {#each $inputList as image, i (image.filename)}
+<div
+  class="image-track"
+  style={`
+    --thumb-size: ${thumbSize}px;
+    --thumb-spacing: ${thumbSpacing}px;
+  `}
+>
+  <Scrollbar bind:this={scrollbar}>
     <div
-      class="thumb"
-      class:selected={i === $selectedIndex}
-      on:click={() => { $selectedIndex = i; }}
-      bind:this={thumbs[i]}
-    >
-      <Preview title={image.filename} {image} />
-      <span class="delete" title="この画像を削除" on:click={() => requestDelete(i)}>
-        <SVGIcon icon={mdiTrashCanOutline}/>
-      </span>
-    </div>
-  {/each}
+      class="thumb-placeholder placeholder-before"
+      style={`height: ${beforeHeight}px`}
+    ></div>
 
-  <div class="uploader" title="画像をアップロード" on:click={() => fileInput.click()}>
-    <Uploader bind:this={uploader} />
-    <span class="uploader-mark">
-      <SVGIcon icon={mdiPlus} />
-    </span>
-    <input type="file" accept="image/*" multiple bind:this={fileInput} on:change={upload}>
-  </div>
-</Scrollbar>
+    {#each $inputList.slice(startIndex, endIndex + 1) as image, i (image.filename)}
+      <div
+        class="thumb"
+        class:selected={image === $selectedImage}
+        on:click={() => { $selectedIndex = startIndex + i; }}
+        bind:this={thumbs[i]}
+      >
+        <img src={image.blobURL} alt={image.filename} title={image.filename} />
+        <span class="delete" title="この画像を削除" on:click={() => requestDelete(i)}>
+          <SVGIcon icon={mdiTrashCanOutline}/>
+        </span>
+      </div>
+    {/each}
+
+    <div
+      class="thumb-placeholder placeholder-after"
+      style={`height: ${afterHeight}px`}
+    ></div>
+
+    <div class="uploader" title="画像をアップロード" on:click={() => fileInput.click()}>
+      <Uploader bind:this={uploader} />
+      <span class="uploader-mark">
+        <SVGIcon icon={mdiPlus} />
+      </span>
+      <input type="file" accept="image/*" multiple bind:this={fileInput} on:change={upload}>
+    </div>
+  </Scrollbar>
+</div>
 
 <RootDialog
   scrimClickAction=""
@@ -129,10 +197,13 @@
 <svelte:window on:keydown={onKeyDown} />
 
 <style lang="scss">
-  :global {
-    .image-track {
-      height: 100%;
-      user-select: none;
+  .image-track {
+    user-select: none;
+
+    :global {
+      .scrollbar {
+        height: calc(100vh - var(--header-height));
+      }
 
       .scrollbar-wrapper {
         padding: 10px;
@@ -142,15 +213,13 @@
 
   .thumb,
   .uploader {
-    --thumb-size: 150px;
-
     width: var(--thumb-size);
     height: var(--thumb-size);
     outline: none;
     color: var(--placeholder);
     border: 3px solid currentColor;
     border-radius: 3px;
-    margin-bottom: 20px;
+    margin-bottom: var(--thumb-spacing);
 
     &:hover {
       color: var(--placeholder-light);
@@ -162,6 +231,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
+
+    img {
+      max-width: 100%;
+      max-height: 100%;
+    }
 
     &.selected {
       border-color: var(--mdc-theme-primary);
@@ -177,6 +251,10 @@
         height: 100%;
       }
     }
+  }
+
+  .thumb-placeholder {
+    width: 100%;
   }
 
   .uploader {

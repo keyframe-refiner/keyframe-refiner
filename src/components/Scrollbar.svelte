@@ -39,7 +39,7 @@
   });
 </script>
 
-<div bind:this={container} {...$$restProps}>
+<div class="scrollbar" bind:this={container} {...$$restProps}>
   <div class="scrollbar-wrapper">
     <slot></slot>
   </div>
