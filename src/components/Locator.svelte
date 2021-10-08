@@ -141,14 +141,11 @@
 
   .locator-circle {
     position: absolute;
-    top: var(--locator-y);
-    left: var(--locator-x);
     width: calc(var(--locator-radius) * 2);
     height: calc(var(--locator-radius) * 2);
-    margin-top: calc(var(--locator-radius) * -1);
-    margin-left: calc(var(--locator-radius) * -1);
     cursor: move;
     stroke-width: calc(var(--locator-line-width) * 1.5);
+    transform: translate3d(calc(var(--locator-x) - 50%), calc(var(--locator-y) - 50%), 0);
   }
 
   .locator-line {
