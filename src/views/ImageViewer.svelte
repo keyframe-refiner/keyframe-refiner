@@ -174,18 +174,15 @@
         --viewer-height: ${displayHeight}px;`
       }
     >
-      <div class="viewer-wrapper">
-        <img
-            class="viewer-image"
-            src={$selectedImage?.blobURL}
-            alt={$selectedImage?.filename}
-            bind:this={imgEl}
-            on:mousedown|preventDefault
-        />
-        <div class="viewer-placeholder"></div>
-        <Cropper bind:cropRect={$ROI} {localToReal} {realToLocal} />
-        <Locator bind:point={$pivotPoint} limits={$ROI} {localToReal} {realToLocal} />
-      </div>
+      <img
+          class="viewer-image"
+          src={$selectedImage?.blobURL}
+          alt={$selectedImage?.filename}
+          bind:this={imgEl}
+          on:mousedown|preventDefault
+      />
+      <Cropper bind:cropRect={$ROI} {localToReal} {realToLocal} />
+      <Locator bind:point={$pivotPoint} limits={$ROI} {localToReal} {realToLocal} />
 
     </article>
   </Scrollbar>
@@ -209,6 +206,10 @@
     width: 100%;
     height: 100%;
     user-select: none;
+
+    :global(.scrollbar) {
+      height: 100%;
+    }
   }
 
   .viewer-zoom {
@@ -229,7 +230,11 @@
   }
 
   .viewer-body {
-    height: calc(100vh - var(--header-height));
+    position: relative;
+    display: inline-flex;
+    width: var(--viewer-width);
+    height: var(--viewer-height);
+    transform: translate3d(var(--viewer-offset-x), var(--viewer-offset-y), 0);
   }
 
   .viewer-image {
@@ -238,16 +243,5 @@
     left: 0;
     transform: scale3d(var(--viewer-scale), var(--viewer-scale), 1);
     transform-origin: 0 0;
-  }
-
-  .viewer-placeholder {
-    width: var(--viewer-width);
-    height: var(--viewer-height);
-  }
-
-  .viewer-wrapper {
-    position: relative;
-    display: inline-flex;
-    transform: translate(var(--viewer-offset-x), var(--viewer-offset-y));
   }
 </style>
