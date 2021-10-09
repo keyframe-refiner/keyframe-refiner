@@ -175,7 +175,7 @@
         on:click={() => { $selectedIndex = startIndex + i; }}
       >
         <img src={image.blobURL} alt={image.filename} title={image.filename} on:mousedown|preventDefault />
-        <span class="delete" title="この画像を削除" on:click={() => requestDelete(startIndex + i)}>
+        <span class="delete" title="この画像を削除" on:click|stopPropagation={() => requestDelete(startIndex + i)}>
           <SVGIcon icon={mdiTrashCanOutline} />
         </span>
       </div>
