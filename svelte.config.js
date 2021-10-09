@@ -5,10 +5,6 @@ function createPreprocessors(sourceMap = false) {
     sourceMap,
     scss: true,
     typescript: true,
-    defaults: {
-      script: 'typescript',
-      style: 'scss',
-    },
   });
 }
 
