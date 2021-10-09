@@ -1,6 +1,7 @@
 <script lang="ts">
   import clamp from 'lodash-es/clamp';
   import { onMount, afterUpdate, tick } from 'svelte';
+  import Portal from 'svelte-portal';
   import Button from '@smui/button/styled';
   import { Title, Content, Actions } from '@smui/dialog/styled';
   import { mdiPlus, mdiTrashCanOutline, mdiDeleteSweep } from '@mdi/js';
@@ -192,15 +193,17 @@
       </span>
       <input type="file" accept="image/*" multiple bind:this={fileInput} on:change={upload}>
     </div>
-
-    {#if $inputList.size !== 0}
-      <Button class="clear-all" title="すべての画像を削除" color="secondary" variant="outlined" on:click={requestClear}>
-        <SVGIcon icon={mdiDeleteSweep} />
-      </Button>
-    {/if}
   </Scrollbar>
 </div>
 
+{#if $inputList.size !== 0}
+  <Portal target="body">
+    <div class="clear-all" on:click={requestClear}>
+      <span>すべての画像を削除</span>
+      <SVGIcon icon={mdiDeleteSweep} />
+    </div>
+  </Portal>
+{/if}
 <RootDialog
   scrimClickAction=""
   escapeKeyAction=""
@@ -252,7 +255,6 @@
     color: var(--placeholder);
     border: 3px solid currentColor;
     border-radius: 3px;
-    margin-bottom: var(--thumb-spacing);
 
     &:hover {
       color: var(--placeholder-light);
@@ -264,6 +266,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-bottom: var(--thumb-spacing);
 
     img {
       max-width: 100%;
@@ -326,21 +329,62 @@
     }
   }
 
-  :global(.clear-all) {
+  .clear-all {
+    --clear-button-height: 40px;
+
     display: flex;
     align-items: center;
-    justify-content: center;
-    opacity: 0.25;
-    width: var(--thumb-size);
-    transition: opacity 0.3s;
+    justify-content: space-between;
+    position: fixed;
+    left: 0;
+    bottom: 10px;
+    padding: 10px;
+    padding-right: 0;
+    height: var(--clear-button-height);
+    background-color: var(--mdc-theme-secondary);
+    transform: translate3d(-100%, 0, 0);
+    opacity: 0.2;
+    // TODO: use postcss-easing
+    animation: fade-out 2s cubic-bezier(0.33, 1, 0.68, 1); // easeOutCubic
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); // easeOutBack
+    cursor: pointer;
+    z-index: 1;
 
     &:hover {
+      transform: translate3d(0, 0, 0);
       opacity: 1;
     }
 
-    :global(svg) {
-      width: 24px !important;
-      height: 24px !important;
+    &::before {
+      content: '';
+      position: absolute;
+      right: 100%;
+      width: 100%;
+      height: 100%;
+      background-color: inherit;
+    }
+
+    :global(.icon) {
+      position: absolute;
+      left: 100%;
+      padding: 8px;
+      width: var(--clear-button-height);
+      height: var(--clear-button-height);
+      background-color: inherit;
+      border-radius: 0 50% 50% 0;
+      animation: fly-in-left 0.3s ease-out;
+    }
+  }
+
+  @keyframes fade-out {
+    0%, 50% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes fly-in-left {
+    from {
+      transform: translate3d(-100%, 0, 0);
     }
   }
 </style>
