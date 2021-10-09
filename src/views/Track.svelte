@@ -344,9 +344,8 @@
     background-color: var(--mdc-theme-secondary);
     transform: translate3d(-100%, 0, 0);
     opacity: 0.2;
-    // TODO: use postcss-easing
-    animation: fade-out 2s cubic-bezier(0.33, 1, 0.68, 1); // easeOutCubic
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); // easeOutBack
+    animation: fade-out 2s easeOutCubic;
+    transition: all 0.3s easeOutBack;
     cursor: pointer;
     z-index: 1;
 
