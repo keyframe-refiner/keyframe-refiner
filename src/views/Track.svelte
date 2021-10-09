@@ -352,6 +352,7 @@
     &:hover {
       transform: translate3d(0, 0, 0);
       opacity: 1;
+      animation: none;
     }
 
     &::before {
@@ -379,11 +380,19 @@
     0%, 50% {
       opacity: 1;
     }
+
+    100% {
+      opacity: 0.2;
+    }
   }
 
   @keyframes fly-in-left {
-    from {
+    0% {
       transform: translate3d(-100%, 0, 0);
+    }
+
+    100% {
+      transform: translate3d(0, 0, 0);
     }
   }
 </style>
