@@ -9,7 +9,7 @@
   "scripts": {
     "serve": "webpack serve --config ./scripts/webpack.config.dev.js --mode development --progress",
     "check": "svelte-check",
-    "lint": "eslint ./src"
+    "lint": "eslint ./src --ext .ts,.svelte"
   },
   "browserslist": [
     "defaults"
