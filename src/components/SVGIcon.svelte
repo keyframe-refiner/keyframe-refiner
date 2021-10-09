@@ -5,7 +5,7 @@
   export let icon: string;
 </script>
 
-<span {...$$restProps}>
+<span class="icon" {...$$restProps}>
   <Icon component={Svg} viewBox="0 0 24 24">
     <path fill="currentColor" d={icon} />
   </Icon>
