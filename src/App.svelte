@@ -35,6 +35,8 @@
   <DnD />
 </main>
 
+<div id="modal"></div>
+
 <style lang="scss">
   main {
     width: 100%;

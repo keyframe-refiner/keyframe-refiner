@@ -5,8 +5,10 @@
   export let open: boolean;
 </script>
 
-<Portal target="body">
-  <Dialog bind:open on:MDCDialog:closed {...$$restProps}>
-    <slot></slot>
-  </Dialog>
-</Portal>
+{#if open}
+  <Portal target="#modal">
+    <Dialog bind:open on:MDCDialog:closed {...$$restProps}>
+      <slot></slot>
+    </Dialog>
+  </Portal>
+{/if}
