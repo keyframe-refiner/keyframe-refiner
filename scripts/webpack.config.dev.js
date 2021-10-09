@@ -8,6 +8,11 @@ const { createPreprocessors } = require('../svelte.config');
 const fromRootTo = path.resolve.bind(path, __dirname, '..');
 
 module.exports = {
+  // should switch `target` to 'browserlist' in production mode,
+  // see: https://github.com/webpack/webpack-dev-server/issues/2758#issuecomment-710086019
+  target: 'web',
+  devtool: 'cheap-module-source-map',
+  entry: fromRootTo('src/index.ts'),
   resolve: {
     extensions: ['.ts', '.js', '.mjs', '.svelte'],
     mainFields: ['svelte', 'browser', 'module', 'main'],
@@ -15,8 +20,6 @@ module.exports = {
       svelte: path.resolve('node_modules', 'svelte'),
     },
   },
-  devtool: 'cheap-module-source-map',
-  entry: fromRootTo('src/index.ts'),
   module: {
     rules: [{
       // FIXME: immutable breaks @smui/dialog
