@@ -5,6 +5,7 @@ function createPreprocessors(sourceMap = false) {
     sourceMap,
     scss: true,
     typescript: true,
+    postcss: require('./postcss.config'),
   });
 }
 

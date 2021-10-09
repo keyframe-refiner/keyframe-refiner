@@ -66,6 +66,7 @@ module.exports = {
       use: [
         'style-loader',
         'css-loader',
+        'postcss-loader',
         {
           loader: 'sass-loader',
           options: {
@@ -79,7 +80,6 @@ module.exports = {
             },
           },
         },
-        'postcss-loader',
       ],
     }, {
       test: /\.css$/i,
