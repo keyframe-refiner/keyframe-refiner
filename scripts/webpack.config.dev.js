@@ -79,12 +79,14 @@ module.exports = {
             },
           },
         },
+        'postcss-loader',
       ],
     }, {
       test: /\.css$/i,
       use: [
         'style-loader',
-        'css-loader?sourceMap=true',
+        'css-loader',
+        'postcss-loader',
       ],
     }],
   },

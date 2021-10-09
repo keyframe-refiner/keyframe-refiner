@@ -11,6 +11,9 @@
     "check": "svelte-check",
     "lint": "eslint ./src"
   },
+  "browserslist": [
+    "defaults"
+  ],
   "dependencies": {
     "@mdi/js": "^5.9.55",
     "@smui/button": "^4.2.0",
@@ -36,6 +39,7 @@
     "@types/lodash-es": "^4.17.5",
     "@typescript-eslint/eslint-plugin": "^4.29.0",
     "@typescript-eslint/parser": "^4.29.0",
+    "autoprefixer": "^10.3.7",
     "cross-env": "^7.0.3",
     "css-loader": "^5.2.6",
     "eslint": "^7.32.0",
@@ -47,6 +51,9 @@
     "eslint-webpack-plugin": "^3.0.1",
     "html-webpack-plugin": "^5.3.1",
     "mini-css-extract-plugin": "^1.6.2",
+    "postcss": "^8.3.9",
+    "postcss-easings": "^3.0.1",
+    "postcss-loader": "^6.1.1",
     "rimraf": "^3.0.2",
     "sass": "~1.32.13",
     "sass-loader": "^10.2.0",
