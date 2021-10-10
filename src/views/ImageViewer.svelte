@@ -1,7 +1,7 @@
 <script lang="ts">
   import clamp from 'lodash-es/clamp';
   import debounce from 'lodash-es/debounce';
-  import { afterUpdate, tick } from 'svelte';
+  import { afterUpdate } from 'svelte';
   import IconButton from '@smui/icon-button/styled';
   import { mdiMagnifyMinusOutline, mdiMagnifyPlusOutline } from '@mdi/js';
 
@@ -96,13 +96,6 @@
       clientY = viewerEl.clientHeight / 2;
     }
 
-    const viewerRect = viewerEl.getBoundingClientRect();
-    const imgRect = imgEl.getBoundingClientRect();
-
-    // calculate the distance between the pointer and the left-top cornor of the canvas
-    const dx = clientX - imgRect.left;
-    const dy = clientY - imgRect.top;
-
     // memoize previous scale value
     const prevScale = scale;
 
@@ -112,14 +105,20 @@
     // how much `scale` is scaled
     const n = scale / prevScale;
 
-    // await rendering
-    await tick();
-
     // update scrollbar position
-    // `dx * n` => the new distance between the scaled canvas and the pointer
-    // `clientX - viewerRect.left` => the distance between the pointer and the left-top cornor of the viewer
     const s = await scrollbar.getScrollbar();
 
+    s.update();
+
+    const viewerRect = viewerEl.getBoundingClientRect();
+    const imgRect = imgEl.getBoundingClientRect();
+
+    // calculate the distance between the pointer and the left-top cornor of the canvas
+    const dx = clientX - imgRect.left;
+    const dy = clientY - imgRect.top;
+
+    // `dx * n` => the new distance between the scaled canvas and the pointer
+    // `clientX - viewerRect.left` => the distance between the pointer and the left-top cornor of the viewer
     s.setPosition(
       dx * n - (clientX - viewerRect.left),
       dy * n - (clientY - viewerRect.top),
