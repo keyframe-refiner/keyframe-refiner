@@ -80,14 +80,14 @@
       y: e.clientY,
     });
 
-    document.body.classList.add('non-selection');
+    document.body.classList.add('disable-select');
 
     update();
   }
 
   function onPointerUp() {
     moving = false;
-    document.body.classList.remove('non-selection');
+    document.body.classList.remove('disable-select');
   }
 
   function onPointerMove(e: PointerEvent) {
