@@ -4,9 +4,10 @@
   import type Scrollbar from 'smooth-scrollbar';
 
   import { defaultTransformer } from '../utils/coord-transformer';
-  import { Rect } from '../record-factory';
+  import { Point, Rect } from '../record-factory';
 
   export let cropRect = new Rect();
+  $: localRect = realRectToLocalRect(cropRect);
 
   export let localToReal = defaultTransformer;
   export let realToLocal = defaultTransformer;
@@ -24,8 +25,6 @@
 
     return x1y1.formRectWith(x2y2);
   }
-
-  $: localRect = realRectToLocalRect(cropRect);
 
   let container: HTMLElement;
   let cropping = false;
@@ -45,17 +44,10 @@
 
   let direction: Direction = Direction.NONE;
 
-  const pointerPosition = {
-    clientX: 0,
-    clientY: 0,
-  };
+  let pointerPosition = new Point();
 
-  const pointerOffset = {
-    x1: 0,
-    y1: 0,
-    x2: 0,
-    y2: 0,
-  };
+  // offsets from pointer to the four points of crop rect
+  let pointerOffset = new Rect();
 
   let getScrollbar: () => Promise<Scrollbar>;
 
@@ -80,8 +72,8 @@
     container.dispatchEvent(new CustomEvent('pan-move', {
       bubbles: true,
       detail: {
-        pointerX: pointerPosition.clientX,
-        pointerY: pointerPosition.clientY,
+        pointerX: pointerPosition.x,
+        pointerY: pointerPosition.y,
       },
     }));
   }
@@ -89,16 +81,13 @@
   function updateAll() {
     const bounding = container.getBoundingClientRect();
 
-    const px = pointerPosition.clientX - bounding.left;
-    const py = pointerPosition.clientY - bounding.top;
+    const px = pointerPosition.x - bounding.left;
+    const py = pointerPosition.y - bounding.top;
 
-    const cropWidth = pointerOffset.x1 - pointerOffset.x2;
-    const cropHeight = pointerOffset.y1 - pointerOffset.y2;
-
-    const x1 = clamp(px - pointerOffset.x1, 0, bounding.width - cropWidth);
-    const y1 = clamp(py - pointerOffset.y1, 0, bounding.height - cropHeight);
-    const x2 = x1 + cropWidth;
-    const y2 = y1 + cropHeight;
+    const x1 = clamp(px - pointerOffset.x1, 0, bounding.width - localRect.width);
+    const y1 = clamp(py - pointerOffset.y1, 0, bounding.height - localRect.height);
+    const x2 = x1 + localRect.width;
+    const y2 = y1 + localRect.height;
 
     cropRect = localRectToRealRect(new Rect({ x1, y1, x2, y2 }));
 
@@ -117,8 +106,8 @@
 
     const bounding = container.getBoundingClientRect();
 
-    const lx = clamp(pointerPosition.clientX - bounding.left, 0, bounding.width);
-    const ly = clamp(pointerPosition.clientY - bounding.top, 0, bounding.height);
+    const lx = clamp(pointerPosition.x - bounding.left, 0, bounding.width);
+    const ly = clamp(pointerPosition.y - bounding.top, 0, bounding.height);
 
     let { x1, y1, x2, y2 } = localRect;
 
@@ -176,18 +165,22 @@
       cropping = true;
       direction = dir;
 
-      pointerPosition.clientX = e.clientX;
-      pointerPosition.clientY = e.clientY;
+      pointerPosition = new Point({
+        x: e.clientX,
+        y: e.clientY,
+      });
 
       if (dir === Direction.ALL) {
         const bounding = container.getBoundingClientRect();
         const px = e.clientX - bounding.left;
         const py = e.clientY - bounding.top;
 
-        pointerOffset.x1 = px - localRect.x1;
-        pointerOffset.y1 = py - localRect.y1;
-        pointerOffset.x2 = px - localRect.x2;
-        pointerOffset.y2 = py - localRect.y2;
+        pointerOffset = new Rect({
+          x1: px - localRect.x1,
+          y1: py - localRect.y1,
+          x2: px - localRect.x2,
+          y2: py - localRect.y2,
+        });
       }
     };
   }
@@ -202,8 +195,10 @@
       return;
     }
 
-    pointerPosition.clientX = e.clientX;
-    pointerPosition.clientY = e.clientY;
+    pointerPosition = new Point({
+      x: e.clientX,
+      y: e.clientY,
+    });
 
     update();
   }
@@ -216,8 +211,10 @@
     const px = e.clientX - bounding.left;
     const py = e.clientY - bounding.top;
 
-    pointerPosition.clientX = e.clientX;
-    pointerPosition.clientY = e.clientY;
+    pointerPosition = new Point({
+      x: e.clientX,
+      y: e.clientY,
+    });
 
     localRect = localRectToRealRect(new Rect({
       x1: px,
