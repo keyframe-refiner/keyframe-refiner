@@ -80,11 +80,14 @@
       y: e.clientY,
     });
 
+    document.body.classList.add('non-selection');
+
     update();
   }
 
   function onPointerUp() {
     moving = false;
+    document.body.classList.remove('non-selection');
   }
 
   function onPointerMove(e: PointerEvent) {

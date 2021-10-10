@@ -164,6 +164,7 @@
 
       cropping = true;
       direction = dir;
+      document.body.classList.add('non-selection');
 
       pointerPosition = new Point({
         x: e.clientX,
@@ -188,6 +189,7 @@
   function onPointerUp() {
     cropping = false;
     direction = Direction.NONE;
+    document.body.classList.remove('non-selection');
   }
 
   function onPointerMove(e: PointerEvent) {

@@ -36,6 +36,10 @@ body {
   color: var(--mdc-theme-surface);
   background: var(--mdc-theme-background);
   font-family: 'ヒラギノ角ゴ Pro', 'Hiragino Kaku Gothic Pro', 'メイリオ', Meiryo, 'MS Pゴシック', 'MS PGothic', sans-serif;
+
+  &.non-selection {
+    user-select: none;
+  }
 }
 
 pre {
