@@ -216,7 +216,7 @@
       y: e.clientY,
     });
 
-    localRect = localRectToRealRect(new Rect({
+    cropRect = localRectToRealRect(new Rect({
       x1: px,
       y1: py,
       x2: px,
