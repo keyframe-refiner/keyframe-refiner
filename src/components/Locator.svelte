@@ -149,7 +149,7 @@
     stroke-dasharray: 8 8;
     fill: none;
     stroke: var(--locator-color);
-    animation: locator-spinner 0.5s linear infinite;
+    animation: locator-spinner 0.5s steps(16) infinite;
   }
 
   .locator-circle {

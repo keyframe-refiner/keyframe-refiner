@@ -321,7 +321,9 @@
     .cropper-border-white {
       stroke: white;
       stroke-dasharray: 6 6;
-      animation: border-spiner 0.5s linear infinite;
+      // use steps() to improve animation performance
+      // step count must equlas to the changed stoke-dashoffset
+      animation: border-spiner 0.5s steps(12) infinite;
     }
   }
 
