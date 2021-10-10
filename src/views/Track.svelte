@@ -6,7 +6,7 @@
   import { Title, Content, Actions } from '@smui/dialog/styled';
   import { mdiPlus, mdiTrashCanOutline, mdiDeleteSweep } from '@mdi/js';
 
-  import { inputList, selectedIndex, selectedImage } from '../store';
+  import { inputList, selectedImage } from '../store';
   import SVGIcon from '../components/SVGIcon.svelte';
   import Uploader from '../components/Uploader.svelte';
   import RootDialog from '../components/RootDialog.svelte';
@@ -23,6 +23,9 @@
   let openDeleteConfirm = false;
   let openClearConfirm = false;
   let fileInput: HTMLInputElement;
+
+  let selectedIndex = 0;
+  $: $selectedImage = $inputList.get(selectedIndex);
 
   let startIndex = 0;
   let endIndex = 0;
@@ -62,13 +65,13 @@
       return;
     }
 
-    const targetIndex = $selectedIndex + delta;
+    const targetIndex = selectedIndex + delta;
 
     if (targetIndex < 0 || targetIndex > $inputList.size - 1) {
       return;
     }
 
-    $selectedIndex = targetIndex;
+    selectedIndex = targetIndex;
 
     const top = targetIndex * thumbHeight;
     const bottom = top + thumbHeight;
@@ -96,7 +99,7 @@
 
     switch (e.key) {
       case 'Delete':
-        requestDelete($selectedIndex);
+        requestDelete(selectedIndex);
         break;
 
       case 'ArrowUp':
@@ -115,8 +118,8 @@
     const image = $inputList.get(deleteIndex);
     $inputList = $inputList.remove(deleteIndex);
 
-    if (deleteIndex === $selectedIndex) {
-      $selectedIndex = clamp($selectedIndex, 0, $inputList.size - 1);
+    if (deleteIndex === selectedIndex) {
+      selectedIndex = clamp(selectedIndex, 0, $inputList.size - 1);
     }
 
     if (image) {
@@ -135,7 +138,7 @@
   async function clearAll() {
     const currentList = $inputList;
     $inputList = $inputList.clear();
-    $selectedIndex = 0;
+    selectedIndex = 0;
 
     await tick();
     currentList.forEach(image => image.destory());
@@ -172,7 +175,7 @@
       <div
         class="thumb"
         class:selected={image === $selectedImage}
-        on:click={() => { $selectedIndex = startIndex + i; }}
+        on:click={() => { selectedIndex = startIndex + i; }}
       >
         <img src={image.blobURL} alt={image.filename} title={image.filename} on:mousedown|preventDefault />
         <span class="delete" title="この画像を削除" on:click|stopPropagation={() => requestDelete(startIndex + i)}>
