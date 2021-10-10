@@ -94,15 +94,13 @@ module.exports = {
     }],
   },
   output: {
-    path: fromRootTo('dist/renderer'),
+    path: fromRootTo('dist'),
     filename: '[name].js',
   },
   devServer: {
-    contentBase: fromRootTo('src'),
     hot: true,
-    host: '0.0.0.0',
     port: 3000,
-    publicPath: '/',
+    static: false,
   },
   plugins: [
     new ESLintPlugin(),
@@ -113,7 +111,7 @@ module.exports = {
           'http-equiv': 'Content-Security-Policy',
           content: "script-src 'self'",
         },
-        'viewport': 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no',
+        viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no',
       },
     }),
   ],
