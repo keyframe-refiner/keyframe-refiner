@@ -11,6 +11,7 @@
 
   export let localToReal = defaultTransformer;
   export let realToLocal = defaultTransformer;
+  export let readonly = false;
 
   function localRectToRealRect(localRect: Rect) {
     const x1y1 = localToReal(localRect.x1y1);
@@ -95,6 +96,10 @@
   }
 
   function update() {
+    if (readonly) {
+      return;
+    }
+
     if (direction === Direction.NONE) {
       return;
     }
@@ -160,6 +165,10 @@
 
   function onPointerDown(dir: Direction) {
     return (e: PointerEvent) => {
+      if (readonly) {
+        return;
+      }
+
       e.stopPropagation();
 
       cropping = true;
@@ -206,6 +215,10 @@
   }
 
   function startNew(e: PointerEvent) {
+    if (readonly) {
+      return;
+    }
+
     cropping = true;
     direction = Direction.NW;
 
@@ -229,6 +242,7 @@
 
 <div
   class="cropper"
+  class:readonly
   bind:this={container}
   style={`
     --cropper-x1: ${localRect.x1}px;
@@ -294,6 +308,21 @@
     bottom: 0;
     left: 0;
     user-select: none;
+
+    &.readonly {
+      .cropper-border-white {
+        animation: none;
+      }
+
+      .cropper-handle {
+        display: none;
+      }
+
+      .cropper-box,
+      .cropper-mask {
+        cursor: default;
+      }
+    }
   }
 
   .cropper-box {

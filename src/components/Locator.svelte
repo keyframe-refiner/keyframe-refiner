@@ -7,6 +7,7 @@
   import { Point, Rect } from '../record-factory';
 
   export let point = new Point();
+  export let readonly = false;
 
   export let limits = new Rect({
     x1: -Infinity,
@@ -51,6 +52,10 @@
   });
 
   function update() {
+    if (readonly) {
+      return;
+    }
+
     const bounding = container.getBoundingClientRect();
 
     const p = localToReal(new Point({
@@ -73,6 +78,10 @@
   }
 
   function onPointerDown(e: PointerEvent) {
+    if (readonly) {
+      return;
+    }
+
     moving = true;
 
     pointerPosition = new Point({
@@ -106,6 +115,7 @@
 
 <div
   class="locator"
+  class:readonly
   bind:this={container}
   on:pointerdown={onPointerDown}
   style={`--locator-x: ${localPoint.x}px; --locator-y: ${localPoint.y}px`}
@@ -145,6 +155,18 @@
     bottom: 0;
     left: 0;
     user-select: none;
+
+    &.readonly {
+      .locator-circle,
+      .locator-line {
+        animation: none;
+      }
+
+      .locator-circle {
+        cursor: default;
+        stroke-dasharray: none;
+      }
+    }
   }
 
   .locator-circle,
