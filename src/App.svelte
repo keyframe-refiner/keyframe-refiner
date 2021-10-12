@@ -1,17 +1,30 @@
 <script lang="ts">
-  import { mdiImageMultiple } from '@mdi/js';
+  import { mdiImageMultiple, mdiGithub } from '@mdi/js';
 
   import DnD from './components/DnD.svelte';
   import SVGIcon from './components/SVGIcon.svelte';
   import Track from './views/Track.svelte';
   import ImageViewer from './views/ImageViewer.svelte';
   import Property from './views/Property.svelte';
-  import { selectedImage } from './store';
+  import { selectedImage, currentStep } from './store';
+  import { stepDescription } from './step';
+  import Stepper from './components/Stepper.svelte';
 </script>
 
 <main>
   <header id="header">
     <h1 id="logo">原画位置合わせ</h1>
+
+    <Stepper
+      steps={$currentStep && currentStep.getAllSteps().map(s => stepDescription[s])}
+      currentIndex={$currentStep && currentStep.getIndex()}
+    /> <!-- force reactivity -->
+
+    <span id="badge">
+      <a id="github" href="https://github.com/textcunma/genga-mapping" target="_blank">
+        <SVGIcon icon={mdiGithub} />
+      </a>
+    </span>
   </header>
 
   <article id="gallery">
@@ -48,18 +61,41 @@
     top: 0;
     left: 0;
     display: flex;
+    align-items: center;
+    justify-content: space-between;
     width: 100%;
     height: var(--header-height);
     background: var(--background-dimmed);
 
-    display: flex;
-    align-items: center;
+    :global(.stepper) {
+      flex: 2;
+    }
   }
 
   #logo {
+    flex: 1;
     font-size: 24px;
-    margin-left: 0.5em;
+    padding-left: 10px;
     user-select: none;
+  }
+
+  #badge {
+    flex: 1;
+    padding-right: 10px;
+    text-align: right;
+  }
+
+  #github {
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+    color: var(--placeholder-surface);
+    cursor: pointer;
+    transition: transform .3s easeOutBack;
+
+    &:hover {
+      transform: scale(1.1);
+    }
   }
 
   #gallery {
@@ -82,16 +118,12 @@
   }
 
   #property {
-    flex: 0 0 300px;
+    width: 300px;
     border-left: 2px solid var(--background-dimmed);
-    padding: 10px;
 
     :global {
-      table {
-        width: 100%;
-        table-layout: fixed;
-        text-overflow: ellipsis;
-        word-break: break-all;
+      .scrollbar {
+        height: calc(100vh - var(--header-height));
       }
     }
   }

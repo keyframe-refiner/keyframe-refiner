@@ -4,9 +4,10 @@
   import Portal from 'svelte-portal';
   import Button from '@smui/button/styled';
   import { Title, Content, Actions } from '@smui/dialog/styled';
-  import { mdiPlus, mdiTrashCanOutline, mdiDeleteSweep } from '@mdi/js';
+  import { mdiPlus, mdiTrashCanOutline, mdiDeleteSweep, mdiGhost } from '@mdi/js';
 
-  import { inputList, selectedImage } from '../store';
+  import { inputList, selectedImage, refImage, currentStep } from '../store';
+  import { STEP } from '../step';
   import SVGIcon from '../components/SVGIcon.svelte';
   import Uploader from '../components/Uploader.svelte';
   import RootDialog from '../components/RootDialog.svelte';
@@ -115,24 +116,33 @@
   }
 
   async function deleteImage() {
-    const image = $inputList.get(deleteIndex);
+    const image = $inputList.get(deleteIndex)!;
     $inputList = $inputList.remove(deleteIndex);
 
     if (deleteIndex === selectedIndex) {
       selectedIndex = clamp(selectedIndex, 0, $inputList.size - 1);
     }
 
-    if (image) {
-      // revoke object url after image is removed from DOM
-      await tick();
-      image.destory();
+    if (image === $refImage) {
+      $refImage = undefined;
+      $currentStep = STEP.SELECT_REF_IMAGE;
     }
+
+    // revoke object url after image is removed from DOM
+    await tick();
+    image.destory();
   }
 
   function requestDelete(index: number) {
+    const image = $inputList.get(index)!;
+
     deleteIndex = index;
     openDeleteConfirm = true;
-    deleteFilename = $inputList.get(deleteIndex)?.filename;
+    deleteFilename = image.filename;
+
+    if (image === $refImage) {
+      deleteFilename += '（基準画像）';
+    }
   }
 
   async function clearAll() {
@@ -181,6 +191,12 @@
         <span class="delete" title="この画像を削除" on:click|stopPropagation={() => requestDelete(startIndex + i)}>
           <SVGIcon icon={mdiTrashCanOutline} />
         </span>
+
+        {#if image === $refImage}
+          <span class="reference-image" title="基準画像">
+            <SVGIcon icon={mdiGhost} />
+          </span>
+        {/if}
       </div>
     {/each}
 
@@ -312,16 +328,20 @@
     height: 50%;
   }
 
-  .delete {
+  .delete,
+  .reference-image {
     display: flex;
     align-items: center;
     justify-content: center;
     position: absolute;
-    top: 0;
-    right: 0;
     width: 30px;
     height: 30px;
     background: rgba(0, 0, 0, 0.75);
+  }
+
+  .delete {
+    top: 0;
+    right: 0;
     cursor: pointer;
     border-bottom-left-radius: 3px;
     opacity: 0;
@@ -330,6 +350,13 @@
     &:hover {
       color: var(--mdc-theme-surface);
     }
+  }
+
+  .reference-image {
+    top: 0;
+    left: 0;
+    color: #ffbf43;
+    border-bottom-right-radius: 3px;
   }
 
   .clear-all {

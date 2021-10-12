@@ -15,9 +15,10 @@
   --mdc-theme-background: #{theme.$background};
 
   --background-dimmed: #181c20;
+  --surface-dimmed: #a9acb8;
   --placeholder: #3e4149;
   --placeholder-light: #6e737f;
-  --header-height: 60px;
+  --header-height: 80px;
   --scrollbar-width: 8px;
 }
 
@@ -86,4 +87,20 @@ pre {
 // reset circular progress immediately
 [aria-valuemin='0'] .mdc-circular-progress__determinate-circle {
   transition-duration: 0ms;
+}
+
+table {
+  width: 100%;
+  table-layout: fixed;
+  text-overflow: ellipsis;
+  word-break: break-all;
+}
+
+td {
+  vertical-align: top;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  color: var(--placeholder) !important;
 }
