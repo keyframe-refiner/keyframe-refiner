@@ -4,20 +4,32 @@
   import Portal from 'svelte-portal';
   import Button from '@smui/button/styled';
   import { Title, Content, Actions } from '@smui/dialog/styled';
-  import { mdiPlus, mdiTrashCanOutline, mdiDeleteSweep, mdiGhost } from '@mdi/js';
+  import { mdiPlus, mdiTrashCanOutline, mdiDeleteSweep, mdiGhost, mdiAlertCircleOutline } from '@mdi/js';
 
-  import { inputList, selectedImage, refImage, stepManager } from '../store';
   import { STEP } from '../step';
+  import { ImageState, getImageState } from '../utils/image-state';
   import SVGIcon from '../components/SVGIcon.svelte';
   import Uploader from '../components/Uploader.svelte';
   import RootDialog from '../components/RootDialog.svelte';
   import Scrollbar from '../components/Scrollbar.svelte';
+  import {
+    inputList,
+    outputList,
+    selectedIndex,
+    refImage,
+    stepManager,
+  } from '../store';
+
+  const { currentStep } = stepManager;
+
+  type ImageStateWithIndex = ImageState & {
+    index: number,
+  };
 
   export let thumbSize = 150;
   export let thumbSpacing = 20;
   $: thumbHeight = thumbSize + thumbSpacing;
-
-  const { currentStep } = stepManager;
+  $: allowEdit = $currentStep !== STEP.RUN_CV;
 
   let uploader: Uploader;
   let scrollbar: Scrollbar;
@@ -27,11 +39,9 @@
   let openClearConfirm = false;
   let fileInput: HTMLInputElement;
 
-  let selectedIndex = 0;
-  $: $selectedImage = $inputList.get(selectedIndex);
-
   let startIndex = 0;
   let endIndex = 0;
+  let displayList: ImageStateWithIndex[] = [];
 
   $: [beforeHeight, afterHeight] = [
     startIndex * thumbHeight,
@@ -46,6 +56,7 @@
 
   afterUpdate(() => {
     sliceItem();
+    displayList = getDisplayList();
   });
 
   async function sliceItem() {
@@ -63,18 +74,38 @@
     endIndex = Math.min($inputList.size - 1, end + extraCount);
   }
 
+  function getDisplayList() {
+    if ($inputList.isEmpty()) {
+      return [];
+    }
+
+    const results: ImageStateWithIndex[] = [];
+
+    for (let i = startIndex; i <= endIndex; i++) {
+      const input = $inputList.get(i)!;
+      const output = $outputList.get(i);
+
+      results.push({
+        ...getImageState(input, output, $refImage, $currentStep),
+        index: i,
+      });
+    }
+
+    return results;
+  }
+
   async function navigate(delta: number) {
     if (openDeleteConfirm || openClearConfirm) {
       return;
     }
 
-    const targetIndex = selectedIndex + delta;
+    const targetIndex = $selectedIndex + delta;
 
     if (targetIndex < 0 || targetIndex > $inputList.size - 1) {
       return;
     }
 
-    selectedIndex = targetIndex;
+    $selectedIndex = targetIndex;
 
     const top = targetIndex * thumbHeight;
     const bottom = top + thumbHeight;
@@ -102,7 +133,7 @@
 
     switch (e.key) {
       case 'Delete':
-        requestDelete(selectedIndex);
+        requestDelete($selectedIndex);
         break;
 
       case 'ArrowUp':
@@ -121,8 +152,8 @@
     const image = $inputList.get(deleteIndex)!;
     $inputList = $inputList.remove(deleteIndex);
 
-    if (deleteIndex === selectedIndex) {
-      selectedIndex = clamp(selectedIndex, 0, $inputList.size - 1);
+    if (deleteIndex === $selectedIndex) {
+      $selectedIndex = clamp($selectedIndex, 0, $inputList.size - 1);
     }
 
     if (image === $refImage) {
@@ -150,7 +181,7 @@
   async function clearAll() {
     const currentList = $inputList;
     $inputList = $inputList.clear();
-    selectedIndex = 0;
+    $selectedIndex = 0;
     $refImage = undefined;
     stepManager.reset();
 
@@ -185,12 +216,13 @@
       style={`height: ${beforeHeight}px`}
     ></div>
 
-    {#each [...$inputList.slice(startIndex, endIndex + 1)] as image, i (image.filename)}
+    {#each displayList as { image, error, index, dimmed } (image)}
       <div
         class="thumb"
-        class:selected={image === $selectedImage}
-        class:dimmed={false}
-        on:click={() => { selectedIndex = startIndex + i; }}
+        class:dimmed
+        class:error
+        class:selected={$selectedIndex === index}
+        on:click={() => { $selectedIndex = index; }}
       >
         <img
           src={image.blobURL}
@@ -198,12 +230,21 @@
           title={image.filename}
           on:mousedown|preventDefault
         />
-        <span class="delete" title="この画像を削除" on:click|stopPropagation={() => requestDelete(startIndex + i)}>
-          <SVGIcon icon={mdiTrashCanOutline} />
-        </span>
+
+        {#if error}
+          <span class="error-icon" title={error}>
+            <SVGIcon icon={mdiAlertCircleOutline} />
+          </span>
+        {/if}
+
+        {#if allowEdit}
+          <span class="delete-icon" title="この画像を削除" on:click|stopPropagation={() => requestDelete(index)}>
+            <SVGIcon icon={mdiTrashCanOutline} />
+          </span>
+        {/if}
 
         {#if image === $refImage}
-          <span class="reference-image" title="基準画像">
+          <span class="reference-image-icon" title="基準画像">
             <SVGIcon icon={mdiGhost} />
           </span>
         {/if}
@@ -215,17 +256,19 @@
       style={`height: ${afterHeight}px`}
     ></div>
 
-    <div class="uploader" title="画像をアップロード" on:click={() => fileInput.click()}>
-      <Uploader bind:this={uploader} />
-      <span class="uploader-mark">
-        <SVGIcon icon={mdiPlus} />
-      </span>
-      <input type="file" accept="image/*" multiple bind:this={fileInput} on:change={upload}>
-    </div>
+    {#if allowEdit}
+      <div class="uploader" title="画像をアップロード" on:click={() => fileInput.click()}>
+        <Uploader bind:this={uploader} />
+        <span class="uploader-icon">
+          <SVGIcon icon={mdiPlus} />
+        </span>
+        <input type="file" accept="image/*" multiple bind:this={fileInput} on:change={upload}>
+      </div>
+    {/if}
   </Scrollbar>
 </div>
 
-{#if $inputList.size !== 0}
+{#if allowEdit && $inputList.size !== 0}
   <Portal target="body">
     <div class="clear-all" on:click={requestClear}>
       <span>すべての画像を削除</span>
@@ -233,6 +276,7 @@
     </div>
   </Portal>
 {/if}
+
 <RootDialog
   scrimClickAction=""
   escapeKeyAction=""
@@ -310,7 +354,11 @@
       opacity: var(--dimmed-image-opacity);
     }
 
-    &:hover .delete {
+    &.error {
+      border-color: var(--mdc-theme-secondary);
+    }
+
+    &:hover .delete-icon {
       opacity: 1;
     }
 
@@ -320,6 +368,16 @@
         height: 100%;
       }
     }
+  }
+
+  .error-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 50%;
+    height: 50%;
+    color: var(--mdc-theme-secondary);
+    transform: translate(-50%, -50%);
   }
 
   .thumb-placeholder {
@@ -337,13 +395,13 @@
     }
   }
 
-  .uploader-mark{
+  .uploader-icon {
     width: 50%;
     height: 50%;
   }
 
-  .delete,
-  .reference-image {
+  .delete-icon,
+  .reference-image-icon {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -353,7 +411,7 @@
     background: rgba(0, 0, 0, 0.75);
   }
 
-  .delete {
+  .delete-icon {
     top: 0;
     right: 0;
     cursor: pointer;
@@ -366,7 +424,7 @@
     }
   }
 
-  .reference-image {
+  .reference-image-icon {
     top: 0;
     left: 0;
     color: #ffbf43;

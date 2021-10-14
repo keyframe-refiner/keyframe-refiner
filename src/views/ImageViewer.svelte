@@ -9,10 +9,21 @@
   import Cropper from '../components/Cropper.svelte';
   import Scrollbar from '../components/Scrollbar.svelte';
   import SVGIcon from '../components/SVGIcon.svelte';
-  import { selectedImage, pivotPoint, ROI, stepManager, calculatingPivot, refImage, showPivot, showROI } from '../store';
   import { STEP } from '../step';
   import { VariableTracker } from '../utils/variable-tracker';
+  import { getImageState } from '../utils/image-state';
   import { Point } from '../record-factory';
+  import {
+    selectedInput,
+    selectedOutput,
+    refImage,
+    pivotPoint,
+    ROI,
+    stepManager,
+    calculatingPivot,
+    showPivot,
+    showROI,
+  } from '../store';
 
   const { currentStep } = stepManager;
 
@@ -31,10 +42,10 @@
   let displayWidth: number;
   let displayHeight: number;
 
-  $: notRefImage = $refImage && $refImage !== $selectedImage;
+  $: imageState = getImageState($selectedInput!, $selectedOutput, $refImage, $currentStep);
 
-  const selectedImageTracker = new VariableTracker(() => [
-    $selectedImage,
+  const selectedInputTracker = new VariableTracker(() => [
+    $selectedInput,
   ]);
 
   const scaleTracker = new VariableTracker(() => [
@@ -42,11 +53,11 @@
   ]);
 
   afterUpdate(() => {
-    if (!$selectedImage || !viewerEl) {
+    if (!$selectedInput || !viewerEl) {
       return;
     }
 
-    if (selectedImageTracker.stale()) {
+    if (selectedInputTracker.stale()) {
       resetScale();
     }
 
@@ -60,7 +71,7 @@
   });
 
   function resetScale() {
-    if (!$selectedImage) {
+    if (!$selectedInput) {
       return;
     }
 
@@ -69,18 +80,18 @@
 
     scale = Math.min(
       1,
-      maxWidth / $selectedImage.width,
-      maxHeight / $selectedImage.height,
+      maxWidth / $selectedInput.width,
+      maxHeight / $selectedInput.height,
     );
   }
 
   function adjustViewerOffsets() {
-    if (!$selectedImage) {
+    if (!$selectedInput) {
       return;
     }
 
-    displayWidth = Math.round($selectedImage.width * scale);
-    displayHeight = Math.round($selectedImage.height * scale);
+    displayWidth = Math.round($selectedInput.width * scale);
+    displayHeight = Math.round($selectedInput.height * scale);
 
     if (displayWidth < viewerEl.clientWidth) {
       viewerOffsetX = Math.round((viewerEl.clientWidth - displayWidth) / 2);
@@ -171,6 +182,14 @@
     <div class="viewer-fullsize-cover message">基準位置を自動算出中...</div>
   {/if}
 
+  {#if imageState.processing}
+    <div class="viewer-fullsize-cover message">OpenCV 処理待ち...</div>
+  {/if}
+
+  {#if imageState.error}
+    <div class="viewer-fullsize-cover error">{imageState.error}</div>
+  {/if}
+
   <Scrollbar options={{ damping: 1, plugins: { overscroll: false } }} bind:this={scrollbar}>
     <article
       class="viewer-body"
@@ -184,9 +203,9 @@
     >
       <img
           class="viewer-image"
-          class:dimmed={false}
-          src={$selectedImage?.blobURL}
-          alt={$selectedImage?.filename}
+          class:dimmed={imageState.dimmed && !imageState.error}
+          src={imageState.image?.blobURL}
+          alt={imageState.image?.filename}
           bind:this={imgEl}
           on:mousedown|preventDefault
       />
@@ -227,6 +246,7 @@
     position: relative;
     width: 100%;
     height: 100%;
+    z-index: 1;
     user-select: none;
 
     :global(.scrollbar) {
@@ -243,9 +263,13 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.75);
+    background-color: rgba(0, 0, 0, 0.5);
     font-size: 32px;
     z-index: 1024;
+
+    &.error {
+      color: var(--mdc-theme-secondary);
+    }
   }
 
   .viewer-zoom {
