@@ -8,10 +8,10 @@
   import ImageViewer from './views/ImageViewer.svelte';
   import Property from './views/Property.svelte';
   import { selectedInput, stepManager, cvWorker } from './store';
-  import { stepDescription } from './step';
+  import { STEP, stepDescription } from './step';
   import Stepper from './components/Stepper.svelte';
 
-  const { allSteps, currentIndex } = stepManager;
+  const { allSteps, currentIndex, currentStep } = stepManager;
 
   let loadingWorker = true;
 
@@ -60,7 +60,9 @@
     </aside>
   </article>
 
-  <DnD />
+  {#if $currentStep !== STEP.RUN_CV}
+    <DnD />
+  {/if}
 </main>
 
 <div id="modal"></div>
