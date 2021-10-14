@@ -23,6 +23,8 @@
     calculatingPivot,
     showPivot,
     showROI,
+    showInputImage,
+    showRefImage,
   } from '../store';
 
   const { currentStep } = stepManager;
@@ -43,9 +45,10 @@
   let displayHeight: number;
 
   $: imageState = getImageState($selectedInput!, $selectedOutput, $refImage, $currentStep);
+  $: displayImage = imageState.image;
 
-  const selectedInputTracker = new VariableTracker(() => [
-    $selectedInput,
+  const displayImageTracker = new VariableTracker(() => [
+    displayImage,
   ]);
 
   const scaleTracker = new VariableTracker(() => [
@@ -53,11 +56,11 @@
   ]);
 
   afterUpdate(() => {
-    if (!$selectedInput || !viewerEl) {
+    if (!displayImage || !viewerEl) {
       return;
     }
 
-    if (selectedInputTracker.stale()) {
+    if (displayImageTracker.stale()) {
       resetScale();
     }
 
@@ -71,7 +74,7 @@
   });
 
   function resetScale() {
-    if (!$selectedInput) {
+    if (!displayImage) {
       return;
     }
 
@@ -80,18 +83,18 @@
 
     scale = Math.min(
       1,
-      maxWidth / $selectedInput.width,
-      maxHeight / $selectedInput.height,
+      maxWidth / displayImage.width,
+      maxHeight / displayImage.height,
     );
   }
 
   function adjustViewerOffsets() {
-    if (!$selectedInput) {
+    if (!displayImage) {
       return;
     }
 
-    displayWidth = Math.round($selectedInput.width * scale);
-    displayHeight = Math.round($selectedInput.height * scale);
+    displayWidth = Math.round(displayImage.width * scale);
+    displayHeight = Math.round(displayImage.height * scale);
 
     if (displayWidth < viewerEl.clientWidth) {
       viewerOffsetX = Math.round((viewerEl.clientWidth - displayWidth) / 2);
@@ -210,8 +213,26 @@
           on:mousedown|preventDefault
       />
 
+      {#if $currentStep === STEP.RUN_CV && $showInputImage}
+        <img
+          class="viewer-image compare"
+          src={$selectedInput?.blobURL}
+          alt={$selectedInput?.filename}
+          on:mousedown|preventDefault
+        />
+      {/if}
+
+      {#if $showRefImage && $refImage}
+        <img
+          class="viewer-image compare"
+          src={$refImage.blobURL}
+          alt={$refImage.filename}
+          on:mousedown|preventDefault
+        />
+      {/if}
+
       {#if $currentStep === STEP.SET_ROI}
-        <Cropper bind:cropRect={$ROI} {localToReal} {realToLocal}/>
+        <Cropper bind:cropRect={$ROI} {localToReal} {realToLocal} />
       {/if}
 
       {#if $showROI}
@@ -219,11 +240,15 @@
       {/if}
 
       {#if $currentStep === STEP.SET_PIVOT}
-        <Locator bind:point={$pivotPoint} limits={$ROI} {localToReal} {realToLocal}/>
+        <Locator bind:point={$pivotPoint} limits={$ROI} {localToReal} {realToLocal} />
       {/if}
 
       {#if $showPivot}
         <Locator bind:point={$pivotPoint} limits={$ROI} {localToReal} {realToLocal} readonly />
+      {/if}
+
+      {#if $refImage && $currentStep !== STEP.RUN_CV && $refImage !== $selectedInput}
+        <div class="not-ref-hint">基準画像ではありません</div>
       {/if}
     </article>
   </Scrollbar>
@@ -307,5 +332,17 @@
     &.dimmed {
       opacity: var(--dimmed-image-opacity);
     }
+
+    &.compare {
+      opacity: 0.75;
+    }
+  }
+
+  .not-ref-hint {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    font-size: 24px;
+    color: var(--mdc-theme-secondary);
   }
 </style>
