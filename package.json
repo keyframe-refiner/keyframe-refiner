@@ -15,9 +15,12 @@
   ],
   "license": "UNLICENSED",
   "scripts": {
-    "serve": "webpack serve --config ./scripts/webpack.config.dev.js --mode development --progress",
     "check": "svelte-check",
-    "lint": "eslint ./src --ext .ts,.svelte"
+    "clean": "rimraf ./dist",
+    "predist": "npm run clean",
+    "dist": "webpack --config ./scripts/webpack.prod.js",
+    "lint": "eslint ./src --ext .ts,.svelte",
+    "serve": "webpack serve --config ./scripts/webpack.dev.js --progress"
   },
   "browserslist": [
     "defaults"
