@@ -53,7 +53,7 @@ export class CVWorker {
     refImage: ImageCanvas,
     ROI: Rect,
     pivot: Point,
-    onProcessed: (index: number, result: ImageCanvas | Error) => void,
+    onProcessed: (index: number, result: ImageCanvas | Error, progress: number) => void,
   ) {
     const total = inputs.length;
     const sliceSize = Math.ceil(total / this.#workers.length);
@@ -105,15 +105,24 @@ export class CVWorker {
 
       return this.#send(worker, 'request-processing', body, buffers, async (e) => {
         if (e.data.error) {
-          onProcessed(e.data.result.index, new Error(e.data.error));
+          onProcessed(
+            e.data.result.index,
+            new Error(e.data.error),
+            (finished + 1) / total,
+          );
         } else {
           const { index, image } = e.data.result;
           const { filename, filetype } = inputs[index];
           const canvas = this.#arrayBufferToCanvas(image.buffer, image.width, image.height);
 
-          onProcessed(index, await ImageCanvas.fromCanvas(canvas, filename, filetype));
+          onProcessed(
+            index,
+            await ImageCanvas.fromCanvas(canvas, filename.replace(/(?=\.\w+$)/, '_out'), filetype),
+            (finished + 1) / total,
+          );
         }
 
+        // update finished count later to avoid racing
         finished++;
 
         if (finished === total) {
