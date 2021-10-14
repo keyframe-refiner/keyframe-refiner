@@ -6,9 +6,20 @@ import { createBaseConfig } from './webpack.base.js';
 export default merge(createBaseConfig(false), {
   target: 'browserslist',
   mode: 'production',
+  output: {
+    filename: '[name].[contenthash].js',
+  },
+  module: {
+    rules: [{
+      test: /\.css$/,
+      use: [
+        MiniCssExtractPlugin.loader,
+        'css-loader',
+      ],
+    }],
+  },
   optimization: {
     minimize: true,
-    moduleIds: 'deterministic',
     splitChunks: {
       cacheGroups: {
         vendor: {
@@ -21,7 +32,7 @@ export default merge(createBaseConfig(false), {
   },
   plugins: [
     new MiniCssExtractPlugin({
-      filename: '[name].css',
+      filename: '[name].[contenthash].css',
     }),
   ],
 });
