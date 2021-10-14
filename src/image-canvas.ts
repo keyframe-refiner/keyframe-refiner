@@ -1,3 +1,15 @@
+export async function canvasToBlob(canvas: HTMLCanvasElement, filetype: string) {
+  return new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (blob) {
+        resolve(blob);
+      } else {
+        reject(new Error('Unable to convert canvas to blob.'));
+      }
+    }, filetype, 1.0);
+  });
+}
+
 export class ImageCanvas {
   readonly width: number;
   readonly height: number;
@@ -35,16 +47,14 @@ export class ImageCanvas {
     });
   }
 
+  static async fromCanvas(canvas: HTMLCanvasElement, filename: string, filetype: string) {
+    const blob = await canvasToBlob(canvas, filetype);
+
+    return new ImageCanvas(canvas, filename, filetype, URL.createObjectURL(blob));
+  }
+
   async toBlob(): Promise<Blob> {
-    return new Promise((resolve, reject) => {
-      this.canvas.toBlob((blob) => {
-        if (blob) {
-          resolve(blob);
-        } else {
-          reject(new Error('Unable to convert canvas to blob.'));
-        }
-      }, this.filetype, 1.0);
-    });
+    return canvasToBlob(this.canvas, this.filetype);
   }
 
   getImageData(): ImageData {
