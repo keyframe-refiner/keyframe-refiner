@@ -16,14 +16,7 @@ jobs:
         with:
           node-version: '16'
 
-      - name: Cache dependencies
-        uses: actions/cache@v2
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-
+      - run: npm install
       - run: npm run dist
 
       - name: Deploy
