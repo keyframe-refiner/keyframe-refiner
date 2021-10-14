@@ -1,23 +1,35 @@
 <script lang="ts">
-  import { ROI, refImage, currentStep } from '../../store';
-  import { Rect } from '../../record-factory';
+  import clamp from 'lodash/clamp';
+  import { ROI, pivotPoint, refImage, stepManager, showROI } from '../../store';
+  import { Rect, Point } from '../../record-factory';
   import { VariableTracker } from '../../utils/variable-tracker';
   import { STEP } from '../../step';
   import ParamDrawer from './ParamDrawer.svelte';
 
+  const { currentStep } = stepManager;
+
   const targetStep = STEP.SET_ROI;
 
   const tracker = new VariableTracker(() => [
-    $refImage,
+    $currentStep,
   ]);
 
   $: if (tracker.stale() && $refImage && $currentStep === targetStep) {
     $ROI = new Rect({
-      x1: 0,
-      y1: 0,
-      x2: $refImage.width,
-      y2: Math.floor($refImage.height / 3),
+      x1: clamp($ROI.x1, 0, $refImage.width),
+      y1: clamp($ROI.y1, 0, $refImage.height),
+      x2: clamp($ROI.x2, 0, $refImage.width),
+      y2: clamp($ROI.y2, 0, $refImage.height),
     });
+  }
+
+  function adjustPivot() {
+    $pivotPoint = new Point({
+      x: clamp($pivotPoint.x, $ROI.x1, $ROI.x2),
+      y: clamp($pivotPoint.y, $ROI.y1, $ROI.y2),
+    });
+
+    $showROI = true;
   }
 </script>
 
@@ -25,6 +37,8 @@
   {targetStep}
   title="対象領域"
   buttonLabel="対象領域を設定"
+  bind:visible={$showROI}
+  on:next={adjustPivot}
 >
   <svelte:fragment slot="body">
     <table>

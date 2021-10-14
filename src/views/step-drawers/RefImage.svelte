@@ -1,12 +1,12 @@
 <script lang="ts">
   import ParamDrawer from './ParamDrawer.svelte';
 
-  import { selectedImage, refImage } from '../../store';
+  import { selectedInput, refImage, showRefImage } from '../../store';
   import { valueOrNA } from '../../utils/value-or-na';
   import { STEP } from '../../step';
 
   function setRefImage() {
-    $refImage = $selectedImage;
+    $refImage = $selectedInput;
   }
 
   function onParamUnlocked() {
@@ -18,6 +18,7 @@
   title="基準画像"
   buttonLabel="表示中の画像を基準に設定"
   targetStep={STEP.SELECT_REF_IMAGE}
+  bind:visible={$showRefImage}
   on:next={setRefImage}
   on:paramUnlocked={onParamUnlocked}
 >

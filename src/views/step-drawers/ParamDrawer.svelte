@@ -1,32 +1,39 @@
 <script lang="ts">
+  // TODO: refactor
   import { createEventDispatcher } from 'svelte';
   import { fade } from 'svelte/transition';
   import Button from '@smui/button/styled';
   import { Title, Content, Actions } from '@smui/dialog/styled';
-  import { mdiLockOutline } from '@mdi/js';
+  import { mdiLockOutline, mdiEyeOutline, mdiEyeOffOutline } from '@mdi/js';
 
   import Drawer from '../../components/Drawer.svelte';
   import RootDialog from '../../components/RootDialog.svelte';
   import SVGIcon from '../../components/SVGIcon.svelte';
-  import { outputList, currentStep } from '../../store';
+  import { outputList, stepManager, showPivot, showROI, showRefImage } from '../../store';
   import { STEP, stepDescription } from '../../step';
 
   export let title: string;
   export let targetStep: STEP;
   export let buttonLabel: string;
+  export let visible: boolean;
+
+  const { currentStep } = stepManager;
 
   let openUnlockConfirm = false;
 
   const dispatch = createEventDispatcher();
 
   function next() {
-    currentStep.forward();
+    stepManager.forward();
 
     dispatch('next');
   }
 
   function unlockParam() {
     $currentStep = targetStep;
+    $showRefImage = false;
+    $showPivot = false;
+    $showROI = targetStep === STEP.SET_PIVOT;
     $outputList = $outputList.clear();
 
     dispatch('paramUnlocked');
@@ -37,9 +44,21 @@
   <svelte:fragment slot="title">
     <span>{title}</span>
 
-    {#if $currentStep && currentStep.hasFinished(targetStep)}
+    {#if $currentStep && stepManager.hasFinished(targetStep)}
       <div class="control" in:fade out:fade>
-        <span class="control-icon" on:click|stopPropagation={() => { openUnlockConfirm = true; }}>
+        <span
+        class="control-icon toggle-visibility"
+        title={visible ? '重ねて表示 OFF' : '重ねて表示 ON'}
+        on:click|stopPropagation={() => { visible = !visible; }}
+        >
+          <SVGIcon icon={visible ? mdiEyeOutline : mdiEyeOffOutline} />
+        </span>
+
+        <span
+          class="control-icon unlock-param"
+          title="パラメータロックを解除"
+          on:click|stopPropagation={() => { openUnlockConfirm = true; }}
+        >
           <SVGIcon icon={mdiLockOutline} />
         </span>
       </div>
@@ -92,5 +111,6 @@
   .control-icon {
     width: 20px;
     height: 20px;
+    margin: 0 3px;
   }
 </style>
