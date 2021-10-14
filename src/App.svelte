@@ -1,23 +1,38 @@
 <script lang="ts">
   import { mdiImageMultiple, mdiGithub } from '@mdi/js';
+  import { fade } from 'svelte/transition';
 
   import DnD from './components/DnD.svelte';
   import SVGIcon from './components/SVGIcon.svelte';
   import Track from './views/Track.svelte';
   import ImageViewer from './views/ImageViewer.svelte';
   import Property from './views/Property.svelte';
-  import { selectedImage, currentStep } from './store';
+  import { selectedImage, stepManager, cvWorker } from './store';
   import { stepDescription } from './step';
   import Stepper from './components/Stepper.svelte';
+
+  const { allSteps, currentIndex } = stepManager;
+
+  let loadingWorker = true;
+
+  $cvWorker.ready.then(() => {
+    loadingWorker = false;
+  }).catch(e => {
+    alert(e?.message || e);
+  });
 </script>
 
 <main>
+  {#if loadingWorker}
+    <div id="loading-worker" in:fade out:fade>Web Worker を起動しています...</div>
+  {/if}
+
   <header id="header">
     <h1 id="logo">原画位置合わせ</h1>
 
     <Stepper
-      steps={$currentStep && currentStep.getAllSteps().map(s => stepDescription[s])}
-      currentIndex={$currentStep && currentStep.getIndex()}
+      steps={$allSteps.map(s => stepDescription[s])}
+      currentIndex={$currentIndex}
     /> <!-- force reactivity -->
 
     <span id="badge">
@@ -54,6 +69,20 @@
   main {
     width: 100%;
     height: 100%;
+  }
+
+  #loading-worker {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    font-size: 32px;
+    background-color: rgba(0, 0, 0, 0.75);
+    z-index: 1024;
   }
 
   #header {

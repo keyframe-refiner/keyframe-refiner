@@ -6,7 +6,7 @@
   import { Title, Content, Actions } from '@smui/dialog/styled';
   import { mdiPlus, mdiTrashCanOutline, mdiDeleteSweep, mdiGhost } from '@mdi/js';
 
-  import { inputList, selectedImage, refImage, currentStep } from '../store';
+  import { inputList, selectedImage, refImage, stepManager } from '../store';
   import { STEP } from '../step';
   import SVGIcon from '../components/SVGIcon.svelte';
   import Uploader from '../components/Uploader.svelte';
@@ -16,6 +16,8 @@
   export let thumbSize = 150;
   export let thumbSpacing = 20;
   $: thumbHeight = thumbSize + thumbSpacing;
+
+  const { currentStep } = stepManager;
 
   let uploader: Uploader;
   let scrollbar: Scrollbar;
@@ -149,6 +151,8 @@
     const currentList = $inputList;
     $inputList = $inputList.clear();
     selectedIndex = 0;
+    $refImage = undefined;
+    stepManager.reset();
 
     await tick();
     currentList.forEach(image => image.destory());
@@ -181,13 +185,19 @@
       style={`height: ${beforeHeight}px`}
     ></div>
 
-    {#each $inputList.slice(startIndex, endIndex + 1).toArray() as image, i (image.filename)}
+    {#each [...$inputList.slice(startIndex, endIndex + 1)] as image, i (image.filename)}
       <div
         class="thumb"
         class:selected={image === $selectedImage}
+        class:dimmed={false}
         on:click={() => { selectedIndex = startIndex + i; }}
       >
-        <img src={image.blobURL} alt={image.filename} title={image.filename} on:mousedown|preventDefault />
+        <img
+          src={image.blobURL}
+          alt={image.filename}
+          title={image.filename}
+          on:mousedown|preventDefault
+        />
         <span class="delete" title="この画像を削除" on:click|stopPropagation={() => requestDelete(startIndex + i)}>
           <SVGIcon icon={mdiTrashCanOutline} />
         </span>
@@ -294,6 +304,10 @@
 
     &.selected {
       border-color: var(--mdc-theme-primary);
+    }
+
+    &.dimmed img {
+      opacity: var(--dimmed-image-opacity);
     }
 
     &:hover .delete {

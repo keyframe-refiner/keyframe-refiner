@@ -6,8 +6,10 @@
 
   import RootDialog from './RootDialog.svelte';
   import { ImageCanvas } from '../image-canvas';
-  import { inputList, currentStep } from '../store';
+  import { inputList, stepManager } from '../store';
   import { STEP } from '../step';
+
+  const { currentStep } = stepManager;
 
   let openDuplicatedDialog = false;
   let openUnsupportDialog = false;
@@ -80,7 +82,7 @@
     isUploading = false;
 
     if ($currentStep === STEP.UPLOAD_IMAGE) {
-      currentStep.forward();
+      stepManager.forward();
     }
   }
 </script>

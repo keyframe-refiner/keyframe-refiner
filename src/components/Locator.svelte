@@ -46,9 +46,6 @@
         }
       });
     }
-
-    // calibrate position
-    update();
   });
 
   function update() {
