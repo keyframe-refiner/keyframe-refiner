@@ -1,6 +1,6 @@
 // TODO: rewrite worker scripts in TypeScript
 
-importScripts('/worker/opencv-4.5.3.js');
+importScripts('./opencv-4.5.3.js');
 
 /**
  * Default handler that is called when the main page requests the position of the pivot point

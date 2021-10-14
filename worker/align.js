@@ -1,4 +1,4 @@
-importScripts('/worker/cv-runner.js');
+importScripts('./cv-runner.js');
 
 function convertImageToGray(img) {
   const dst = new cv.Mat();
