@@ -1,7 +1,9 @@
 <script lang="ts">
   import { ZipWriter, BlobWriter, BlobReader } from '@zip.js/zip.js';
+  import { hasContext, getContext } from 'svelte';
   import Button from '@smui/button/styled';
   import { fade } from 'svelte/transition';
+  import type Scrollbar from 'smooth-scrollbar';
 
   import Drawer from '../../components/Drawer.svelte';
   import { ImageCanvas } from '../../image-canvas';
@@ -22,6 +24,12 @@
   let cvRunning = false;
   let creatingZip = false;
 
+  let getScrollbar: () => Promise<Scrollbar>;
+
+  if (hasContext('getScrollbar')) {
+    getScrollbar = getContext('getScrollbar');
+  }
+
   // reset progress when step changed
   currentStep.subscribe(() => {
     progress = 0;
@@ -39,6 +47,10 @@
       $outputList = $outputList.set(idx, res);
       progress = prg;
     });
+
+    // scroll to bottom
+    const s = await getScrollbar();
+    s.setMomentum(0, s.limit.y - s.scrollTop);
 
     progress = 1;
     cvRunning = false;
