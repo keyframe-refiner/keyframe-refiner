@@ -10,4 +10,6 @@ export function createPreprocessors(sourceMap = false) {
   });
 }
 
-export const preprocess = createPreprocessors();
+export default {
+  preprocess: createPreprocessors(),
+};
