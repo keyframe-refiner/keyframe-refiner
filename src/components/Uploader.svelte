@@ -134,7 +134,7 @@
 <style lang="scss">
   :global {
     .upload-progress {
-      position: absolute;
+      position: absolute !important;
       left: 20px;
       top: 20px;
       width: 50px;
