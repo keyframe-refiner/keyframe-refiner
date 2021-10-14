@@ -3,4 +3,4 @@ module.exports = {
     require('postcss-easings'),
     require('autoprefixer'),
   ],
-}
+};

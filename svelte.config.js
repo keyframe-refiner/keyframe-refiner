@@ -1,15 +1,13 @@
-const preprocess = require('svelte-preprocess');
+import sveltePreprocess from 'svelte-preprocess';
+import postcssConfig from './postcss.config.cjs';
 
-function createPreprocessors(sourceMap = false) {
-  return preprocess({
+export function createPreprocessors(sourceMap = false) {
+  return sveltePreprocess({
     sourceMap,
     scss: true,
     typescript: true,
-    postcss: require('./postcss.config'),
+    postcss: postcssConfig,
   });
 }
 
-module.exports = {
-  createPreprocessors,
-  preprocess: createPreprocessors(),
-};
+export const preprocess = createPreprocessors();
