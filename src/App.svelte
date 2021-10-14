@@ -7,7 +7,7 @@
   import Track from './views/Track.svelte';
   import ImageViewer from './views/ImageViewer.svelte';
   import Property from './views/Property.svelte';
-  import { selectedImage, stepManager, cvWorker } from './store';
+  import { selectedInput, stepManager, cvWorker } from './store';
   import { stepDescription } from './step';
   import Stepper from './components/Stepper.svelte';
 
@@ -36,7 +36,7 @@
     /> <!-- force reactivity -->
 
     <span id="badge">
-      <a id="github" href="https://github.com/textcunma/genga-mapping" target="_blank">
+      <a id="github" href="https://github.com/textcunma/keyframe-refiner" target="_blank">
         <SVGIcon icon={mdiGithub} />
       </a>
     </span>
@@ -48,7 +48,7 @@
     </aside>
 
     <section id="image-viewer">
-      {#if $selectedImage}
+      {#if $selectedInput}
         <ImageViewer />
       {:else}
         <SVGIcon id="viewer-placeholder" title="表示できる画像がありません" icon={mdiImageMultiple} />
