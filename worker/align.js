@@ -1,4 +1,4 @@
-importScripts('worker/cv-runner.js');
+importScripts('/worker/cv-runner.js');
 
 function convertImageToGray(img) {
   const dst = new cv.Mat();
@@ -6,37 +6,41 @@ function convertImageToGray(img) {
   return dst;
 }
 
-function checkCircle(img) {
+function checkCircle(img, ROI) {
   const dst = new cv.Mat();
   cv.medianBlur(img, dst, 5);
   const circles = new cv.Mat();
   cv.HoughCircles(dst, circles, cv.HOUGH_GRADIENT, 1, 20, 50, 30, 0, 0);
 
-  let center;
+  let x, y;
 
   try {
-    if (circles.cols !== 1) {
-      throw new Error('画像に円が 2 つ以上あります');
+    if (circles.cols === 0) {
+      throw new Error('対象領域内で円を検出できませんでした');
     }
 
-    const x = circles.data32F[0];
-    const y = circles.data32F[1];
-    const r = circles.data32F[2];
-    center = new cv.Point(x, y);
-    cv.circle(dst, center, r, new cv.Scalar(0, 255, 0, 255), cv.FILLED);
+    if (circles.cols > 1) {
+      throw new Error('対象領域内で円が 2 つ以上あります');
+    }
+
+    x = circles.data32F[0];
+    y = circles.data32F[1];
   } finally {
     dst.delete();
     circles.delete();
   }
 
-  return center;
+  return new cv.Point(
+    Math.round(x + ROI.x),
+    Math.round(y + ROI.y),
+  );
 }
 
 self.onRequestPivot = async function onRequestPivot(image, ROI) {
   const cutImg = image.roi(ROI);
   const grayImg = convertImageToGray(cutImg);
 
-  const center = checkCircle(grayImg);
+  const center = checkCircle(grayImg, ROI);
 
   grayImg.delete();
   cutImg.delete();
@@ -44,12 +48,11 @@ self.onRequestPivot = async function onRequestPivot(image, ROI) {
   return { ...center };
 };
 
-// TODO: change refImage to { width, height } object
 self.onRequestProcessing = async function onRequestProcessing(image, refImage, ROI, pivot) {
   const cutImg = image.roi(ROI);
   const grayImg = convertImageToGray(cutImg);
 
-  const center = checkCircle(grayImg);
+  const center = checkCircle(grayImg, ROI);
 
   const shiftedImg = new cv.Mat();
 
