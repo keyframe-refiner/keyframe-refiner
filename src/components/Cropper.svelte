@@ -291,7 +291,7 @@
 />
 
 <style lang="scss">
-  @keyframes border-spiner {
+  @keyframes border-spinner {
     to {
       stroke-dashoffset: 12;
     }
@@ -354,7 +354,7 @@
       stroke-dasharray: 6 6;
       // use steps() to improve animation performance
       // step count must equlas to the changed stoke-dashoffset
-      animation: border-spiner 0.5s steps(12) infinite;
+      animation: border-spinner 0.5s steps(12) infinite;
     }
   }
 
