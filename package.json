@@ -19,6 +19,7 @@
     "clean": "rimraf ./dist",
     "predist": "npm run clean",
     "dist": "webpack --config ./scripts/webpack.prod.js",
+    "postdist": "cpx './worker/*' ./dist/worker",
     "lint": "eslint ./src --ext .ts,.svelte",
     "serve": "webpack serve --config ./scripts/webpack.dev.js --progress"
   },
