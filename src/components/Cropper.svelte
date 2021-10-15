@@ -279,7 +279,7 @@
     <div class="cropper-handle handle-se" on:pointerdown={onPointerDown(Direction.SE)}></div>
 
     <div class="cropper-info" class:show={cropping && direction !== Direction.ALL}>
-      {localRect.width} x {localRect.height}
+      {cropRect.width} x {cropRect.height}
     </div>
   </div>
 </div>
