@@ -136,9 +136,12 @@ export class CVWorker {
   }
 
   async #handshake() {
-    await Promise.all(this.#workers.map(w => this.#sendOnce(w, 'ping')));
-
-    this.#readyDefer.resolve(null);
+    try {
+      await Promise.all(this.#workers.map(w => this.#sendOnce(w, 'ping')));
+      this.#readyDefer.resolve(null);
+    } catch (e) {
+      this.#readyDefer.reject(e);
+    }
   }
 
   async #sendOnce(worker: Worker, request: string, body?: any, transfer?: Transferable[]) {
