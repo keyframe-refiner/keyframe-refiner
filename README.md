@@ -4,7 +4,7 @@
 
 
 # 使用方法
-0. https://textcunma.github.io/keyframe-refiner/　にアクセス
+0. (https://textcunma.github.io/keyframe-refiner/)　にアクセス
 
 1. 画像アップロード 
     - **画面左サイドバーにある「+」ボタンを押す**
