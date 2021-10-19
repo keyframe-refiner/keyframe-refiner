@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { afterUpdate, hasContext, getContext } from 'svelte';
+  import { onMount, onDestroy, afterUpdate, hasContext, getContext } from 'svelte';
   import { mdiChevronRight } from '@mdi/js';
   import type Scrollbar from 'smooth-scrollbar';
   import SVGIcon from './SVGIcon.svelte';
@@ -13,7 +13,9 @@
     highlight,
   ]);
 
-  let drawerBodyEl: HTMLElement;
+  let drawerBodyWrapper: HTMLElement;
+  let observer : ResizeObserver | undefined;
+  let contentHeight: number;
 
   let getScrollbar: () => Promise<Scrollbar>;
 
@@ -21,13 +23,25 @@
     getScrollbar = getContext('getScrollbar');
   }
 
-  afterUpdate(async () => {
-    drawerBodyEl.style.maxHeight = `${open ? drawerBodyEl.scrollHeight : 0}px`;
+  onMount(() => {
+    if (typeof ResizeObserver === 'function') {
+      observer = new ResizeObserver(() => {
+        contentHeight = drawerBodyWrapper.scrollHeight;
+      });
 
+      observer.observe(drawerBodyWrapper);
+    }
+  });
+
+  onDestroy(() => {
+    observer?.disconnect();
+  });
+
+  afterUpdate(async () => {
     if (tracker.stale() && highlight) {
       // scroll to drawer
       const s = await getScrollbar();
-      s.scrollIntoView(drawerBodyEl);
+      s.scrollIntoView(drawerBodyWrapper);
     }
   });
 
@@ -51,8 +65,11 @@
     <slot name="title"></slot>
   </header>
 
-  <article class="drawer-body" bind:this={drawerBodyEl}>
-    <div class="drawer-body-wrapper">
+  <article
+    class="drawer-body"
+    style={`max-height: ${open ? contentHeight : 0}px`}
+  >
+    <div class="drawer-body-wrapper" bind:this={drawerBodyWrapper}>
       <slot name="body"></slot>
     </div>
   </article>
