@@ -3,7 +3,7 @@
   import { afterUpdate } from 'svelte';
 
   import { VariableTracker } from '../utils/variable-tracker';
-  import type { ImageCanvas } from '../image-canvas';
+  import type { ImageCanvas } from '../utils/image-canvas';
 
   export let image: ImageCanvas;
 
