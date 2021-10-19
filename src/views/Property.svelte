@@ -1,12 +1,12 @@
 <script lang="ts">
   import { selectedOutput } from '../store';
-  import { ImageCanvas } from '../image-canvas';
-  import InputImage from './step-drawers/InputImage.svelte';
-  import ImageInfo from './step-drawers/ImageInfo.svelte';
-  import RefImage from './step-drawers/RefImage.svelte';
-  import ROI from './step-drawers/ROI.svelte';
-  import Pivot from './step-drawers/Pivot.svelte';
-  import CVRunner from './step-drawers/CVRunner.svelte';
+  import { ImageCanvas } from '../utils/image-canvas';
+  import InputImage from './property-drawers/InputImage.svelte';
+  import ImageInfo from './property-drawers/ImageInfo.svelte';
+  import RefImage from './property-drawers/RefImage.svelte';
+  import ROI from './property-drawers/ROI.svelte';
+  import Pivot from './property-drawers/Pivot.svelte';
+  import CVRunner from './property-drawers/CVRunner.svelte';
   import Scrollbar from '../components/Scrollbar.svelte';
 </script>
 

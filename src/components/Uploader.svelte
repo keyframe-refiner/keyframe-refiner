@@ -5,7 +5,7 @@
   import Portal from 'svelte-portal';
 
   import RootDialog from './RootDialog.svelte';
-  import { ImageCanvas } from '../image-canvas';
+  import { ImageCanvas } from '../utils/image-canvas';
   import { inputList, stepManager } from '../store';
   import { STEP } from '../step';
 

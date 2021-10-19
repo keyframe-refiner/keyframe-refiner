@@ -12,7 +12,7 @@
   import { STEP } from '../step';
   import { VariableTracker } from '../utils/variable-tracker';
   import { getImageState } from '../utils/image-state';
-  import { Point } from '../record-factory';
+  import { Point } from '../utils/record-factory';
   import {
     selectedInput,
     selectedOutput,

@@ -1,11 +1,11 @@
 import { List } from 'immutable';
-import { Point, Rect } from './record-factory';
+import { Point, Rect } from './utils/record-factory';
 import { defaultSteps } from './step';
 import { StepManager } from './utils/step-manager';
-import { CVWorker } from './cv-worker';
+import { CVWorker } from './utils/cv-worker';
 
 import { writable, derived } from 'svelte/store';
-import type { ImageCanvas } from './image-canvas';
+import type { ImageCanvas } from './utils/image-canvas';
 
 export const inputList = writable(List<ImageCanvas>());
 export const outputList = writable(List<ImageCanvas | Error>());

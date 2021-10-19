@@ -1,4 +1,4 @@
-import { Defer } from './utils/defer';
+import { Defer } from './defer';
 import { Point } from './record-factory';
 import { ImageCanvas } from './image-canvas';
 import type { Rect } from './record-factory';

@@ -6,7 +6,7 @@
   import type Scrollbar from 'smooth-scrollbar';
 
   import Drawer from '../../components/Drawer.svelte';
-  import { ImageCanvas } from '../../image-canvas';
+  import { ImageCanvas } from '../../utils/image-canvas';
   import { STEP } from '../../step';
   import {
     inputList,

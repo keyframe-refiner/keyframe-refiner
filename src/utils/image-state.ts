@@ -1,4 +1,4 @@
-import type { ImageCanvas } from '../image-canvas';
+import type { ImageCanvas } from './image-canvas';
 import { STEP } from '../step';
 
 export type ImageState = {

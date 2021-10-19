@@ -4,8 +4,7 @@
   import type Scrollbar from 'smooth-scrollbar';
 
   import { defaultTransformer } from '../utils/coord-transformer';
-  import { Point, Rect } from '../record-factory';
-
+  import { Point, Rect } from '../utils/record-factory';
   export let cropRect = new Rect();
   $: localRect = realRectToLocalRect(cropRect);
 
