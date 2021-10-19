@@ -41,7 +41,8 @@
 
   let startIndex = 0;
   let endIndex = 0;
-  let displayList: ImageStateWithIndex[] = [];
+
+  $: displayList = getDisplayList(startIndex, endIndex); // bind variables here for reactivity
 
   $: [beforeHeight, afterHeight] = [
     startIndex * thumbHeight,
@@ -56,7 +57,6 @@
 
   afterUpdate(() => {
     sliceItem();
-    displayList = getDisplayList();
   });
 
   async function sliceItem() {
@@ -74,14 +74,14 @@
     endIndex = Math.min($inputList.size - 1, end + extraCount);
   }
 
-  function getDisplayList() {
+  function getDisplayList(start: number, end: number) {
     if ($inputList.isEmpty()) {
       return [];
     }
 
     const results: ImageStateWithIndex[] = [];
 
-    for (let i = startIndex; i <= endIndex; i++) {
+    for (let i = start; i <= end; i++) {
       const input = $inputList.get(i)!;
       const output = $outputList.get(i);
 
