@@ -39,20 +39,20 @@
         </tr>
 
         <tr>
+          <td>解像度</td>
+          <td>
+            {#if xRes && yRes}
+              {Math.floor(xRes[0] / xRes[1])} x {Math.floor(yRes[0] / yRes[1])}
+            {:else}
+              N/A
+            {/if}
+          </td>
+        </tr>
+
+        <tr>
           <td>メディアタイプ</td>
           <td>{valueOrNA(image?.filetype)}</td>
         </tr>
-
-        {#if xRes && yRes}
-          <tr>
-            <td>解像度</td>
-            <td>
-              {Math.floor(xRes[0] / xRes[1])}
-              x
-              {Math.floor(yRes[0] / yRes[1])}
-            </td>
-          </tr>
-        {/if}
       </tbody>
     </table>
   </div>
