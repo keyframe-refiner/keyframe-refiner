@@ -43,7 +43,7 @@
           <td>{valueOrNA(image?.filetype)}</td>
         </tr>
 
-        {#if image?.exif}
+        {#if xRes && yRes}
           <tr>
             <td>解像度</td>
             <td>
