@@ -112,12 +112,12 @@ export class CVWorker {
           );
         } else {
           const { index, image } = e.data.result;
-          const { filename, filetype } = inputs[index];
+          const { filename, filetype, exif } = inputs[index];
           const canvas = this.#arrayBufferToCanvas(image.buffer, image.width, image.height);
 
           onProcessed(
             index,
-            await ImageCanvas.fromCanvas(canvas, filename.replace(/(?=\.\w+$)/, '_out'), filetype),
+            await ImageCanvas.fromCanvas(canvas, filename.replace(/(?=\.\w+$)/, '_out'), filetype, exif),
             (finished + 1) / total,
           );
         }
