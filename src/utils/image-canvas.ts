@@ -1,13 +1,48 @@
-import piexif from 'piexifjs';
+import piexif, { ImageIFD } from 'piexifjs';
 
 const MIME_JPEG = 'image/jpeg';
+const DEFAULT_DPI = [96, 96];
+
+function decodeDataURL(dataURL: string) {
+  return atob(dataURL.split(',')[1]);
+}
+
+function hexToUint16(h1: string, h0: string) {
+  return (h1.charCodeAt(0) << 8) + h0.charCodeAt(0);
+}
+
+function getResolutionFromJFIF(dataURL: string) {
+  const decoded = decodeDataURL(dataURL);
+
+  if (decoded.slice(0x06, 0x0A) !== 'JFIF') {
+    // doesn't contain JFIF data
+    return DEFAULT_DPI;
+  }
+
+  // read resolution
+  const xRes = hexToUint16(decoded[0x0E], decoded[0x0F]);
+  const yRes = hexToUint16(decoded[0x10], decoded[0x11]);
+
+  return xRes && yRes ? [xRes, yRes] : DEFAULT_DPI;
+}
 
 async function getEXIF(jpegImg: Blob) {
   const reader = new FileReader();
 
   return new Promise<any>((resolve, reject) => {
     reader.onload = () => {
-      resolve(piexif.load(reader.result));
+      const dataURL = reader.result as string;
+      const exif = piexif.load(dataURL);
+      const zeroth = exif['0th'];
+
+      if (!zeroth[ImageIFD.XResolution] || !zeroth[ImageIFD.YResolution]) {
+        // add resolution data
+        const [xRes, yRes] = getResolutionFromJFIF(dataURL);
+        zeroth[ImageIFD.XResolution] = [xRes, 1];
+        zeroth[ImageIFD.YResolution] = [yRes, 1];
+      }
+
+      resolve(exif);
     };
 
     reader.onerror = reject;
@@ -89,7 +124,7 @@ export class ImageCanvas {
     const exif = piexif.dump(this.exif);
     const inserted = piexif.insert(exif, dataURL);
 
-    const buffer = atob(inserted.split(',')[1]).split('').map((char) => char.charCodeAt(0));
+    const buffer = Array.from(decodeDataURL(inserted), (char) => char.charCodeAt(0));
     return new Blob([new Uint8Array(buffer)], {
       type: this.filetype,
     });
