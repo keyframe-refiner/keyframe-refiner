@@ -1,7 +1,7 @@
 import piexif, { ImageIFD } from 'piexifjs';
 
 const MIME_JPEG = 'image/jpeg';
-const DEFAULT_DPI = [96, 96];
+const DEFAULT_DPI = [96, 96, 2]; // [x, y, unit]
 
 function decodeDataURL(dataURL: string) {
   return atob(dataURL.split(',')[1]);
@@ -20,10 +20,11 @@ function getResolutionFromJFIF(dataURL: string) {
   }
 
   // read resolution
+  const unit = decoded.charCodeAt(0x0D) + 1; // JFIF unit -> EXIF Unit
   const xRes = hexToUint16(decoded[0x0E], decoded[0x0F]);
   const yRes = hexToUint16(decoded[0x10], decoded[0x11]);
 
-  return xRes && yRes ? [xRes, yRes] : DEFAULT_DPI;
+  return xRes && yRes ? [xRes, yRes, unit] : DEFAULT_DPI;
 }
 
 async function getEXIF(jpegImg: Blob) {
@@ -37,9 +38,10 @@ async function getEXIF(jpegImg: Blob) {
 
       if (!zeroth[ImageIFD.XResolution] || !zeroth[ImageIFD.YResolution]) {
         // add resolution data
-        const [xRes, yRes] = getResolutionFromJFIF(dataURL);
+        const [xRes, yRes, unit] = getResolutionFromJFIF(dataURL);
         zeroth[ImageIFD.XResolution] = [xRes, 1];
         zeroth[ImageIFD.YResolution] = [yRes, 1];
+        zeroth[ImageIFD.ResolutionUnit] = unit;
       }
 
       resolve(exif);
