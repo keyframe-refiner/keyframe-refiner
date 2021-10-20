@@ -1,7 +1,7 @@
 # 原画位置合わせ
 
 スキャンされた原画のタップ穴を基準に原画の位置合わせを自動で行います。
-
+![Image](assets/explanation.jpg)
 
 ## 使用方法
 0. [原画位置合わせ (https://textcunma.github.io/keyframe-refiner/)](https://textcunma.github.io/keyframe-refiner/)　にアクセス
