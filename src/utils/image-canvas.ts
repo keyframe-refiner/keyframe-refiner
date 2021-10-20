@@ -8,8 +8,9 @@ function decodeDataURL(dataURL: string) {
   return atob(dataURL.split(',')[1]);
 }
 
-function hexToUint16(h1: string, h0: string) {
-  return (h1.charCodeAt(0) << 8) + h0.charCodeAt(0);
+// convert two characters to uint16 value
+function parseUint16(str: string, offset: number = 0) {
+  return (str.charCodeAt(offset) << 8) + str.charCodeAt(offset + 1);
 }
 
 function getResolutionFromJFIF(dataURL: string) {
@@ -22,26 +23,26 @@ function getResolutionFromJFIF(dataURL: string) {
 
   // read resolution
   const unit = decoded.charCodeAt(0x0D) + 1; // JFIF unit -> EXIF Unit
-  const xRes = hexToUint16(decoded[0x0E], decoded[0x0F]);
-  const yRes = hexToUint16(decoded[0x10], decoded[0x11]);
+  const xRes = parseUint16(decoded, 0x0E);
+  const yRes = parseUint16(decoded, 0x10);
 
   return xRes && yRes ? [xRes, yRes, unit] : DEFAULT_DPI;
 }
 
 // remove JFIF segment
-function removeJFIF(hex: string) {
-  const startIndex = hex.indexOf(JFIF_MARKER);
+function removeJFIF(decodedStr: string) {
+  const startIndex = decodedStr.indexOf(JFIF_MARKER);
 
   if (startIndex === -1) {
-    return hex;
+    return decodedStr;
   }
 
   const lengthByteStart = startIndex + 2;
-  const segmentLength = hexToUint16(hex[lengthByteStart], hex[lengthByteStart + 1]);
+  const segmentLength = parseUint16(decodedStr, lengthByteStart);
 
   const endIndex = lengthByteStart + segmentLength;
 
-  return hex.slice(0, startIndex) + hex.slice(endIndex);
+  return decodedStr.slice(0, startIndex) + decodedStr.slice(endIndex);
 }
 
 async function getEXIF(jpegImg: Blob) {
