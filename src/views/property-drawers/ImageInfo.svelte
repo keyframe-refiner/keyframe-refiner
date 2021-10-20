@@ -1,7 +1,6 @@
 <script lang="ts">
-  import piexif from 'piexifjs';
+  import ImageInfo from '../../components/ImageInfo.svelte';
   import Drawer from '../../components/Drawer.svelte';
-  import { valueOrNA } from '../../utils/value-or-na';
   import { getImageState } from '../../utils/image-state';
   import {
     selectedInput,
@@ -12,50 +11,14 @@
   const { currentStep } = stepManager;
 
   $: image = getImageState($selectedInput!, $selectedOutput, $refImage, $currentStep).image;
-
-  $: xRes = image?.exif['0th'][piexif.ImageIFD.XResolution];
-  $: yRes = image?.exif['0th'][piexif.ImageIFD.XResolution];
 </script>
 
 <Drawer>
   <span slot="title">画像情報</span>
 
-  <div slot="body">
-    <table>
-      <tbody>
-        <tr>
-          <td>ファイル名</td>
-          <td>{valueOrNA(image?.filename)}</td>
-        </tr>
-
-        <tr>
-          <td>幅</td>
-          <td>{valueOrNA(image?.width)}</td>
-        </tr>
-
-        <tr>
-          <td>高さ</td>
-          <td>{valueOrNA(image?.height)}</td>
-        </tr>
-
-        <tr>
-          <td>解像度</td>
-          <td>
-            {#if xRes && yRes}
-              {Math.floor(xRes[0] / xRes[1])} x {Math.floor(yRes[0] / yRes[1])}
-            {:else}
-              N/A
-            {/if}
-          </td>
-        </tr>
-
-        <tr>
-          <td>メディアタイプ</td>
-          <td>{valueOrNA(image?.filetype)}</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+  <svelte:fragment slot="body">
+    <ImageInfo {image} allowEmpty />
+  </svelte:fragment>
 </Drawer>
 
 <style lang="scss">
