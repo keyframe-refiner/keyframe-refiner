@@ -27,7 +27,7 @@
           <td>大きさ</td>
           <td>
             {#if image?.width && image?.width}
-              {image.width} x {image.height}
+              {image.width} × {image.height}
             {:else}
               N/A
             {/if}
@@ -38,7 +38,7 @@
           <td>解像度</td>
           <td>
             {#if xRes && yRes}
-              {Math.floor(xRes[0] / xRes[1])} x {Math.floor(yRes[0] / yRes[1])}
+              {Math.floor(xRes[0] / xRes[1])} × {Math.floor(yRes[0] / yRes[1])}
             {:else}
               N/A
             {/if}
