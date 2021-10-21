@@ -73,9 +73,11 @@
     const results = filterUnsupportFiles(filterDuplicatedFiles(files));
     const totalCount = results.length;
 
-    for (let i = 0; i < totalCount; i++) {
-      $inputList = $inputList.push(await ImageCanvas.fromFile(results[i]));
+    // read images in parallel
+    const reader = results.map(ImageCanvas.fromFile);
 
+    for (let i = 0; i < totalCount; i++) {
+      $inputList = $inputList.push(await reader[i]);
       progress = (i + 1) / totalCount;
     }
 
@@ -127,9 +129,11 @@
   </Actions>
 </RootDialog>
 
-<Portal target="#image-viewer">
-  <CircularProgress class="upload-progress" closed={!isUploading} {progress} />
-</Portal>
+{#if isUploading}
+  <Portal target="#image-viewer">
+    <CircularProgress class="upload-progress" {progress} />
+  </Portal>
+{/if}
 
 <style lang="scss">
   :global {
