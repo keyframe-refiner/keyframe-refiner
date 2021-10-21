@@ -1,7 +1,7 @@
 <script lang="ts">
   import pAll from 'p-all';
   import { ZipWriter, BlobWriter, BlobReader } from '@zip.js/zip.js';
-  import { mdiDownload } from '@mdi/js';
+  import { mdiPackageDown, mdiSpaceInvaders } from '@mdi/js';
   import Portal from 'svelte-portal';
   import Fab from '@smui/fab/styled';
   import Button from '@smui/button/styled';
@@ -100,7 +100,7 @@
   <Portal target="body">
     <div class="download-btn" style={`--progress: ${progress * 100}%`}>
       <Fab disabled={progress !== 1 || creatingZip} on:click={download} title="zip ファイルをダウンロード">
-        <SVGIcon icon={mdiDownload} />
+        <SVGIcon icon={cvRunning ? mdiSpaceInvaders : mdiPackageDown} />
       </Fab>
 
       {#if progress !== 1}
@@ -137,10 +137,12 @@
 
     :global {
       button {
-        background: theme.$green-500;
+        background-color: theme.$green-500;
+        transition: none;
 
         &:disabled {
-          background: var(--placeholder);
+          background-color: var(--placeholder);
+          transition: background-color .3s;
           cursor: not-allowed;
           pointer-events: none;
         }
