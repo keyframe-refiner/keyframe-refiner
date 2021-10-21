@@ -138,11 +138,11 @@
     :global {
       button {
         background-color: theme.$green-500;
-        transition: none;
+        transition: background-color .3s;
 
         &:disabled {
           background-color: var(--placeholder);
-          transition: background-color .3s;
+          transition: none;
           cursor: not-allowed;
           pointer-events: none;
         }
