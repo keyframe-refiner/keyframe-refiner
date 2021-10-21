@@ -1,6 +1,6 @@
 <script lang="ts">
   import clamp from 'lodash-es/clamp';
-  import { onMount, afterUpdate, tick } from 'svelte';
+  import { onMount, afterUpdate } from 'svelte';
   import Portal from 'svelte-portal';
   import Button from '@smui/button/styled';
   import { Title, Content, Actions } from '@smui/dialog/styled';
@@ -172,10 +172,6 @@
       $refImage = undefined;
       $currentStep = STEP.SELECT_REF_IMAGE;
     }
-
-    // revoke object url after image is removed from DOM
-    await tick();
-    image.destory();
   }
 
   function requestDelete(index: number) {
@@ -191,14 +187,10 @@
   }
 
   async function clearAll() {
-    const currentList = $inputList;
     $inputList = $inputList.clear();
     $selectedIndex = 0;
     $refImage = undefined;
     stepManager.reset();
-
-    await tick();
-    currentList.forEach(image => image.destory());
   }
 
   function requestClear() {

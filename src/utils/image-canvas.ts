@@ -83,7 +83,6 @@ export async function canvasToBlob(canvas: HTMLCanvasElement, filetype: string) 
   });
 }
 
-// TODO: remove blobURL
 export class ImageCanvas {
   readonly width: number;
   readonly height: number;
@@ -92,7 +91,6 @@ export class ImageCanvas {
     readonly canvas: HTMLCanvasElement,
     readonly filename: string,
     readonly filetype: string,
-    readonly blobURL: string,
     readonly exif?: any,
   ) {
     this.width = canvas.width;
@@ -117,8 +115,8 @@ export class ImageCanvas {
         canvas.height = img.naturalHeight;
         ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight);
 
-        // URL.revokeObjectURL(img.src);
-        resolve(new ImageCanvas(canvas, file.name, file.type, url, exif));
+        URL.revokeObjectURL(img.src);
+        resolve(new ImageCanvas(canvas, file.name, file.type, exif));
       };
 
       img.onerror = e => {
@@ -130,10 +128,16 @@ export class ImageCanvas {
     });
   }
 
-  static async fromCanvas(canvas: HTMLCanvasElement, filename: string, filetype: string, exif?: any) {
-    const blob = await canvasToBlob(canvas, filetype);
+  static fromImageData(imageData: ImageData, filename: string, filetype: string, exif?: any) {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d')!;
 
-    return new ImageCanvas(canvas, filename, filetype, URL.createObjectURL(blob), exif);
+    canvas.width = imageData.width;
+    canvas.height = imageData.height;
+
+    ctx.putImageData(imageData, 0, 0);
+
+    return new ImageCanvas(canvas, filename, filetype, exif);
   }
 
   async toBlob(): Promise<Blob> {
@@ -155,9 +159,5 @@ export class ImageCanvas {
   getImageData(): ImageData {
     const ctx = this.canvas.getContext('2d')!;
     return ctx.getImageData(0, 0, this.width, this.height);
-  }
-
-  destory() {
-    URL.revokeObjectURL(this.blobURL);
   }
 }

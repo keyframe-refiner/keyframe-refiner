@@ -2,7 +2,7 @@
   import { selectedOutput } from '../store';
   import { ImageCanvas } from '../utils/image-canvas';
   import InputImage from './property-drawers/InputImage.svelte';
-  import ImageInfo from './property-drawers/ImageInfo.svelte';
+  import SelectedImage from './property-drawers/SelectedImage.svelte';
   import RefImage from './property-drawers/RefImage.svelte';
   import ROI from './property-drawers/ROI.svelte';
   import Pivot from './property-drawers/Pivot.svelte';
@@ -11,7 +11,7 @@
 </script>
 
 <Scrollbar>
-  <ImageInfo />
+  <SelectedImage />
   {#if $selectedOutput instanceof ImageCanvas}
     <InputImage />
   {/if}

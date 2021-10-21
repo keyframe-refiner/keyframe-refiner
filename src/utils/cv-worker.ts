@@ -99,14 +99,15 @@ export class CVWorker {
         }, [imageBuffer.buffer]);
 
         const { filename, filetype, exif } = inputs[jobIndex];
-        const canvas = this.#arrayBufferToCanvas(
-          image.buffer,
+
+        const imageData = new ImageData(
+          new Uint8ClampedArray(image.buffer),
           image.width,
           image.height,
         );
 
-        result = await ImageCanvas.fromCanvas(
-          canvas,
+        result = ImageCanvas.fromImageData(
+          imageData,
           filename.replace(/(?=\.\w+$)/, '_out'),
           filetype,
           exif,
@@ -212,22 +213,5 @@ export class CVWorker {
       height: imageData.height,
       buffer: imageData.data.buffer,
     };
-  }
-
-  #arrayBufferToCanvas(buffer: ArrayBuffer, width: number, height: number) {
-    const canvas = document.createElement('canvas');
-    canvas.width = width;
-    canvas.height = height;
-
-    const ctx = canvas.getContext('2d')!;
-
-    const imageData = new ImageData(
-      new Uint8ClampedArray(buffer),
-      width, height,
-    );
-
-    ctx.putImageData(imageData, 0, 0);
-
-    return canvas;
   }
 }
