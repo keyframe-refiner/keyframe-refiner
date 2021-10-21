@@ -8,6 +8,7 @@
 
   import { STEP } from '../step';
   import { ImageState, getImageState } from '../utils/image-state';
+  import { VariableTracker } from '../utils/variable-tracker';
   import SVGIcon from '../components/SVGIcon.svelte';
   import Uploader from '../components/Uploader.svelte';
   import RootDialog from '../components/RootDialog.svelte';
@@ -41,13 +42,19 @@
 
   let startIndex = 0;
   let endIndex = 0;
-
-  $: displayList = getDisplayList(startIndex, endIndex); // bind variables here for reactivity
+  let displayList: ImageStateWithIndex[] = [];
 
   $: [beforeHeight, afterHeight] = [
     startIndex * thumbHeight,
     ($inputList.size - endIndex - 1) * thumbHeight - thumbSpacing,
   ];
+
+  const updateDisplayListTracker = new VariableTracker(() => [
+    $inputList,
+    $outputList,
+    startIndex,
+    endIndex,
+  ]);
 
   onMount(async () => {
     const s = await scrollbar.getScrollbar();
@@ -55,8 +62,12 @@
     s.addListener(sliceItem);
   });
 
-  afterUpdate(() => {
-    sliceItem();
+  afterUpdate(async () => {
+    await sliceItem();
+
+    if (updateDisplayListTracker.stale()) {
+      displayList = getDisplayList();
+    }
   });
 
   async function sliceItem() {
@@ -74,14 +85,14 @@
     endIndex = Math.min($inputList.size - 1, end + extraCount);
   }
 
-  function getDisplayList(start: number, end: number) {
+  function getDisplayList() {
     if ($inputList.isEmpty()) {
       return [];
     }
 
     const results: ImageStateWithIndex[] = [];
 
-    for (let i = start; i <= end; i++) {
+    for (let i = startIndex; i <= endIndex; i++) {
       const input = $inputList.get(i)!;
       const output = $outputList.get(i);
 
