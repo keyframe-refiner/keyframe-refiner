@@ -9,10 +9,11 @@
   import Cropper from '../components/Cropper.svelte';
   import Scrollbar from '../components/Scrollbar.svelte';
   import SVGIcon from '../components/SVGIcon.svelte';
-  import { STEP } from '../step';
+  import Preview from '../components/Preview.svelte';
   import { VariableTracker } from '../utils/variable-tracker';
   import { getImageState } from '../utils/image-state';
   import { Point } from '../utils/record-factory';
+  import { STEP } from '../step';
   import {
     selectedInput,
     selectedOutput,
@@ -204,31 +205,24 @@
         --viewer-height: ${displayHeight}px;`
       }
     >
-      <img
+      <div
           class="viewer-image"
           class:dimmed={imageState.dimmed && !imageState.error}
-          src={imageState.image?.blobURL}
-          alt={imageState.image?.filename}
           bind:this={imgEl}
-          on:mousedown|preventDefault
-      />
+      >
+        <Preview image={imageState.image} />
+      </div>
 
       {#if $currentStep === STEP.RUN_CV && $showInputImage}
-        <img
-          class="viewer-image compare"
-          src={$selectedInput?.blobURL}
-          alt={$selectedInput?.filename}
-          on:mousedown|preventDefault
-        />
+        <div class="viewer-image compare">
+          <Preview image={$selectedInput} />
+        </div>
       {/if}
 
       {#if $showRefImage && $refImage}
-        <img
-          class="viewer-image compare"
-          src={$refImage.blobURL}
-          alt={$refImage.filename}
-          on:mousedown|preventDefault
-        />
+        <div class="viewer-image compare">
+          <Preview image={$refImage} />
+        </div>
       {/if}
 
       {#if $currentStep === STEP.SET_ROI}

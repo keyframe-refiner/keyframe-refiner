@@ -1,5 +1,6 @@
 <script lang="ts">
   import piexif from 'piexifjs';
+  import Preview from './Preview.svelte';
   import type { ImageCanvas } from '../utils/image-canvas';
 
   export let preview = false;
@@ -12,7 +13,7 @@
 
 <div class="image-info">
   {#if preview && image}
-    <img src={image.blobURL} alt={image.filename}>
+    <Preview {image} />
   {/if}
 
   {#if image || allowEmpty}
@@ -58,14 +59,14 @@
   .image-info {
     margin: 10px 0;
     text-align: center;
+
+    :global(canvas) {
+      max-width: 60%;
+      max-height: 60%;
+    }
   }
 
   table {
     text-align: left;
-  }
-
-  img {
-    max-width: 60%;
-    max-height: 60%;
   }
 </style>

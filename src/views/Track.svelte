@@ -6,13 +6,14 @@
   import { Title, Content, Actions } from '@smui/dialog/styled';
   import { mdiPlus, mdiTrashCanOutline, mdiDeleteSweep, mdiGhost, mdiAlertCircleOutline } from '@mdi/js';
 
-  import { STEP } from '../step';
   import { ImageState, getImageState } from '../utils/image-state';
   import { VariableTracker } from '../utils/variable-tracker';
   import SVGIcon from '../components/SVGIcon.svelte';
   import Uploader from '../components/Uploader.svelte';
   import RootDialog from '../components/RootDialog.svelte';
   import Scrollbar from '../components/Scrollbar.svelte';
+  import Preview from '../components/Preview.svelte';
+  import { STEP } from '../step';
   import {
     inputList,
     outputList,
@@ -235,12 +236,7 @@
         class:selected={$selectedIndex === index}
         on:click={() => { $selectedIndex = index; }}
       >
-        <img
-          src={image.blobURL}
-          alt={image.filename}
-          title={image.filename}
-          on:mousedown|preventDefault
-        />
+        <Preview {image} />
 
         {#if error}
           <span class="error-icon" title={error}>
@@ -352,7 +348,7 @@
     justify-content: center;
     margin-bottom: var(--thumb-spacing);
 
-    img {
+    :global(canvas) {
       max-width: 100%;
       max-height: 100%;
     }
@@ -361,7 +357,7 @@
       border-color: var(--mdc-theme-primary);
     }
 
-    &.dimmed img {
+    &.dimmed :global(canvas) {
       opacity: var(--dimmed-image-opacity);
     }
 
