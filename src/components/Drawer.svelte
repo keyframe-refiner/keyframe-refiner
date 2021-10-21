@@ -67,7 +67,7 @@
 
   <article
     class="drawer-body"
-    style={`max-height: ${open ? contentHeight : 0}px`}
+    style={`height: ${open ? contentHeight : 0}px`}
   >
     <div class="drawer-body-wrapper" bind:this={drawerBodyWrapper}>
       <slot name="body"></slot>
@@ -143,7 +143,7 @@
 
   .drawer-body {
     overflow: hidden;
-    transition: max-height .3s;
+    transition: height .3s;
   }
 
   .drawer-body-wrapper {
