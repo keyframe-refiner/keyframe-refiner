@@ -62,7 +62,7 @@
 <style lang="scss">
   @use '@material/theme/index' as theme;
 
-  :global(.request-pivot) {
+  :global(.drawer .request-pivot) {
     width: 100%;
     margin-top: 10px;
 
