@@ -34,7 +34,7 @@ export const ROI = writable(new Rect({
 export const stepManager = new StepManager(defaultSteps);
 
 export const cvWorker = writable(
-  new CVWorker('./worker/align.js', 4),
+  new CVWorker('./worker/align.js'),
 );
 
 // states

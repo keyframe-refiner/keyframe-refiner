@@ -10,7 +10,10 @@ export class CVWorker {
 
   #messageID = 0;
 
-  constructor(scriptURL: string, workerCount = 4) {
+  constructor(
+    scriptURL: string,
+    workerCount = navigator.hardwareConcurrency || 4,
+  ) {
     this.#workers = [];
 
     for (let i = 0; i < workerCount; i++) {
@@ -23,7 +26,7 @@ export class CVWorker {
   async requestPivot(image: ImageCanvas, ROI: Rect) {
     const imageData = image.getImageData();
 
-    const result = await this.#sendOnce(
+    const { pivot } = await this.#sendOnce(
       this.#workers[0],
       'request-pivot',
       {
@@ -43,8 +46,8 @@ export class CVWorker {
     );
 
     return new Point({
-      x: Math.round(result.x),
-      y: Math.round(result.y),
+      x: Math.round(pivot.x),
+      y: Math.round(pivot.y),
     });
   }
 
@@ -55,81 +58,89 @@ export class CVWorker {
     pivot: Point,
     onProcessed: (index: number, result: ImageCanvas | Error, progress: number) => void,
   ) {
-    const total = inputs.length;
-    const sliceSize = Math.ceil(total / this.#workers.length);
-    let finished = 0;
+    await this.#broadcast('set-config', {
+      config: {
+        refImage: this.#createImageBuffer(refImage.getImageData()),
+        ROI: {
+          x: ROI.x1,
+          y: ROI.y1,
+          width: ROI.width,
+          height: ROI.height,
+        },
+        pivot: {
+          x: pivot.x,
+          y: pivot.y,
+        },
+      },
+    });
 
     const deferred = new Defer<null>();
+    const total = inputs.length;
+    let currentIdx = 0;
+    let finished = 0;
 
-    const pivotPoint = {
-      x: pivot.x,
-      y: pivot.y,
-    };
-
-    const ROIrect = {
-      x: ROI.x1,
-      y: ROI.y1,
-      width: ROI.width,
-      height: ROI.height,
-    };
-
-    const refImageBuffer = this.#createImageBuffer(refImage.getImageData());
-
-    const removeListeners = this.#workers.map((worker, index) => {
-      const start = index * sliceSize;
-      const end = start + sliceSize;
-
-      if (start >= total) {
-        return null;
+    const spawn = async (worker: Worker) => {
+      if (currentIdx >= total) {
+        return;
       }
 
-      const buffers: ArrayBuffer[] = [];
+      // remember job index
+      const jobIndex = currentIdx;
 
-      const images = inputs.slice(start, end).map((image, idx) => {
-        const imageData = image.getImageData();
+      const imageBuffer = this.#createImageBuffer(inputs[jobIndex].getImageData());
 
-        buffers.push(imageData.data.buffer);
+      let result: ImageCanvas | Error;
 
-        return {
-          index: idx + start,
-          image: this.#createImageBuffer(imageData),
-        };
-      });
+      // console.log(`---> worker: ${this.#workers.indexOf(worker)}, job: ${jobIndex}`);
 
-      const body = {
-        images,
-        refImage: refImageBuffer,
-        ROI: ROIrect,
-        pivot: pivotPoint,
-      };
+      try {
+        const { image } = await this.#sendOnce(worker, 'request-processing', {
+          image: imageBuffer,
+        }, [imageBuffer.buffer]);
 
-      return this.#send(worker, 'request-processing', body, buffers, async (e) => {
-        if (e.data.error) {
-          onProcessed(
-            e.data.result.index,
-            new Error(e.data.error),
-            (finished + 1) / total,
-          );
-        } else {
-          const { index, image } = e.data.result;
-          const { filename, filetype, exif } = inputs[index];
-          const canvas = this.#arrayBufferToCanvas(image.buffer, image.width, image.height);
+        const { filename, filetype, exif } = inputs[jobIndex];
+        const canvas = this.#arrayBufferToCanvas(
+          image.buffer,
+          image.width,
+          image.height,
+        );
 
-          onProcessed(
-            index,
-            await ImageCanvas.fromCanvas(canvas, filename.replace(/(?=\.\w+$)/, '_out'), filetype, exif),
-            (finished + 1) / total,
-          );
-        }
+        result = await ImageCanvas.fromCanvas(
+          canvas,
+          filename.replace(/(?=\.\w+$)/, '_out'),
+          filetype,
+          exif,
+        );
+      } catch (e) {
+        console.error('[main]', e);
+        result = e;
+      }
 
-        // update finished count later to avoid racing
-        finished++;
+      finished++;
 
-        if (finished === total) {
-          deferred.resolve(null);
-          removeListeners.forEach(fn => fn?.());
-        }
-      });
+      // console.log(`<--- worker: ${this.#workers.indexOf(worker)}, job: ${jobIndex}, progress: ${finished}/${total}`);
+
+      onProcessed(jobIndex, result, finished / total);
+
+      if (finished === total) {
+        // we are done
+        deferred.resolve(null);
+      } else if (currentIdx < total) {
+        // run next job
+        currentIdx++;
+        spawn(worker);
+      }
+    };
+
+    this.#workers.forEach((worker, i) => {
+      // parallel processing
+      currentIdx = i;
+      spawn(worker);
+    });
+
+    // clean up when finished
+    deferred.promise.then(() => {
+      this.#broadcast('clean');
     });
 
     return deferred.promise;
@@ -144,14 +155,22 @@ export class CVWorker {
     }
   }
 
+  async #broadcast(request: string, body?: any) {
+    const promises = this.#workers.map(
+      worker => this.#sendOnce(worker, request, body),
+    );
+
+    return Promise.all(promises);
+  }
+
   async #sendOnce(worker: Worker, request: string, body?: any, transfer?: Transferable[]) {
     const defer = new Defer<any>();
 
-    const removeListener = this.#send(worker, request, body, transfer, (e) => {
-      if (e.data.error) {
-        defer.reject(new Error(e.data.error));
+    const removeListener = this.#send(worker, request, body, transfer, ({ data }) => {
+      if (data.error) {
+        defer.reject(new Error(data.error));
       } else {
-        defer.resolve(e.data.result);
+        defer.resolve(data.result);
       }
 
       removeListener();
@@ -165,23 +184,23 @@ export class CVWorker {
     request: string,
     body?: any,
     transfer?: Transferable[],
-    callback?: (e: MessageEvent) => void,
+    onMessage?: (e: MessageEvent) => void,
   ) {
     const id = this.#messageID;
     this.#messageID++;
 
     function handler(e: MessageEvent) {
       if (e.data.respondTo === request && e.data.id === id) {
-        callback?.(e);
+        onMessage?.(e);
       }
     }
 
     worker.addEventListener('message', handler);
 
     worker.postMessage({
-      ...body,
       request,
       id,
+      body,
     }, transfer || []);
 
     return () => worker.removeEventListener('message', handler);

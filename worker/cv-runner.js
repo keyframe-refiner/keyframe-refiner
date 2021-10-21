@@ -2,6 +2,12 @@
 
 importScripts('./opencv-4.5.3.js');
 
+self.config = null;
+
+self.ready = new Promise(resolve => {
+  cv.onRuntimeInitialized = resolve;
+});
+
 /**
  * Default handler that is called when the main page requests the position of the pivot point
  *
@@ -25,11 +31,11 @@ function onRequestPivot(image, ROI) {
  * @return {cv.Mat}           the result
  */
 function onRequestProcessing(image, refImage, ROI, pivot) {
-  return image;
+  return image.clone();
 }
 
-function createImageMat(imageData) {
-  const { width, height, buffer } = imageData;
+function createImageMat(imageBuffer) {
+  const { width, height, buffer } = imageBuffer;
 
   const mat = new cv.Mat(height, width, cv.CV_8UC4);
   mat.data.set(new Uint8ClampedArray(buffer));
@@ -37,93 +43,104 @@ function createImageMat(imageData) {
   return mat;
 }
 
-self.ready = new Promise(resolve => {
-  cv.onRuntimeInitialized = resolve;
-});
+function respond(evt, { result, error, transfer } = {}) {
+  self.postMessage({
+    respondTo: evt.data.request,
+    id: evt.data.id,
+    error,
+    result,
+  }, transfer);
+}
+
+function handleError(evt, error) {
+  console.error('[worker]', error);
+
+  respond(evt, {
+    error: error.message,
+  });
+}
+
+async function pong(evt) {
+  await ready;
+  respond(evt);
+}
 
 async function requestPivot(evt) {
-  const { image, ROI } = evt.data;
+  const { image, ROI } = evt.data.body;
   const mat = createImageMat(image);
   const ROIrect = new cv.Rect(ROI.x, ROI.y, ROI.width, ROI.height);
 
   try {
-    const result = await self.onRequestPivot(mat, ROIrect);
+    const pivot = await self.onRequestPivot(mat, ROIrect);
 
-    self.postMessage({
-      respondTo: evt.data.request,
-      id: evt.data.id,
-      result,
+    respond(evt, {
+      result: {
+        pivot,
+      },
     });
   } catch (e) {
-    console.error(e);
-
-    self.postMessage({
-      respondTo: evt.data.request,
-      id: evt.data.id,
-      error: e.message,
-    });
+    handleError(evt, e);
   } finally {
     mat.delete();
   }
 }
 
 async function requestProcessing(evt) {
-  const { ROI, pivot } = evt.data;
+  const { refImage, ROI, pivot } = config;
 
-  const refImage = createImageMat(evt.data.refImage);
+  const mat = createImageMat(evt.data.body.image);
 
-  for (const { image, index } of evt.data.images) {
-    const mat = createImageMat(image);
+  try {
+    const result = await self.onRequestProcessing(mat, refImage, ROI, pivot);
+    const { buffer } = new Uint8ClampedArray(result.data);
 
-    try {
-      const ROIrect = new cv.Rect(ROI.x, ROI.y, ROI.width, ROI.height);
-      const pivotPoint = new cv.Point(pivot.x, pivot.y);
-
-      const result = await self.onRequestProcessing(mat, refImage, ROIrect, pivotPoint);
-
-      const { buffer } = new Uint8ClampedArray(result.data);
-
-      self.postMessage({
-        respondTo: evt.data.request,
-        id: evt.data.id,
-        result: {
-          index,
-          image: {
-            buffer,
-            width: result.cols,
-            height: result.rows,
-          },
+    respond(evt, {
+      result: {
+        image: {
+          buffer,
+          width: result.cols,
+          height: result.rows,
         },
-      }, [buffer]);
-
-      result.delete();
-    } catch (e) {
-      console.error('[worker]', e);
-
-      self.postMessage({
-        respondTo: evt.data.request,
-        id: evt.data.id,
-        error: e.message,
-        result: {
-          index,
-        },
-      });
-    } finally {
-      mat.delete();
-    }
+      },
+      transfer: [buffer],
+    });
+  } catch (e) {
+    handleError(evt, e);
+  } finally {
+    mat.delete();
   }
+}
 
-  refImage.delete();
+function setConfig(evt) {
+  const { refImage, ROI, pivot } = evt.data.body.config;
+
+  self.config = {
+    refImage: createImageMat(refImage),
+    pivot: new cv.Point(pivot.x, pivot.y),
+    ROI: new cv.Rect(ROI.x, ROI.y, ROI.width, ROI.height),
+  };
+
+  respond(evt);
+}
+
+function clean(evt) {
+  self.config.refImage.delete();
+  self.config = null;
+  respond(evt);
 }
 
 self.addEventListener('message', async (evt) => {
   switch (evt.data?.request) {
     case 'ping':
-      await ready;
-      self.postMessage({
-        respondTo: evt.data.request,
-        id: evt.data.id,
-      });
+      await pong(evt);
+      break;
+
+    case 'set-config':
+      setConfig(evt);
+      break;
+
+    case 'clean':
+      clean(evt);
       break;
 
     case 'request-pivot':
