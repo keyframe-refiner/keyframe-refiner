@@ -79,7 +79,7 @@ export async function canvasToBlob(canvas: HTMLCanvasElement, filetype: string) 
       } else {
         reject(new Error('Unable to convert canvas to blob.'));
       }
-    }, filetype, 1.0);
+    }, filetype);
   });
 }
 
@@ -141,7 +141,7 @@ export class ImageCanvas {
 
     // add resolution data
     const exif = piexif.dump(this.exif);
-    const dataURL = piexif.insert(exif, this.canvas.toDataURL(this.filetype, 1.0));
+    const dataURL = piexif.insert(exif, this.canvas.toDataURL(this.filetype));
     const decoded = decodeDataURL(dataURL);
 
     const buffer = Array.from(removeJFIF(decoded), char => char.charCodeAt(0));
