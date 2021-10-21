@@ -1,8 +1,17 @@
 <script lang="ts">
   import Button from '@smui/button/styled';
-  import { pivotPoint, refImage, ROI, stepManager, cvWorker, calculatingPivot, showPivot, showROI } from '../../store';
+  import ParamDrawer from '../../components/ParamDrawer.svelte';
   import { STEP } from '../../step';
-  import ParamDrawer from './ParamDrawer.svelte';
+  import {
+    pivotPoint,
+    refImage,
+    ROI,
+    stepManager,
+    cvWorker,
+    calculatingPivot,
+    showPivot,
+    showROI,
+  } from '../../store';
 
   const { currentStep } = stepManager;
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import ParamDrawer from './ParamDrawer.svelte';
+  import ParamDrawer from '../../components/ParamDrawer.svelte';
   import ImageInfo from '../../components/ImageInfo.svelte';
 
   import { selectedInput, refImage, showRefImage } from '../../store';

@@ -4,7 +4,7 @@
   import { Rect, Point } from '../../utils/record-factory';
   import { VariableTracker } from '../../utils/variable-tracker';
   import { STEP } from '../../step';
-  import ParamDrawer from './ParamDrawer.svelte';
+  import ParamDrawer from '../../components/ParamDrawer.svelte';
 
   const { currentStep } = stepManager;
 

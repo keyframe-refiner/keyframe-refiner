@@ -6,11 +6,17 @@
   import { Title, Content, Actions } from '@smui/dialog/styled';
   import { mdiLockOutline, mdiEyeOutline, mdiEyeOffOutline } from '@mdi/js';
 
-  import Drawer from '../../components/Drawer.svelte';
-  import RootDialog from '../../components/RootDialog.svelte';
-  import SVGIcon from '../../components/SVGIcon.svelte';
-  import { outputList, stepManager, showPivot, showROI, showRefImage } from '../../store';
-  import { STEP, stepDescription } from '../../step';
+  import Drawer from './Drawer.svelte';
+  import RootDialog from './RootDialog.svelte';
+  import SVGIcon from './SVGIcon.svelte';
+  import { STEP, stepDescription } from '../step';
+  import {
+    outputList,
+    stepManager,
+    showPivot,
+    showROI,
+    showRefImage,
+  } from '../store';
 
   export let title: string;
   export let targetStep: STEP;
