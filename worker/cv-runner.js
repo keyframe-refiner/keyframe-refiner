@@ -104,6 +104,8 @@ async function requestProcessing(evt) {
       },
       transfer: [buffer],
     });
+
+    result.delete();
   } catch (e) {
     handleError(evt, e);
   } finally {

@@ -69,6 +69,7 @@ self.onRequestProcessing = async function onRequestProcessing(image, refImage, R
     height: refImage.rows,
   });
 
+  M.delete();
   cutImg.delete();
   grayImg.delete();
 
