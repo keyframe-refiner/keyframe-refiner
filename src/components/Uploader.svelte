@@ -83,7 +83,7 @@
 
     isUploading = false;
 
-    if ($currentStep === STEP.UPLOAD_IMAGE) {
+    if ($currentStep === STEP.OPEN_IMAGES) {
       stepManager.forward();
     }
   }

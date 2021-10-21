@@ -268,7 +268,7 @@
     ></div>
 
     {#if allowEdit}
-      <div class="uploader" title="画像をアップロード" on:click={() => fileInput.click()}>
+      <div class="uploader" title="原画を追加" on:click={() => fileInput.click()}>
         <Uploader bind:this={uploader} />
         <span class="uploader-icon">
           <SVGIcon icon={mdiPlus} />
