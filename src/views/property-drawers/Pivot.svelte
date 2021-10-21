@@ -60,8 +60,14 @@
 </ParamDrawer>
 
 <style lang="scss">
+  @use '@material/theme/index' as theme;
+
   :global(.request-pivot) {
     width: 100%;
     margin-top: 10px;
+
+    &:not(:disabled) {
+      background-color: theme.$blue-grey-500;
+    }
   }
 </style>
