@@ -53,6 +53,7 @@
   const updateDisplayListTracker = new VariableTracker(() => [
     $inputList,
     $outputList,
+    $refImage,
     startIndex,
     endIndex,
   ]);
