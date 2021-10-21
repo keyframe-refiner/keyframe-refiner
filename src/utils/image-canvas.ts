@@ -102,7 +102,7 @@ export class ImageCanvas {
   static async fromFile(file: File): Promise<ImageCanvas> {
     const img = document.createElement('img');
     const canvas = document.createElement('canvas');
-    const url = img.src = URL.createObjectURL(file);
+    const url = URL.createObjectURL(file);
 
     let exif: any;
 
@@ -125,6 +125,8 @@ export class ImageCanvas {
         URL.revokeObjectURL(img.src);
         reject(e);
       };
+
+      img.src = url;
     });
   }
 
