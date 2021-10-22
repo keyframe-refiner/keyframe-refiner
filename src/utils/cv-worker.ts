@@ -86,6 +86,7 @@ export class CVWorker {
 
       // remember job index
       const jobIndex = currentIdx;
+      currentIdx++;
 
       const imageBuffer = this.#createImageBuffer(inputs[jobIndex].getImageData());
 
@@ -128,16 +129,11 @@ export class CVWorker {
         deferred.resolve(null);
       } else if (currentIdx < total) {
         // run next job
-        currentIdx++;
         spawn(worker);
       }
     };
 
-    this.#workers.forEach((worker, i) => {
-      // parallel processing
-      currentIdx = i;
-      spawn(worker);
-    });
+    this.#workers.forEach(spawn);
 
     // clean up when finished
     deferred.promise.then(() => {
