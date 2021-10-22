@@ -1,12 +1,20 @@
+import { afterUpdate } from 'svelte';
+
 export class VariableTracker {
-  #lastVars: any[] | undefined;
-  #varGetter: () => any[];
+  readonly #varGetter: () => any[];
+  #lastVars?: any[];
+
+  #changed: boolean = false;
 
   constructor(varGetter: () => any[]) {
     this.#varGetter = varGetter;
+
+    afterUpdate(() => {
+      this.#changed = this.#check();
+    });
   }
 
-  stale() {
+  #check() {
     if (!this.#lastVars) {
       this.#lastVars = this.#varGetter();
       return true;
@@ -18,5 +26,9 @@ export class VariableTracker {
     this.#lastVars = vars;
 
     return result;
+  }
+
+  stale() {
+    return this.#changed;
   }
 }
