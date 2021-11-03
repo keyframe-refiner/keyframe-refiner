@@ -178,6 +178,6 @@ export class ImageCanvas {
     this.exif.Exif[ExifIFD.PixelYDimension] = this.height;
 
     // fix orientation
-    this.exif.Exif[ExifIFD.Orientation] = 1;
+    this.exif['0th'][ImageIFD.Orientation] = 1;
   }
 }
