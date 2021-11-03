@@ -194,7 +194,7 @@
     <div class="viewer-fullsize-cover error">{imageState.error}</div>
   {/if}
 
-  <Scrollbar options={{ damping: 1, plugins: { overscroll: false } }} bind:this={scrollbar}>
+  <Scrollbar options={{ damping: 1 }} bind:this={scrollbar}>
     <article
       class="viewer-body"
       style={`
