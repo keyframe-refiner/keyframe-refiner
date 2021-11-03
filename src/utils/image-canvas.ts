@@ -1,4 +1,4 @@
-import piexif, { ImageIFD } from 'piexifjs';
+import piexif, { ImageIFD, ExifIFD } from 'piexifjs';
 
 const MIME_JPEG = 'image/jpeg';
 const DEFAULT_DPI = [96, 96, 2]; // [x, y, unit]
@@ -95,6 +95,8 @@ export class ImageCanvas {
   ) {
     this.width = canvas.width;
     this.height = canvas.height;
+
+    this.fixExif();
   }
 
   static async fromFile(file: File): Promise<ImageCanvas> {
@@ -159,5 +161,23 @@ export class ImageCanvas {
   getImageData(): ImageData {
     const ctx = this.canvas.getContext('2d')!;
     return ctx.getImageData(0, 0, this.width, this.height);
+  }
+
+  private fixExif() {
+    if (!this.exif) {
+      return;
+    }
+
+    // fix dimensions
+    this.exif['0th'][ImageIFD.ImageWidth] =
+    this.exif['1st'][ImageIFD.ImageWidth] =
+    this.exif.Exif[ExifIFD.PixelXDimension] = this.width;
+
+    this.exif['0th'][ImageIFD.ImageLength] =
+    this.exif['1st'][ImageIFD.ImageLength] =
+    this.exif.Exif[ExifIFD.PixelYDimension] = this.height;
+
+    // fix orientation
+    this.exif.Exif[ExifIFD.Orientation] = 1;
   }
 }
