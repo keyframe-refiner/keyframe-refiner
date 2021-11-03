@@ -7,8 +7,8 @@
   export let allowEmpty = false;
   export let image: ImageCanvas | undefined;
 
-  $: xRes = image?.exif['0th'][piexif.ImageIFD.XResolution];
-  $: yRes = image?.exif['0th'][piexif.ImageIFD.XResolution];
+  $: xRes = image?.exif?.['0th'][piexif.ImageIFD.XResolution];
+  $: yRes = image?.exif?.['0th'][piexif.ImageIFD.XResolution];
 </script>
 
 <div class="image-info">
