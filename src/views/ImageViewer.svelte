@@ -37,7 +37,7 @@
 
   let scrollbar: Scrollbar;
   let viewerEl: HTMLElement;
-  let imgEl: HTMLImageElement;
+  let imageEl: HTMLElement;
 
   let viewerOffsetX = 0;
   let viewerOffsetY = 0;
@@ -131,7 +131,7 @@
     s.update();
 
     const viewerRect = viewerEl.getBoundingClientRect();
-    const imgRect = imgEl.getBoundingClientRect();
+    const imgRect = imageEl.getBoundingClientRect();
 
     // calculate the distance between the pointer and the left-top cornor of the canvas
     const dx = clientX - imgRect.left;
@@ -208,7 +208,7 @@
       <div
           class="viewer-image"
           class:dimmed={imageState.dimmed && !imageState.error}
-          bind:this={imgEl}
+          bind:this={imageEl}
       >
         <Preview image={imageState.image} />
       </div>
