@@ -1,5 +1,7 @@
 importScripts('./cv-runner.js');
 
+const HOLE_COUNT = 3;
+
 function convertToBinary(img, ROI) {
   const cutImg = img.roi(ROI);
   const bwImg = new cv.Mat();
@@ -12,7 +14,7 @@ function convertToBinary(img, ROI) {
   return bwImg;
 }
 
-function findPolygons(img, ROI, minArea = 100, topN = 3) {
+function findPolygons(img, ROI, minArea = 100, topN = HOLE_COUNT) {
   const bwImg = convertToBinary(img, ROI);
 
   // find contours
@@ -76,7 +78,7 @@ function findPolygons(img, ROI, minArea = 100, topN = 3) {
 function calcRotation(img, ROI) {
   const polygons = findPolygons(img, ROI);
 
-  if (polygons.length < 2) {
+  if (polygons.length < HOLE_COUNT) {
     throw new Error('タップ穴を検出できませんでした');
   }
 
@@ -113,8 +115,8 @@ function translate(img, tx, ty, size) {
   M.delete();
 }
 
-function rotate(img, center, angle, size) {
-  const M = cv.getRotationMatrix2D(center, angle, 1);
+function rotate(img, pivot, angle, size) {
+  const M = cv.getRotationMatrix2D(pivot, angle, 1);
 
   cv.warpAffine(
     img, img, M, size,
