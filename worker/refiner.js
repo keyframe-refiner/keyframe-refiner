@@ -124,7 +124,10 @@ function refine(image, refImage, ROI, pivot) {
   M.data64F[2] += pivot.x - center.x;
   M.data64F[5] += pivot.y - center.y;
 
-  cv.warpAffine(result, result, M, size, cv.INTER_LINEAR, cv.BORDER_CONSTANT, [255, 255, 255, 255]);
+  cv.warpAffine(
+    result, result, M, size,
+    cv.INTER_LINEAR, cv.BORDER_CONSTANT, [255, 255, 255, 255],
+  );
 
   // clear
   M.delete();
