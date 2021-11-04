@@ -22,7 +22,7 @@
           x1: 0,
           y1: 0,
           x2: $refImage.width,
-          y2: $refImage.height / 6,
+          y2: Math.floor($refImage.height / 6),
         });
       } else {
         $ROI = new Rect({
