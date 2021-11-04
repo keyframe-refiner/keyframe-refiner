@@ -100,32 +100,6 @@ function calcRotation(img, ROI) {
   return { center, angle };
 }
 
-function translate(img, tx, ty, size) {
-  const M = cv.matFromArray(
-    2, 3, cv.CV_32F,
-    [1, 0, tx,
-      0, 1, ty],
-  );
-
-  cv.warpAffine(
-    img, img, M, size,
-    cv.INTER_LINEAR, cv.BORDER_CONSTANT, new cv.Scalar(255, 255, 255, 255),
-  );
-
-  M.delete();
-}
-
-function rotate(img, pivot, angle, size) {
-  const M = cv.getRotationMatrix2D(pivot, angle, 1);
-
-  cv.warpAffine(
-    img, img, M, size,
-    cv.INTER_LINEAR, cv.BORDER_CONSTANT, new cv.Scalar(255, 255, 255, 255),
-  );
-
-  M.delete();
-}
-
 function getPivot(image, ROI) {
   const { center } = calcRotation(image, ROI);
 
@@ -137,13 +111,23 @@ function refine(image, refImage, ROI, pivot) {
   image.copyTo(result);
 
   const { center, angle } = calcRotation(result, ROI);
+
   const size = {
     width: refImage.cols,
     height: refImage.rows,
   };
 
-  translate(result, pivot.x - center.x, pivot.y - center.y, size);
-  rotate(result, pivot, angle, size);
+  // M = T*R
+  // get the rotation matrix R
+  const M = cv.getRotationMatrix2D(center, angle, 1);
+  // apply translation T
+  M.data64F[2] += pivot.x - center.x;
+  M.data64F[5] += pivot.y - center.y;
+
+  cv.warpAffine(result, result, M, size, cv.INTER_LINEAR, cv.BORDER_CONSTANT, [255, 255, 255, 255]);
+
+  // clear
+  M.delete();
 
   return result;
 }
