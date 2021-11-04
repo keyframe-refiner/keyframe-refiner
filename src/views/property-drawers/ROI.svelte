@@ -18,7 +18,6 @@
   afterUpdate(() => {
     if (tracker.stale() && $refImage && $currentStep === targetStep) {
       if ($ROI.width === 0 && $ROI.height === 0) {
-        console.log($ROI);
         $ROI = new Rect({
           x1: 0,
           y1: 0,
