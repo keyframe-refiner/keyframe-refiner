@@ -15,12 +15,21 @@
   ]);
 
   $: if (tracker.stale() && $refImage && $currentStep === targetStep) {
-    $ROI = new Rect({
-      x1: clamp($ROI.x1, 0, $refImage.width),
-      y1: clamp($ROI.y1, 0, $refImage.height),
-      x2: clamp($ROI.x2, 0, $refImage.width),
-      y2: clamp($ROI.y2, 0, $refImage.height),
-    });
+    if ($ROI.width === 0 || $ROI.height === 0) {
+      $ROI = new Rect({
+        x1: 0,
+        y1: 0,
+        x2: $refImage.width,
+        y2: $refImage.height / 6,
+      });
+    } else {
+      $ROI = new Rect({
+        x1: clamp($ROI.x1, 0, $refImage.width),
+        y1: clamp($ROI.y1, 0, $refImage.height),
+        x2: clamp($ROI.x2, 0, $refImage.width),
+        y2: clamp($ROI.y2, 0, $refImage.height),
+      });
+    }
   }
 
   function adjustPivot() {
