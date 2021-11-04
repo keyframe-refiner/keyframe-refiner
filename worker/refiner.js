@@ -141,7 +141,7 @@ function refine(image, refImage, ROI, pivot) {
   };
 
   translate(result, pivot.x - center.x, pivot.y - center.y, size);
-  rotate(result, center, angle, size);
+  rotate(result, pivot, angle, size);
 
   return result;
 }
