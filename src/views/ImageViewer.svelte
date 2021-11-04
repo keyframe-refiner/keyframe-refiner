@@ -168,8 +168,8 @@
 
   function localToReal(p: Point) {
     return new Point({
-      x: Math.round(p.x / scale),
-      y: Math.round(p.y / scale),
+      x: clamp(Math.round(p.x / scale), 0, $refImage!.width),
+      y: clamp(Math.round(p.y / scale), 0, $refImage!.height),
     });
   }
 
