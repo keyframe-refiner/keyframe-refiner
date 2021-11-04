@@ -12,7 +12,7 @@ function convertToBinary(img, ROI) {
   return bwImg;
 }
 
-function findPolygons(img, ROI, minArea = 100, topN = 2) {
+function findPolygons(img, ROI, minArea = 100, topN = 3) {
   const bwImg = convertToBinary(img, ROI);
 
   // find contours
@@ -31,30 +31,26 @@ function findPolygons(img, ROI, minArea = 100, topN = 2) {
     cv.approxPolyDP(contour, approx, 0.02 * arcLength, true);
 
     if (approx.rows >= 4 && approx.rows <= 10 && area > minArea) {
-      const polygon = new cv.Mat();
-      cv.approxPolyDP(contour, polygon, 3, true);
-
-      const rect = cv.boundingRect(polygon);
+      const rect = cv.boundingRect(approx);
 
       polygons.push({
         area,
         center: new cv.Point(
-          rect.x + rect.width / 2,
-          rect.y + rect.height / 2,
+          ROI.x + rect.x + rect.width / 2,
+          ROI.y + rect.y + rect.height / 2,
         ),
       });
 
-      // draw contour and bounding rect
-      // cv.drawContours(img, contours, i, [0, 255, 0, 255], 2, cv.LINE_8, hierarchy, 0);
+      // draw bounding rect
+      // const rx = rect.x + ROI.x;
+      // const ry = rect.y + ROI.y;
       // cv.rectangle(
       //   img,
-      //   new cv.Point(rect.x, rect.y),
-      //   new cv.Point(rect.x + rect.width, rect.y + rect.height),
+      //   new cv.Point(rx, ry),
+      //   new cv.Point(rx + rect.width, ry + rect.height),
       //   [0, 0, 255, 255],
       //   2,
       // );
-
-      polygon.delete();
     }
 
     contour.delete();
@@ -87,16 +83,17 @@ function calcRotation(img, ROI) {
   const { center: c1 } = polygons[0];
   const { center: c2 } = polygons[1];
 
-  const center = new cv.Point(
-    Math.round((c1.x + c2.x) / 2),
-    Math.round((c1.y + c2.y) / 2),
-  );
+  // use the circular hole (the middle one) as pivot
+  const center = new cv.Point(c2.x, c2.y);
 
-  // draw c1 and c2
-  // cv.circle(img, c1, 10, [0, 255, 255, 255], 2);
-  // cv.circle(img, c2, 10, [0, 255, 255, 255], 2);
+  // draw centroids
+  // polygons.forEach(({ center }) => {
+  //   cv.circle(img, center, 10, [0, 255, 255, 255], 2);
+  // });
 
   const angle = Math.atan2(c2.y - c1.y, c2.x - c1.x) * 180 / Math.PI;
+
+  // console.log(polygons.map(p => [p.center.x, p.center.y]));
 
   return { center, angle };
 }
