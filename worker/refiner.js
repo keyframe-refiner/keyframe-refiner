@@ -2,20 +2,13 @@ importScripts('./cv-runner.js');
 
 const HOLE_COUNT = 3;
 
-function convertToBinary(img, ROI) {
+function findPolygons(img, ROI, minArea = 100, minExtent = 0.75, topN = HOLE_COUNT) {
+  // conver to binary image
   const cutImg = img.roi(ROI);
   const bwImg = new cv.Mat();
   cv.medianBlur(cutImg, bwImg, 5);
   cv.cvtColor(cutImg, bwImg, cv.COLOR_RGBA2GRAY, 0);
   cv.threshold(bwImg, bwImg, 100, 255, cv.THRESH_BINARY_INV);
-
-  cutImg.delete();
-
-  return bwImg;
-}
-
-function findPolygons(img, ROI, minArea = 100, minExtent = 0.75, topN = HOLE_COUNT) {
-  const bwImg = convertToBinary(img, ROI);
 
   // find contours
   const contours = new cv.MatVector();
@@ -32,7 +25,7 @@ function findPolygons(img, ROI, minArea = 100, minExtent = 0.75, topN = HOLE_COU
     const approx = new cv.Mat();
     cv.approxPolyDP(contour, approx, 0.02 * arcLength, true);
 
-    if (approx.rows >= 4 && area > minArea) {
+    if (approx.rows >= 4 && area > minArea && cv.isContourConvex(approx)) {
       const rect = cv.minAreaRect(approx);
       const { width, height } = rect.size;
       const extent = area / (width * height);
@@ -52,16 +45,14 @@ function findPolygons(img, ROI, minArea = 100, minExtent = 0.75, topN = HOLE_COU
       });
 
       if (self.debug) {
+        // draw contours
+        cv.drawContours(cutImg, contours, i, [255, 0, 0, 255], 3);
+
         // draw rotated rect
         const vertices = cv.RotatedRect.points(rect);
 
-        for (const v of vertices) {
-          v.x += ROI.x;
-          v.y += ROI.y;
-        }
-
         for (let i = 0; i < 4; i++) {
-          cv.line(img, vertices[i], vertices[(i + 1) % 4], [0, 0, 255, 255], 3, cv.LINE_AA, 0);
+          cv.line(cutImg, vertices[i], vertices[(i + 1) % 4], [0, 0, 255, 255], 3, cv.LINE_AA, 0);
         }
       }
     }
@@ -73,6 +64,7 @@ function findPolygons(img, ROI, minArea = 100, minExtent = 0.75, topN = HOLE_COU
   contours.delete();
   hierarchy.delete();
   bwImg.delete();
+  cutImg.delete();
 
   // sort polygons by area...
   polygons.sort((a, b) => b.area - a.area);
