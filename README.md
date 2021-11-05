@@ -1,5 +1,5 @@
 ![banner](assets/banner.png)
-<img alt="MIT License" src="https://img.shields.io/badge/license-MIT-blue.svg" /></a><br><br>
+<a href="https://github.com/keyframe-refiner/keyframe-refiner/blob/develop/LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/license-MIT-blue.svg" /></a><br><br>
 スキャンされた原画のタップ穴を基準に原画の位置合わせを自動で行います。
 ![explanation](assets/explanation.jpg)
 
