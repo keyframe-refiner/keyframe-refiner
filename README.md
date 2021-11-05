@@ -1,5 +1,14 @@
 ![banner](assets/banner.png)
-<a href="https://github.com/keyframe-refiner/keyframe-refiner/blob/develop/LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/license-MIT-blue.svg" /></a><br><br>
+
+<div style="text-align:center">
+
+[![license][license-badge]](LICENSE)
+[![version][version-badge]](https://keyframe-refiner.js.org)
+[![build status][github-action-badge]](https://github.com/keyframe-refiner/keyframe-refiner/actions/workflows/deploy.yml)
+[![OSS life cycle][osslifecycle-badge]](https://github.com/keyframe-refiner/keyframe-refiner)
+
+</div>
+
 スキャンされた原画のタップ穴を基準に原画の位置合わせを自動で行います。
 ![explanation](assets/explanation.jpg)
 
@@ -19,14 +28,14 @@
     - 1 枚目の画像を基準にしたい場合はそのままボタンを押す
     - もし基準画像を変更したい場合には左サイドバーに表示されているサムネイルを押すと変更可能
 4. 対象領域設定
-    - **左クリックで検出する対象領域を指定** 
+    - **左クリックで検出する対象領域を指定**
     <br>【!注意!】<br>
     選択したモードによって対象領域設定が変わります<br>
         - **タップ穴を基準とした場合** <br>
         タップ穴(３つの穴)が全て入るように領域を指定
         - **フレームを基準とした場合** <br>
         フレームが全て入るように領域を指定
-    
+
 5. 基準位置設定
     - **右サイドバーにある「自動算出」ボタンを押す**
     - もし自動算出された位置が不適当である場合、手動で変更も可能
@@ -64,3 +73,9 @@
 
 ## ライセンス
 [MIT](LICENSE)
+
+
+[license-badge]: https://img.shields.io/github/license/keyframe-refiner/keyframe-refiner?color=blue
+[version-badge]: https://img.shields.io/github/package-json/v/keyframe-refiner/keyframe-refiner/master
+[github-action-badge]: https://img.shields.io/github/workflow/status/keyframe-refiner/keyframe-refiner/Deploy%20to%20GitHub%20Pages?
+[osslifecycle-badge]: https://img.shields.io/osslifecycle/keyframe-refiner/keyframe-refiner
