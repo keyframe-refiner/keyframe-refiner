@@ -73,8 +73,8 @@
   </Content>
 
   <Actions>
-    <Button>キャンセル</Button>
-    <Button on:click={changeMode}>応用</Button>
+    <Button>閉じる</Button>
+    <Button on:click={changeMode}>適用</Button>
   </Actions>
 </RootDialog>
 
