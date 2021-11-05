@@ -2,7 +2,7 @@
 
 <div align="center">
 
-スキャンされた原画のタップ穴を基準に原画の位置合わせを自動で行います
+スキャンされた原画のタップ穴・フレームを基準に原画の位置合わせを自動で行います
 
 [![license][license-badge]](LICENSE)
 [![version][version-badge]](https://keyframe-refiner.js.org)
@@ -17,9 +17,9 @@
 0. [原画位置合わせ (https://keyframe-refiner.js.org)](https://keyframe-refiner.js.org)　にアクセス
 
 1. モードを選択 <br>
-    以下のモードを選択できます。
+    以下のモードを選択できます
     - タップ穴を基準にする
-    - フレームを基準にする (ベータ版)
+    - フレームを基準にする
 
 2. 原画を追加
     - **画面左サイドバーにある「+」ボタンを押すか、ファイルをドラッグ＆ドロップ**
