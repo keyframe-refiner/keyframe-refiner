@@ -47,18 +47,18 @@ function findPolygons(img, ROI, minArea = 100, minExtent = 0.7, topN = HOLE_COUN
         ),
       });
 
-      // console.log(area / (rect.width * rect.height), area);
-
-      // draw bounding rect
-      // const rx = rect.x + ROI.x;
-      // const ry = rect.y + ROI.y;
-      // cv.rectangle(
-      //   img,
-      //   new cv.Point(rx, ry),
-      //   new cv.Point(rx + rect.width, ry + rect.height),
-      //   [Math.random() * 255 | 0, Math.random() * 255 | 0, Math.random() * 255 | 0, 255],
-      //   2,
-      // );
+      if (self.debug) {
+        // draw bounding rect
+        const rx = rect.x + ROI.x;
+        const ry = rect.y + ROI.y;
+        cv.rectangle(
+          img,
+          new cv.Point(rx, ry),
+          new cv.Point(rx + rect.width, ry + rect.height),
+          [0, 0, 255, 255],
+          3,
+        );
+      }
     }
 
     contour.delete();
@@ -94,14 +94,14 @@ function calcRotation(img, ROI) {
   // use the circular hole (the middle one) as pivot
   const center = new cv.Point(c2.x, c2.y);
 
-  // draw centroids
-  // polygons.forEach(({ center }) => {
-  //   cv.circle(img, center, 10, [0, 255, 255, 255], 2);
-  // });
+  if (self.debug) {
+    // draw centroids
+    polygons.forEach(({ center }) => {
+      cv.circle(img, center, 10, [255, 0, 0, 255], -1);
+    });
+  }
 
   const angle = Math.atan2(c2.y - c1.y, c2.x - c1.x) * 180 / Math.PI;
-
-  // console.log(polygons.map(p => [p.center.x, p.center.y]));
 
   return { center, angle };
 }

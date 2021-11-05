@@ -2,6 +2,7 @@ import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 
 import sass from 'sass';
+import webpack from 'webpack';
 import ESLintPlugin from 'eslint-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import FaviconsWebpackPlugin from 'favicons-webpack-plugin';
@@ -87,6 +88,9 @@ export function createBaseConfig(dev = false) {
     },
     plugins: [
       new ESLintPlugin(),
+      new webpack.DefinePlugin({
+        __DEBUG__: dev,
+      }),
       new FaviconsWebpackPlugin({
         logo: fromRootTo('assets/logo.png'),
         favicons: {

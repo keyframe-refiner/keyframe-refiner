@@ -3,6 +3,8 @@ import { Point } from './record-factory';
 import { ImageCanvas } from './image-canvas';
 import type { Rect } from './record-factory';
 
+declare const __DEBUG__: boolean;
+
 export class CVWorker {
   readonly #workers: Worker[];
   readonly #readyDefer = new Defer<null>();
@@ -145,7 +147,9 @@ export class CVWorker {
 
   async #handshake() {
     try {
-      await Promise.all(this.#workers.map(w => this.#sendOnce(w, 'ping')));
+      await Promise.all(this.#workers.map(w => this.#sendOnce(w, 'ping', {
+        debug: __DEBUG__,
+      })));
       this.#readyDefer.resolve(null);
     } catch (e) {
       this.#readyDefer.reject(e);

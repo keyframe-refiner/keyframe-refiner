@@ -4,6 +4,8 @@ importScripts('./opencv-4.5.3.js');
 
 self.config = null;
 
+self.debug = false;
+
 self.ready = new Promise(resolve => {
   cv.onRuntimeInitialized = resolve;
 });
@@ -62,6 +64,7 @@ function handleError(evt, error) {
 
 async function pong(evt) {
   await ready;
+  self.debug = evt.data.body.debug;
   respond(evt);
 }
 
