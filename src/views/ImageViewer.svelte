@@ -153,6 +153,11 @@
     zoomAt(scale / stepRatio);
   }
 
+  // normalize wheel delta
+  function wheelDelta(deltaY: number, deltaMode: number) {
+    return deltaY * ([1, 0.05, 0.002][deltaMode] || 1);
+  }
+
   function wheelZoom(e: WheelEvent) {
     if (!e.ctrlKey) {
       return;
@@ -162,7 +167,7 @@
     e.preventDefault();
 
     // deltaY > 0 => zoomIn, deltaY < 0 => zoomOut
-    const delta = e.deltaY / -100;
+    const delta = wheelDelta(e.deltaY, e.deltaMode) / -100;
     zoomAt(scale + delta, e.clientX, e.clientY);
   }
 
