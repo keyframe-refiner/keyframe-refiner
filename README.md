@@ -2,6 +2,8 @@
 
 <div align="center">
 
+スキャンされた原画のタップ穴を基準に原画の位置合わせを自動で行います
+
 [![license][license-badge]](LICENSE)
 [![version][version-badge]](https://keyframe-refiner.js.org)
 [![build status][github-action-badge]](https://github.com/keyframe-refiner/keyframe-refiner/actions/workflows/deploy.yml)
@@ -9,7 +11,6 @@
 
 </div>
 
-スキャンされた原画のタップ穴を基準に原画の位置合わせを自動で行います。
 ![explanation](assets/explanation.jpg)
 
 ## 使用方法
