@@ -13,7 +13,7 @@
   import RootDialog from '../components/RootDialog.svelte';
   import Scrollbar from '../components/Scrollbar.svelte';
   import Preview from '../components/Preview.svelte';
-  import { STEP } from '../step';
+  import { STEP } from '../constants';
   import {
     inputList,
     outputList,

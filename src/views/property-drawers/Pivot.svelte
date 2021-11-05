@@ -1,7 +1,7 @@
 <script lang="ts">
   import Button from '@smui/button/styled';
   import ParamDrawer from '../../components/ParamDrawer.svelte';
-  import { STEP } from '../../step';
+  import { STEP } from '../../constants';
   import {
     pivotPoint,
     refImage,

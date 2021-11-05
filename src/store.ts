@@ -1,6 +1,6 @@
 import { List } from 'immutable';
 import { Point, Rect } from './utils/record-factory';
-import { defaultSteps } from './step';
+import { defaultSteps } from './constants';
 import { StepManager } from './utils/step-manager';
 import { CVWorker } from './utils/cv-worker';
 

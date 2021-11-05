@@ -8,7 +8,7 @@
   import ImageViewer from './views/ImageViewer.svelte';
   import Property from './views/Property.svelte';
   import { selectedInput, stepManager, cvWorker } from './store';
-  import { STEP, stepDescription } from './step';
+  import { STEP, stepDescription } from './constants';
   import Stepper from './components/Stepper.svelte';
 
   const { allSteps, currentIndex, currentStep } = stepManager;

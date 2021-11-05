@@ -10,7 +10,7 @@
   import Drawer from '../../components/Drawer.svelte';
   import SVGIcon from '../../components/SVGIcon.svelte';
   import { ImageCanvas } from '../../utils/image-canvas';
-  import { STEP } from '../../step';
+  import { STEP } from '../../constants';
   import {
     inputList,
     outputList,

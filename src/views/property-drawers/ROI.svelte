@@ -4,7 +4,7 @@
   import { ROI, pivotPoint, refImage, stepManager, showROI } from '../../store';
   import { Rect, Point } from '../../utils/record-factory';
   import { VariableTracker } from '../../utils/variable-tracker';
-  import { STEP } from '../../step';
+  import { STEP } from '../../constants';
   import ParamDrawer from '../../components/ParamDrawer.svelte';
 
   const { currentStep } = stepManager;

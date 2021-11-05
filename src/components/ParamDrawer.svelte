@@ -9,7 +9,7 @@
   import Drawer from './Drawer.svelte';
   import RootDialog from './RootDialog.svelte';
   import SVGIcon from './SVGIcon.svelte';
-  import { STEP, stepDescription } from '../step';
+  import { STEP, stepDescription } from '../constants';
   import {
     outputList,
     stepManager,
