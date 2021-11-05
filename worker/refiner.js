@@ -25,7 +25,7 @@ function findPolygons(img, ROI, minArea = 100, minExtent = 0.75, topN = HOLE_COU
     const approx = new cv.Mat();
     cv.approxPolyDP(contour, approx, 0.02 * arcLength, true);
 
-    if (approx.rows >= 4 && area > minArea) {
+    if (approx.rows >= 4 && area > minArea && cv.isContourConvex(approx)) {
       const rect = cv.minAreaRect(approx);
       const { width, height } = rect.size;
       const extent = area / (width * height);
