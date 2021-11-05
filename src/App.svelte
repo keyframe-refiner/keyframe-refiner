@@ -15,9 +15,11 @@
   const { allSteps, currentIndex, currentStep } = stepManager;
 
   let loadingWorker = true;
+  let openSettings = false;
 
   $cvWorker.ready.then(() => {
     loadingWorker = false;
+    openSettings = true;
   }).catch(e => {
     alert(e?.message || e);
   });
@@ -32,13 +34,13 @@
     <h1 id="logo">原画位置合わせ</h1>
 
     <Stepper
-    steps={$allSteps.map(s => stepDescription[s])}
-    currentIndex={$currentIndex}
+      steps={$allSteps.map(s => stepDescription[s])}
+      currentIndex={$currentIndex}
     />
 
 
     <span id="badge">
-      <Settings />
+      <Settings open={openSettings} />
       <a id="github" href="https://github.com/textcunma/keyframe-refiner" target="_blank">
         <SVGIcon icon={mdiGithub} />
       </a>
