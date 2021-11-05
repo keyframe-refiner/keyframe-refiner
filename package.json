@@ -1,7 +1,7 @@
 {
   "name": "keyframe-refiner",
   "type": "module",
-  "version": "0.0.1",
+  "version": "1.0.0-beta",
   "description": "自動原画位置合わせ / Automatically adjust keyframes' position.",
   "main": "dist/index.js",
   "keywords": [
