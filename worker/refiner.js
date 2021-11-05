@@ -14,7 +14,7 @@ function convertToBinary(img, ROI) {
   return bwImg;
 }
 
-function findPolygons(img, ROI, minArea = 100, topN = HOLE_COUNT) {
+function findPolygons(img, ROI, minArea = 100, minExtent = 0.7, topN = HOLE_COUNT) {
   const bwImg = convertToBinary(img, ROI);
 
   // find contours
@@ -32,8 +32,12 @@ function findPolygons(img, ROI, minArea = 100, topN = HOLE_COUNT) {
     const approx = new cv.Mat();
     cv.approxPolyDP(contour, approx, 0.02 * arcLength, true);
 
-    if (approx.rows >= 4 && approx.rows <= 10 && area > minArea) {
+    if (approx.rows >= 4 && area > minArea) {
       const rect = cv.boundingRect(approx);
+
+      if (area / (rect.width * rect.height) < minExtent) {
+        continue;
+      }
 
       polygons.push({
         area,
@@ -43,6 +47,8 @@ function findPolygons(img, ROI, minArea = 100, topN = HOLE_COUNT) {
         ),
       });
 
+      // console.log(area / (rect.width * rect.height), area);
+
       // draw bounding rect
       // const rx = rect.x + ROI.x;
       // const ry = rect.y + ROI.y;
@@ -50,7 +56,7 @@ function findPolygons(img, ROI, minArea = 100, topN = HOLE_COUNT) {
       //   img,
       //   new cv.Point(rx, ry),
       //   new cv.Point(rx + rect.width, ry + rect.height),
-      //   [0, 0, 255, 255],
+      //   [Math.random() * 255 | 0, Math.random() * 255 | 0, Math.random() * 255 | 0, 255],
       //   2,
       // );
     }
