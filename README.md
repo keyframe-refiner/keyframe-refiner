@@ -1,5 +1,5 @@
-# 原画位置合わせ
-
+![banner](assets/banner.png)
+<img alt="MIT License" src="https://img.shields.io/badge/license-MIT-blue.svg" /></a><br><br>
 スキャンされた原画のタップ穴を基準に原画の位置合わせを自動で行います。
 ![explanation](assets/explanation.jpg)
 
@@ -44,6 +44,10 @@
 
     <br>**「検出できませんでした」と表示された場合** <br>
     対象領域が狭いことが原因と考えられます。対象領域を広くして再度「CV処理開始」ボタンを押してください。
+
+
+## デバッグモード
+出力時にどこを検出したのかを描画してくれます。結果不良の原因となる検出の誤判定を確認することができます。
 
 
 ## アルゴリズム
