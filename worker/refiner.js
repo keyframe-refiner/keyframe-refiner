@@ -113,12 +113,23 @@ function getPivot(image, ROI) {
 }
 
 function refine(image, refImage, ROI, pivot) {
-  const { center, angle } = calcRotation(image, ROI);
-
   const size = {
     width: refImage.cols,
     height: refImage.rows,
   };
+
+  const padded = new cv.Mat();
+
+  // add padding to image to fit the reference image
+  cv.copyMakeBorder(
+    image, padded,
+    0, Math.max(0, size.height - image.rows),
+    0, Math.max(0, size.width - image.cols),
+    cv.BORDER_CONSTANT,
+    [255, 255, 255, 255],
+  );
+
+  const { center, angle } = calcRotation(padded, ROI);
 
   // M = T*R
   // get the rotation matrix R
@@ -130,12 +141,13 @@ function refine(image, refImage, ROI, pivot) {
   const result = new cv.Mat();
 
   cv.warpAffine(
-    image, result, M, size,
+    padded, result, M, size,
     cv.INTER_LINEAR, cv.BORDER_CONSTANT, [255, 255, 255, 255],
   );
 
   // clear
   M.delete();
+  padded.delete();
 
   return result;
 }
