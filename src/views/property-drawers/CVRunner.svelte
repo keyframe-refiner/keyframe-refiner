@@ -19,6 +19,7 @@
     pivotPoint,
     cvWorker,
     stepManager,
+    detectMode,
   } from '../../store';
 
   const { currentStep } = stepManager;
@@ -40,10 +41,13 @@
     cvRunning = true;
     progress = 0;
 
-    await $cvWorker.requestProcessing([...$inputList], $refImage, $ROI, $pivotPoint, (idx, res, prg) => {
-      $outputList = $outputList.set(idx, res);
-      progress = prg;
-    });
+    await $cvWorker.requestProcessing(
+      $detectMode, [...$inputList], $refImage, $ROI, $pivotPoint,
+      (idx, res, prg) => {
+        $outputList = $outputList.set(idx, res);
+        progress = prg;
+      },
+    );
 
     progress = 1;
     cvRunning = false;

@@ -11,6 +11,7 @@
     calculatingPivot,
     showPivot,
     showROI,
+    detectMode,
   } from '../../store';
 
   const { currentStep } = stepManager;
@@ -25,7 +26,7 @@
     $calculatingPivot = true;
 
     try {
-      $pivotPoint = await $cvWorker.requestPivot($refImage, $ROI);
+      $pivotPoint = await $cvWorker.requestPivot($detectMode, $refImage, $ROI);
     } catch (e) {
       // TODO: error handling
       alert(e?.message || e);

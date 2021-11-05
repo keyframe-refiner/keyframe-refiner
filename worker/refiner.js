@@ -14,7 +14,7 @@ function convertToBinary(img, ROI) {
   return bwImg;
 }
 
-function findPolygons(img, ROI, minArea = 100, minExtent = 0.7, topN = HOLE_COUNT) {
+function findPolygons(img, ROI, minArea = 100, minExtent = 0.75, topN = HOLE_COUNT) {
   const bwImg = convertToBinary(img, ROI);
 
   // find contours
@@ -33,31 +33,36 @@ function findPolygons(img, ROI, minArea = 100, minExtent = 0.7, topN = HOLE_COUN
     cv.approxPolyDP(contour, approx, 0.02 * arcLength, true);
 
     if (approx.rows >= 4 && area > minArea) {
-      const rect = cv.boundingRect(approx);
+      const rect = cv.minAreaRect(approx);
+      const { width, height } = rect.size;
+      const extent = area / (width * height);
 
-      if (area / (rect.width * rect.height) < minExtent) {
+      if (extent < minExtent) {
         continue;
       }
 
       polygons.push({
         area,
+        extent,
         center: new cv.Point(
-          ROI.x + rect.x + rect.width / 2,
-          ROI.y + rect.y + rect.height / 2,
+          ROI.x + rect.center.x,
+          ROI.y + rect.center.y,
         ),
+        angle: width < height ? rect.angle - 90 : rect.angle,
       });
 
       if (self.debug) {
-        // draw bounding rect
-        const rx = rect.x + ROI.x;
-        const ry = rect.y + ROI.y;
-        cv.rectangle(
-          img,
-          new cv.Point(rx, ry),
-          new cv.Point(rx + rect.width, ry + rect.height),
-          [0, 0, 255, 255],
-          3,
-        );
+        // draw rotated rect
+        const vertices = cv.RotatedRect.points(rect);
+
+        for (const v of vertices) {
+          v.x += ROI.x;
+          v.y += ROI.y;
+        }
+
+        for (let i = 0; i < 4; i++) {
+          cv.line(img, vertices[i], vertices[(i + 1) % 4], [0, 0, 255, 255], 3, cv.LINE_AA, 0);
+        }
       }
     }
 
@@ -81,7 +86,7 @@ function findPolygons(img, ROI, minArea = 100, minExtent = 0.7, topN = HOLE_COUN
   return result;
 }
 
-function calcRotation(img, ROI) {
+function pegHoleRotation(img, ROI) {
   const polygons = findPolygons(img, ROI);
 
   if (polygons.length < HOLE_COUNT) {
@@ -106,13 +111,37 @@ function calcRotation(img, ROI) {
   return { center, angle };
 }
 
-function getPivot(image, ROI) {
-  const { center } = calcRotation(image, ROI);
+function frameRotation(img, ROI) {
+  const imgSize = img.cols * img.rows;
+
+  const frame = findPolygons(img, ROI, imgSize * 0.5, 0, 1)[0];
+
+  if (!frame) {
+    throw new Error('フレームを検出できませんでした');
+  }
+
+  if (self.debug) {
+    // draw centroids
+    cv.circle(img, frame.center, 10, [255, 0, 0, 255], -1);
+  }
+
+  return {
+    center: frame.center,
+    angle: frame.angle,
+  };
+}
+
+function calcRotation(mode, img, ROI) {
+  return mode === 'PEG_HOLE' ? pegHoleRotation(img, ROI) : frameRotation(img, ROI);
+}
+
+function getPivot(mode, image, ROI) {
+  const { center } = calcRotation(mode, image, ROI);
 
   return { ...center };
 }
 
-function refine(image, refImage, ROI, pivot) {
+function refine(mode, image, refImage, ROI, pivot) {
   const size = {
     width: refImage.cols,
     height: refImage.rows,
@@ -129,7 +158,7 @@ function refine(image, refImage, ROI, pivot) {
     [255, 255, 255, 255],
   );
 
-  const { center, angle } = calcRotation(padded, ROI);
+  const { center, angle } = calcRotation(mode, padded, ROI);
 
   // M = T*R
   // get the rotation matrix R

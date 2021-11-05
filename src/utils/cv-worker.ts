@@ -2,6 +2,7 @@ import { Defer } from './defer';
 import { Point } from './record-factory';
 import { ImageCanvas } from './image-canvas';
 import type { Rect } from './record-factory';
+import type { MODE } from '../constants';
 
 declare const __DEBUG__: boolean;
 
@@ -31,13 +32,14 @@ export class CVWorker {
     this.#handshake();
   }
 
-  async requestPivot(image: ImageCanvas, ROI: Rect) {
+  async requestPivot(mode: MODE, image: ImageCanvas, ROI: Rect) {
     const imageData = image.getImageData();
 
     const { pivot } = await this.#sendOnce(
       this.#workers[0],
       'request-pivot',
       {
+        mode,
         image: {
           width: imageData.width,
           height: imageData.height,
@@ -60,6 +62,7 @@ export class CVWorker {
   }
 
   async requestProcessing(
+    mode: MODE,
     inputs: ImageCanvas[],
     refImage: ImageCanvas,
     ROI: Rect,
@@ -68,6 +71,7 @@ export class CVWorker {
   ) {
     await this.#broadcast('set-config', {
       config: {
+        mode,
         refImage: this.#createImageBuffer(refImage.getImageData()),
         ROI: {
           x: ROI.x1,
