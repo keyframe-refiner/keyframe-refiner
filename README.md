@@ -1,6 +1,6 @@
 ![banner](assets/banner.png)
 
-<div style="text-align:center">
+<div align="center">
 
 [![license][license-badge]](LICENSE)
 [![version][version-badge]](https://keyframe-refiner.js.org)
