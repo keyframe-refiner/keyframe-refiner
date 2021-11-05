@@ -88,7 +88,7 @@
     width: 30px;
     height: 30px;
     cursor: pointer;
-    color: #c5cae9;
+    color: #ffccbc;
 
     transition: transform .3s easeOutBack;
 

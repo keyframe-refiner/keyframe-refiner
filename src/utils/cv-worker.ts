@@ -4,8 +4,6 @@ import { ImageCanvas } from './image-canvas';
 import type { Rect } from './record-factory';
 import type { MODE } from '../constants';
 
-declare const __DEBUG__: boolean;
-
 export class CVWorker {
   readonly #workers: Worker[];
   readonly #readyDefer = new Defer<null>();
@@ -15,6 +13,7 @@ export class CVWorker {
 
   constructor(
     scriptURL: string,
+    debugMode = false,
     workerCount = navigator.hardwareConcurrency || 4,
   ) {
     this.#workers = [];
@@ -29,7 +28,12 @@ export class CVWorker {
       };
     }
 
-    this.#handshake();
+    this.#handshake()
+      .then(() => this.setDebugMode(debugMode));
+  }
+
+  async setDebugMode(debugMode: boolean) {
+    return this.#broadcast('set-debug', { debug: debugMode });
   }
 
   async requestPivot(mode: MODE, image: ImageCanvas, ROI: Rect) {
@@ -157,9 +161,7 @@ export class CVWorker {
 
   async #handshake() {
     try {
-      await Promise.all(this.#workers.map(w => this.#sendOnce(w, 'ping', {
-        debug: __DEBUG__,
-      })));
+      await this.#broadcast('ping');
       this.#readyDefer.resolve(null);
     } catch (e) {
       this.#readyDefer.reject(e);

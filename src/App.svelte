@@ -1,6 +1,11 @@
 <script lang="ts">
-  import { mdiImageMultiple, mdiGithub } from '@mdi/js';
   import { fade } from 'svelte/transition';
+  import {
+    mdiImageMultiple,
+    mdiGithub,
+    mdiBugOutline,
+    mdiBugCheckOutline,
+  } from '@mdi/js';
 
   import DnD from './components/DnD.svelte';
   import SVGIcon from './components/SVGIcon.svelte';
@@ -8,7 +13,7 @@
   import ImageViewer from './views/ImageViewer.svelte';
   import Settings from './views/Settings.svelte';
   import Property from './views/Property.svelte';
-  import { selectedInput, stepManager, cvWorker } from './store';
+  import { selectedInput, stepManager, cvWorker, debugMode } from './store';
   import { STEP, stepDescription } from './constants';
   import Stepper from './components/Stepper.svelte';
 
@@ -23,6 +28,11 @@
   }).catch(e => {
     alert(e?.message || e);
   });
+
+  function toggleDebug() {
+    $debugMode = !$debugMode;
+    $cvWorker.setDebugMode($debugMode);
+  }
 </script>
 
 <main>
@@ -39,8 +49,18 @@
     />
 
 
-    <span id="badge">
+    <span id="controls">
       <Settings open={openSettings} />
+
+      <span
+        id="toggle-debug"
+        class:enabled={$debugMode}
+        on:click={toggleDebug}
+        title="デバッグモード切替"
+      >
+        <SVGIcon icon={$debugMode ? mdiBugCheckOutline : mdiBugOutline} />
+      </span>
+
       <a id="github" href="https://github.com/textcunma/keyframe-refiner" target="_blank">
         <SVGIcon icon={mdiGithub} />
       </a>
@@ -115,13 +135,14 @@
     user-select: none;
   }
 
-  #badge {
+  #controls {
     flex: 1;
     padding-right: 10px;
     text-align: right;
   }
 
-  #github {
+  #github,
+  #toggle-debug {
     display: inline-block;
     width: 32px;
     height: 32px;
@@ -132,6 +153,14 @@
 
     &:hover {
       transform: scale(1.1);
+    }
+  }
+
+  #toggle-debug {
+    color: var(--placeholder);
+
+    &.enabled {
+      color: #f0f4c3;
     }
   }
 

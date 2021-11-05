@@ -7,6 +7,10 @@ import { CVWorker } from './utils/cv-worker';
 import { writable, derived } from 'svelte/store';
 import type { ImageCanvas } from './utils/image-canvas';
 
+declare const __DEBUG__: boolean;
+
+export const debugMode = writable(__DEBUG__);
+
 export const inputList = writable(List<ImageCanvas>());
 export const outputList = writable(List<ImageCanvas | Error>());
 
@@ -36,7 +40,7 @@ export const ROI = writable(new Rect({
 export const stepManager = new StepManager(defaultSteps);
 
 export const cvWorker = writable(
-  new CVWorker('./worker/refiner.js'),
+  new CVWorker('./worker/refiner.js', __DEBUG__),
 );
 
 // states

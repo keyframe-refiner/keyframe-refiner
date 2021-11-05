@@ -64,7 +64,6 @@ function handleError(evt, error) {
 
 async function pong(evt) {
   await ready;
-  self.debug = evt.data.body.debug;
   respond(evt);
 }
 
@@ -129,6 +128,10 @@ function setConfig(evt) {
   respond(evt);
 }
 
+function setDebugMode(evt) {
+  self.debug = evt.data.body.debug;
+}
+
 function clean(evt) {
   self.config.refImage.delete();
   self.config = null;
@@ -139,6 +142,10 @@ self.addEventListener('message', async (evt) => {
   switch (evt.data?.request) {
     case 'ping':
       await pong(evt);
+      break;
+
+    case 'set-debug':
+      setDebugMode(evt);
       break;
 
     case 'set-config':
