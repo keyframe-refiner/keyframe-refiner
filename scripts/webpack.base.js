@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import sass from 'sass';
 import ESLintPlugin from 'eslint-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
+import FaviconsWebpackPlugin from 'favicons-webpack-plugin';
 
 import { createPreprocessors } from '../svelte.config.js';
 
@@ -86,6 +87,7 @@ export function createBaseConfig(dev = false) {
     },
     plugins: [
       new ESLintPlugin(),
+      new FaviconsWebpackPlugin(fromRootTo('assets/logo.png')),
       new HtmlWebpackPlugin({
         title: '原画位置合わせ',
         meta: {
