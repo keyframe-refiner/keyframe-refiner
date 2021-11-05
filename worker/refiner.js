@@ -107,10 +107,7 @@ function getPivot(image, ROI) {
 }
 
 function refine(image, refImage, ROI, pivot) {
-  const result = new cv.Mat();
-  image.copyTo(result);
-
-  const { center, angle } = calcRotation(result, ROI);
+  const { center, angle } = calcRotation(image, ROI);
 
   const size = {
     width: refImage.cols,
@@ -124,7 +121,12 @@ function refine(image, refImage, ROI, pivot) {
   M.data64F[2] += pivot.x - center.x;
   M.data64F[5] += pivot.y - center.y;
 
-  cv.warpAffine(result, result, M, size, cv.INTER_LINEAR, cv.BORDER_CONSTANT, [255, 255, 255, 255]);
+  const result = new cv.Mat();
+
+  cv.warpAffine(
+    image, result, M, size,
+    cv.INTER_LINEAR, cv.BORDER_CONSTANT, [255, 255, 255, 255],
+  );
 
   // clear
   M.delete();
