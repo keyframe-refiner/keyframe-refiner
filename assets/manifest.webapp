@@ -1,5 +1,5 @@
 {
-  "version": "0.0.1",
+  "version": "1.0.0-beta",
   "name": "原画位置合わせ",
   "description": "自動原画位置合わせ / Automatically adjust keyframes' position.",
   "icons": {
