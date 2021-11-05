@@ -1,15 +1,21 @@
 import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { readFileSync } from 'fs';
 
 import sass from 'sass';
 import webpack from 'webpack';
 import ESLintPlugin from 'eslint-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import FaviconsWebpackPlugin from 'favicons-webpack-plugin';
-
 import { createPreprocessors } from '../svelte.config.js';
 
 export const fromRootTo = path.resolve.bind(path, dirname(fileURLToPath(import.meta.url)), '..');
+
+export function getVersion() {
+  const packageJson = JSON.parse(readFileSync(fromRootTo('package.json'), 'utf8'));
+
+  return packageJson.version;
+}
 
 export function createSvelteConfig(include, dev, immutable) {
   return {
@@ -90,6 +96,7 @@ export function createBaseConfig(dev = false) {
       new ESLintPlugin(),
       new webpack.DefinePlugin({
         __DEBUG__: dev,
+        __VERSION__: JSON.stringify(getVersion()),
       }),
       new FaviconsWebpackPlugin({
         logo: fromRootTo('assets/logo.png'),
