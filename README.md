@@ -4,7 +4,7 @@
 ![explanation](assets/explanation.jpg)
 
 ## 使用方法
-0. [原画位置合わせ (https://textcunma.github.io/keyframe-refiner/)](https://textcunma.github.io/keyframe-refiner/)　にアクセス
+0. [原画位置合わせ (https://keyframe-refiner.js.org)](https://keyframe-refiner.js.org)　にアクセス
 
 1. 原画を開く
     - **画面左サイドバーにある「+」ボタンを押すか、ファイルをドラッグ＆ドロップ**
