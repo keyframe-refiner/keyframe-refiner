@@ -1,4 +1,11 @@
+<script lang="ts" context="module">
+  declare const __VERSION__: string;
+  const version = __VERSION__;
+  /* eslint-disable no-multiple-empty-lines */
+</script>
+
 <script lang="ts">
+  /* eslint-enable no-multiple-empty-lines */
   import { fade } from 'svelte/transition';
   import {
     mdiImageMultiple,
@@ -41,7 +48,10 @@
   {/if}
 
   <header id="header">
-    <h1 id="logo">原画位置合わせ</h1>
+    <h1 id="logo">
+      原画位置合わせ
+      <span id="version">v{version}</span>
+    </h1>
 
     <Stepper
       steps={$allSteps.map(s => stepDescription[s])}
@@ -130,9 +140,16 @@
 
   #logo {
     flex: 1;
+    display: flex;
+    flex-direction: column;
     font-size: 24px;
     padding-left: 10px;
     user-select: none;
+  }
+
+  #version {
+    font-size: xx-small;
+    color: var(--placeholder-light);
   }
 
   #controls {
