@@ -29,6 +29,7 @@ export class VariableTracker {
   }
 
   stale() {
-    return this.#changed;
+    // FIXME: this is a hack to force a re-render
+    return this.#changed || this.#check(); // check again after update
   }
 }
