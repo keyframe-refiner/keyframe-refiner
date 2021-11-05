@@ -21,10 +21,16 @@
     showROI,
   } from '../store';
 
+  export let open = false;
+
   const { currentStep } = stepManager;
 
   let selection = $detectMode;
-  let openSettings = false;
+
+  function openSettings() {
+    open = true;
+    selection = $detectMode;
+  }
 
   function changeMode() {
     if (selection === $detectMode) {
@@ -41,7 +47,7 @@
   }
 </script>
 
-<RootDialog id="settings" bind:open={openSettings}>
+<RootDialog id="settings" bind:open  on:MDCDialog:closed={() => { selection = $detectMode; }}>
   <Title>位置合わせ方式</Title>
   <Content>
     <List radioList>
@@ -72,7 +78,7 @@
   </Actions>
 </RootDialog>
 
-<span title="位置合わせ方式を変更" on:click={() => { openSettings = true; }}>
+<span title="位置合わせ方式を変更" on:click={openSettings}>
   <SVGIcon icon={$detectMode === MODE.PEG_HOLE ? mdiAlphaHCircleOutline : mdiAlphaFBoxOutline} />
 </span>
 
@@ -103,12 +109,13 @@
       }
 
       .mdc-deprecated-list-item {
-        padding: 0 25px !important;
-      }
+        --mdc-theme-secondary: var(--mdc-theme-primary);
 
-      .mdc-radio__outer-circle,
-      .mdc-radio__inner-circle {
-        border-color: var(--placeholder-light);
+        padding: 0 25px !important;
+
+        &:focus ::before {
+          opacity: 0;
+        }
       }
 
       .mdc-deprecated-list-item__graphic {
