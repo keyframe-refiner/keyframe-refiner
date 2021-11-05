@@ -10,7 +10,7 @@
   import Drawer from '../../components/Drawer.svelte';
   import SVGIcon from '../../components/SVGIcon.svelte';
   import { ImageCanvas } from '../../utils/image-canvas';
-  import { STEP } from '../../step';
+  import { STEP } from '../../constants';
   import {
     inputList,
     outputList,
@@ -19,6 +19,7 @@
     pivotPoint,
     cvWorker,
     stepManager,
+    detectMode,
   } from '../../store';
 
   const { currentStep } = stepManager;
@@ -40,10 +41,13 @@
     cvRunning = true;
     progress = 0;
 
-    await $cvWorker.requestProcessing([...$inputList], $refImage, $ROI, $pivotPoint, (idx, res, prg) => {
-      $outputList = $outputList.set(idx, res);
-      progress = prg;
-    });
+    await $cvWorker.requestProcessing(
+      $detectMode, [...$inputList], $refImage, $ROI, $pivotPoint,
+      (idx, res, prg) => {
+        $outputList = $outputList.set(idx, res);
+        progress = prg;
+      },
+    );
 
     progress = 1;
     cvRunning = false;

@@ -1,11 +1,15 @@
 import { List } from 'immutable';
 import { Point, Rect } from './utils/record-factory';
-import { defaultSteps } from './step';
+import { defaultSteps, MODE } from './constants';
 import { StepManager } from './utils/step-manager';
 import { CVWorker } from './utils/cv-worker';
 
 import { writable, derived } from 'svelte/store';
 import type { ImageCanvas } from './utils/image-canvas';
+
+declare const __DEBUG__: boolean;
+
+export const debugMode = writable(__DEBUG__);
 
 export const inputList = writable(List<ImageCanvas>());
 export const outputList = writable(List<ImageCanvas | Error>());
@@ -19,6 +23,8 @@ export const selectedOutput = derived(
   [outputList, selectedIndex],
   ([$outputList, $selectedIndex]) => $outputList.get($selectedIndex),
 );
+
+export const detectMode = writable(MODE.PEG_HOLE);
 
 export const refImage = writable<ImageCanvas | undefined>();
 
@@ -34,7 +40,7 @@ export const ROI = writable(new Rect({
 export const stepManager = new StepManager(defaultSteps);
 
 export const cvWorker = writable(
-  new CVWorker('./worker/refiner.js'),
+  new CVWorker('./worker/refiner.js', __DEBUG__),
 );
 
 // states

@@ -1,5 +1,11 @@
 import { List } from 'immutable';
 
+export enum MODE {
+  PEG_HOLE = 'PEG_HOLE',
+  FRAME = 'FRAME',
+}
+
+// steps
 export enum STEP {
   OPEN_IMAGES = 'OPEN_IMAGES',
   SELECT_REF_IMAGE = 'SELECT_REF_IMAGE',

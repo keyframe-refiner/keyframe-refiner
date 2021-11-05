@@ -1,10 +1,10 @@
 <script lang="ts">
   import clamp from 'lodash/clamp';
   import { afterUpdate } from 'svelte';
-  import { ROI, pivotPoint, refImage, stepManager, showROI } from '../../store';
+  import { ROI, pivotPoint, refImage, stepManager, showROI, detectMode } from '../../store';
   import { Rect, Point } from '../../utils/record-factory';
   import { VariableTracker } from '../../utils/variable-tracker';
-  import { STEP } from '../../step';
+  import { STEP, MODE } from '../../constants';
   import ParamDrawer from '../../components/ParamDrawer.svelte';
 
   const { currentStep } = stepManager;
@@ -18,12 +18,21 @@
   afterUpdate(() => {
     if (tracker.stale() && $refImage && $currentStep === targetStep) {
       if ($ROI.width === 0 && $ROI.height === 0) {
-        $ROI = new Rect({
-          x1: 0,
-          y1: 0,
-          x2: $refImage.width,
-          y2: Math.floor($refImage.height / 6),
-        });
+        if ($detectMode === MODE.PEG_HOLE) {
+          $ROI = new Rect({
+            x1: 0,
+            y1: 0,
+            x2: $refImage.width,
+            y2: Math.floor($refImage.height / 6),
+          });
+        } else {
+          $ROI = new Rect({
+            x1: 0,
+            y1: 0,
+            x2: $refImage.width,
+            y2: $refImage.height,
+          });
+        }
       } else {
         $ROI = new Rect({
           x1: clamp($ROI.x1, 0, $refImage.width),

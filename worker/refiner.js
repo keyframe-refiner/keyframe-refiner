@@ -2,20 +2,13 @@ importScripts('./cv-runner.js');
 
 const HOLE_COUNT = 3;
 
-function convertToBinary(img, ROI) {
+function findPolygons(img, ROI, minArea = 100, minExtent = 0.75, topN = HOLE_COUNT) {
+  // conver to binary image
   const cutImg = img.roi(ROI);
   const bwImg = new cv.Mat();
   cv.medianBlur(cutImg, bwImg, 5);
   cv.cvtColor(cutImg, bwImg, cv.COLOR_RGBA2GRAY, 0);
   cv.threshold(bwImg, bwImg, 100, 255, cv.THRESH_BINARY_INV);
-
-  cutImg.delete();
-
-  return bwImg;
-}
-
-function findPolygons(img, ROI, minArea = 100, minExtent = 0.7, topN = HOLE_COUNT) {
-  const bwImg = convertToBinary(img, ROI);
 
   // find contours
   const contours = new cv.MatVector();
@@ -32,32 +25,35 @@ function findPolygons(img, ROI, minArea = 100, minExtent = 0.7, topN = HOLE_COUN
     const approx = new cv.Mat();
     cv.approxPolyDP(contour, approx, 0.02 * arcLength, true);
 
-    if (approx.rows >= 4 && area > minArea) {
-      const rect = cv.boundingRect(approx);
+    if (approx.rows >= 4 && area > minArea && cv.isContourConvex(approx)) {
+      const rect = cv.minAreaRect(approx);
+      const { width, height } = rect.size;
+      const extent = area / (width * height);
 
-      if (area / (rect.width * rect.height) < minExtent) {
+      if (extent < minExtent) {
         continue;
       }
 
       polygons.push({
         area,
+        extent,
         center: new cv.Point(
-          ROI.x + rect.x + rect.width / 2,
-          ROI.y + rect.y + rect.height / 2,
+          ROI.x + rect.center.x,
+          ROI.y + rect.center.y,
         ),
+        angle: width < height ? rect.angle - 90 : rect.angle,
       });
 
       if (self.debug) {
-        // draw bounding rect
-        const rx = rect.x + ROI.x;
-        const ry = rect.y + ROI.y;
-        cv.rectangle(
-          img,
-          new cv.Point(rx, ry),
-          new cv.Point(rx + rect.width, ry + rect.height),
-          [0, 0, 255, 255],
-          3,
-        );
+        // draw contours
+        cv.drawContours(cutImg, contours, i, [255, 0, 0, 255], 3);
+
+        // draw rotated rect
+        const vertices = cv.RotatedRect.points(rect);
+
+        for (let i = 0; i < 4; i++) {
+          cv.line(cutImg, vertices[i], vertices[(i + 1) % 4], [0, 0, 255, 255], 3, cv.LINE_AA, 0);
+        }
       }
     }
 
@@ -68,6 +64,7 @@ function findPolygons(img, ROI, minArea = 100, minExtent = 0.7, topN = HOLE_COUN
   contours.delete();
   hierarchy.delete();
   bwImg.delete();
+  cutImg.delete();
 
   // sort polygons by area...
   polygons.sort((a, b) => b.area - a.area);
@@ -81,7 +78,7 @@ function findPolygons(img, ROI, minArea = 100, minExtent = 0.7, topN = HOLE_COUN
   return result;
 }
 
-function calcRotation(img, ROI) {
+function pegHoleRotation(img, ROI) {
   const polygons = findPolygons(img, ROI);
 
   if (polygons.length < HOLE_COUNT) {
@@ -106,19 +103,54 @@ function calcRotation(img, ROI) {
   return { center, angle };
 }
 
-function getPivot(image, ROI) {
-  const { center } = calcRotation(image, ROI);
+function frameRotation(img, ROI) {
+  const imgSize = img.cols * img.rows;
+
+  const frame = findPolygons(img, ROI, imgSize * 0.5, 0, 1)[0];
+
+  if (!frame) {
+    throw new Error('フレームを検出できませんでした');
+  }
+
+  if (self.debug) {
+    // draw centroids
+    cv.circle(img, frame.center, 10, [255, 0, 0, 255], -1);
+  }
+
+  return {
+    center: frame.center,
+    angle: frame.angle,
+  };
+}
+
+function calcRotation(mode, img, ROI) {
+  return mode === 'PEG_HOLE' ? pegHoleRotation(img, ROI) : frameRotation(img, ROI);
+}
+
+function getPivot(mode, image, ROI) {
+  const { center } = calcRotation(mode, image, ROI);
 
   return { ...center };
 }
 
-function refine(image, refImage, ROI, pivot) {
-  const { center, angle } = calcRotation(image, ROI);
-
+function refine(mode, image, refImage, ROI, pivot) {
   const size = {
     width: refImage.cols,
     height: refImage.rows,
   };
+
+  const padded = new cv.Mat();
+
+  // add padding to image to fit the reference image
+  cv.copyMakeBorder(
+    image, padded,
+    0, Math.max(0, size.height - image.rows),
+    0, Math.max(0, size.width - image.cols),
+    cv.BORDER_CONSTANT,
+    [255, 255, 255, 255],
+  );
+
+  const { center, angle } = calcRotation(mode, padded, ROI);
 
   // M = T*R
   // get the rotation matrix R
@@ -130,12 +162,13 @@ function refine(image, refImage, ROI, pivot) {
   const result = new cv.Mat();
 
   cv.warpAffine(
-    image, result, M, size,
+    padded, result, M, size,
     cv.INTER_LINEAR, cv.BORDER_CONSTANT, [255, 255, 255, 255],
   );
 
   // clear
   M.delete();
+  padded.delete();
 
   return result;
 }

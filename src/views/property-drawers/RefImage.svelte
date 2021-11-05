@@ -3,7 +3,7 @@
   import ImageInfo from '../../components/ImageInfo.svelte';
 
   import { selectedInput, refImage, showRefImage } from '../../store';
-  import { STEP } from '../../step';
+  import { STEP } from '../../constants';
 
   function setRefImage() {
     $refImage = $selectedInput;

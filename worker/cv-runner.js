@@ -64,17 +64,16 @@ function handleError(evt, error) {
 
 async function pong(evt) {
   await ready;
-  self.debug = evt.data.body.debug;
   respond(evt);
 }
 
 async function requestPivot(evt) {
-  const { image, ROI } = evt.data.body;
+  const { mode, image, ROI } = evt.data.body;
   const mat = createImageMat(image);
   const ROIrect = new cv.Rect(ROI.x, ROI.y, ROI.width, ROI.height);
 
   try {
-    const pivot = await self.onRequestPivot(mat, ROIrect);
+    const pivot = await self.onRequestPivot(mode, mat, ROIrect);
 
     respond(evt, {
       result: {
@@ -89,12 +88,12 @@ async function requestPivot(evt) {
 }
 
 async function requestProcessing(evt) {
-  const { refImage, ROI, pivot } = config;
+  const { mode, refImage, ROI, pivot } = config;
 
   const mat = createImageMat(evt.data.body.image);
 
   try {
-    const result = await self.onRequestProcessing(mat, refImage, ROI, pivot);
+    const result = await self.onRequestProcessing(mode, mat, refImage, ROI, pivot);
     const { buffer } = new Uint8ClampedArray(result.data);
 
     respond(evt, {
@@ -117,15 +116,20 @@ async function requestProcessing(evt) {
 }
 
 function setConfig(evt) {
-  const { refImage, ROI, pivot } = evt.data.body.config;
+  const { mode, refImage, ROI, pivot } = evt.data.body.config;
 
   self.config = {
+    mode,
     refImage: createImageMat(refImage),
     pivot: new cv.Point(pivot.x, pivot.y),
     ROI: new cv.Rect(ROI.x, ROI.y, ROI.width, ROI.height),
   };
 
   respond(evt);
+}
+
+function setDebugMode(evt) {
+  self.debug = evt.data.body.debug;
 }
 
 function clean(evt) {
@@ -138,6 +142,10 @@ self.addEventListener('message', async (evt) => {
   switch (evt.data?.request) {
     case 'ping':
       await pong(evt);
+      break;
+
+    case 'set-debug':
+      setDebugMode(evt);
       break;
 
     case 'set-config':

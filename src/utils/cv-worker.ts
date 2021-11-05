@@ -2,8 +2,7 @@ import { Defer } from './defer';
 import { Point } from './record-factory';
 import { ImageCanvas } from './image-canvas';
 import type { Rect } from './record-factory';
-
-declare const __DEBUG__: boolean;
+import type { MODE } from '../constants';
 
 export class CVWorker {
   readonly #workers: Worker[];
@@ -14,6 +13,7 @@ export class CVWorker {
 
   constructor(
     scriptURL: string,
+    debugMode = false,
     workerCount = navigator.hardwareConcurrency || 4,
   ) {
     this.#workers = [];
@@ -28,16 +28,22 @@ export class CVWorker {
       };
     }
 
-    this.#handshake();
+    this.#handshake()
+      .then(() => this.setDebugMode(debugMode));
   }
 
-  async requestPivot(image: ImageCanvas, ROI: Rect) {
+  async setDebugMode(debugMode: boolean) {
+    return this.#broadcast('set-debug', { debug: debugMode });
+  }
+
+  async requestPivot(mode: MODE, image: ImageCanvas, ROI: Rect) {
     const imageData = image.getImageData();
 
     const { pivot } = await this.#sendOnce(
       this.#workers[0],
       'request-pivot',
       {
+        mode,
         image: {
           width: imageData.width,
           height: imageData.height,
@@ -60,6 +66,7 @@ export class CVWorker {
   }
 
   async requestProcessing(
+    mode: MODE,
     inputs: ImageCanvas[],
     refImage: ImageCanvas,
     ROI: Rect,
@@ -68,6 +75,7 @@ export class CVWorker {
   ) {
     await this.#broadcast('set-config', {
       config: {
+        mode,
         refImage: this.#createImageBuffer(refImage.getImageData()),
         ROI: {
           x: ROI.x1,
@@ -153,9 +161,7 @@ export class CVWorker {
 
   async #handshake() {
     try {
-      await Promise.all(this.#workers.map(w => this.#sendOnce(w, 'ping', {
-        debug: __DEBUG__,
-      })));
+      await this.#broadcast('ping');
       this.#readyDefer.resolve(null);
     } catch (e) {
       this.#readyDefer.reject(e);

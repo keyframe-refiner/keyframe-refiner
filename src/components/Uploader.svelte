@@ -7,7 +7,7 @@
   import RootDialog from './RootDialog.svelte';
   import { ImageCanvas } from '../utils/image-canvas';
   import { inputList, stepManager } from '../store';
-  import { STEP } from '../step';
+  import { STEP } from '../constants';
 
   const { currentStep } = stepManager;
 
@@ -83,7 +83,7 @@
 
     isUploading = false;
 
-    if ($currentStep === STEP.OPEN_IMAGES) {
+    if ($currentStep === STEP.OPEN_IMAGES && $inputList.size !== 0) {
       stepManager.forward();
     }
   }

@@ -1,7 +1,7 @@
 <script lang="ts">
   import Button from '@smui/button/styled';
   import ParamDrawer from '../../components/ParamDrawer.svelte';
-  import { STEP } from '../../step';
+  import { STEP } from '../../constants';
   import {
     pivotPoint,
     refImage,
@@ -11,6 +11,7 @@
     calculatingPivot,
     showPivot,
     showROI,
+    detectMode,
   } from '../../store';
 
   const { currentStep } = stepManager;
@@ -25,7 +26,7 @@
     $calculatingPivot = true;
 
     try {
-      $pivotPoint = await $cvWorker.requestPivot($refImage, $ROI);
+      $pivotPoint = await $cvWorker.requestPivot($detectMode, $refImage, $ROI);
     } catch (e) {
       // TODO: error handling
       alert(e?.message || e);
