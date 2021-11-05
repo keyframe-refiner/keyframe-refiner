@@ -1,6 +1,6 @@
 {
   "version": "0.0.1",
-  "name": "keyframe-refiner",
+  "name": "原画位置合わせ",
   "description": "自動原画位置合わせ / Automatically adjust keyframes' position.",
   "icons": {
     "60": "firefox_app_60x60.png",
