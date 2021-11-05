@@ -87,7 +87,14 @@ export function createBaseConfig(dev = false) {
     },
     plugins: [
       new ESLintPlugin(),
-      new FaviconsWebpackPlugin(fromRootTo('assets/logo.png')),
+      new FaviconsWebpackPlugin({
+        logo: fromRootTo('assets/logo.png'),
+        favicons: {
+          lang: 'ja-JP',
+          appName: '原画位置合わせ',
+          appShortName: '原画位置合わせ',
+        },
+      }),
       new HtmlWebpackPlugin({
         title: '原画位置合わせ',
         meta: {
