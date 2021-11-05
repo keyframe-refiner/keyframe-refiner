@@ -19,7 +19,13 @@ export class CVWorker {
     this.#workers = [];
 
     for (let i = 0; i < workerCount; i++) {
-      this.#workers.push(new Worker(scriptURL));
+      const worker = new Worker(scriptURL);
+      this.#workers.push(worker);
+
+      // TODO: add error handling
+      worker.onerror = e => {
+        alert(`Worker ${i} error: ${e.message}`);
+      };
     }
 
     this.#handshake();
