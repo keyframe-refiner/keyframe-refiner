@@ -6,6 +6,7 @@
   import SVGIcon from './components/SVGIcon.svelte';
   import Track from './views/Track.svelte';
   import ImageViewer from './views/ImageViewer.svelte';
+  import Settings from './views/Settings.svelte';
   import Property from './views/Property.svelte';
   import { selectedInput, stepManager, cvWorker } from './store';
   import { STEP, stepDescription } from './constants';
@@ -31,11 +32,13 @@
     <h1 id="logo">原画位置合わせ</h1>
 
     <Stepper
-      steps={$allSteps.map(s => stepDescription[s])}
-      currentIndex={$currentIndex}
-    /> <!-- force reactivity -->
+    steps={$allSteps.map(s => stepDescription[s])}
+    currentIndex={$currentIndex}
+    />
+
 
     <span id="badge">
+      <Settings />
       <a id="github" href="https://github.com/textcunma/keyframe-refiner" target="_blank">
         <SVGIcon icon={mdiGithub} />
       </a>
@@ -120,7 +123,8 @@
     display: inline-block;
     width: 32px;
     height: 32px;
-    color: var(--placeholder-surface);
+    margin-left: 10px;
+    color: #d1c4e9;
     cursor: pointer;
     transition: transform .3s easeOutBack;
 

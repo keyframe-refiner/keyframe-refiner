@@ -1,6 +1,6 @@
 import { List } from 'immutable';
 import { Point, Rect } from './utils/record-factory';
-import { defaultSteps } from './constants';
+import { defaultSteps, MODE } from './constants';
 import { StepManager } from './utils/step-manager';
 import { CVWorker } from './utils/cv-worker';
 
@@ -19,6 +19,8 @@ export const selectedOutput = derived(
   [outputList, selectedIndex],
   ([$outputList, $selectedIndex]) => $outputList.get($selectedIndex),
 );
+
+export const detectMode = writable(MODE.PEG_HOLE);
 
 export const refImage = writable<ImageCanvas | undefined>();
 
