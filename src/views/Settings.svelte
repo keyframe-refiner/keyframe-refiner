@@ -66,7 +66,7 @@
         </Graphic>
         <Text>
           <SVGIcon icon={mdiAlphaFBoxOutline} />
-          フレームを基準にする (beta)
+          フレームを基準にする
         </Text>
       </Item>
     </List>
