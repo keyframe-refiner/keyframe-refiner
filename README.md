@@ -2,7 +2,7 @@
 
 <div align="center">
 
-スキャンされた原画のタップ穴・フレームを基準に原画の位置合わせを自動で行います
+スキャンされた原画やレイアウト用紙のタップ穴・フレームを基準に位置合わせを自動で行います
 
 [![license][license-badge]](LICENSE)
 [![version][version-badge]](https://keyframe-refiner.js.org)
