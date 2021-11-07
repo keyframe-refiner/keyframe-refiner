@@ -12,7 +12,8 @@ export default merge(createBaseConfig(true), {
     hot: true,
     port: 3000,
     static: {
-      directory: fromRootTo('worker'),
+      // force reload when worker script changes
+      directory: fromRootTo('src/worker'),
       publicPath: '/worker',
     },
   },

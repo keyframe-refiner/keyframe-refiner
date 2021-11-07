@@ -2,10 +2,8 @@ import './scrollbar-plugins';
 import App from './App.svelte';
 
 // register service worker
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register(
-    new URL('./sw.js', import.meta.url),
-  );
+if (!__DEV_MODE__ && 'serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./service-worker.js');
 }
 
 export default new App({

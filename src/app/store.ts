@@ -7,7 +7,7 @@ import { CVWorker } from './utils/cv-worker';
 import { writable, derived } from 'svelte/store';
 import type { ImageCanvas } from './utils/image-canvas';
 
-export const debugMode = writable(__DEBUG__);
+export const debugMode = writable(__DEV_MODE__);
 
 export const inputList = writable(List<ImageCanvas>());
 export const outputList = writable(List<ImageCanvas | Error>());

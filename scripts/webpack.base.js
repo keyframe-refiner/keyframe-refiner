@@ -107,7 +107,7 @@ export function createBaseConfig(dev = false) {
     plugins: [
       new ESLintPlugin(),
       new webpack.DefinePlugin({
-        __DEBUG__: dev,
+        __DEV_MODE__: dev,
         __VERSION__: JSON.stringify(getVersion()),
       }),
       new FaviconsWebpackPlugin({

@@ -30,7 +30,7 @@ export class CVWorker {
 
   constructor(
     scriptURL?: URL | string,
-    debugMode = __DEBUG__,
+    debugMode = __DEV_MODE__,
     workerCount = navigator.hardwareConcurrency || 4,
   ) {
     this.#workers = [];

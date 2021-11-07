@@ -65,18 +65,18 @@ class Refiner extends CVRunner {
             ROI.x + rect.center.x,
             ROI.y + rect.center.y,
           ),
-          angle: width < height ? rect.angle - 90 : rect.angle,
+          angle: width < height ? rect.angle + 90 : rect.angle,
         });
 
         if (this.debug) {
           // draw contours
-          cv.drawContours(cutImg, contours, i, new cv.Scalar(255, 0, 0), 3);
+          cv.drawContours(cutImg, contours, i, new cv.Scalar(255, 0, 0, 255), 3);
 
           // draw rotated rect
           const vertices = cv.rotatedRectPoints(rect);
 
           for (let i = 0; i < 4; i++) {
-            cv.line(cutImg, vertices[i], vertices[(i + 1) % 4], new cv.Scalar(0, 0, 255), 3, cv.LINE_AA, 0);
+            cv.line(cutImg, vertices[i], vertices[(i + 1) % 4], new cv.Scalar(0, 0, 255, 255), 3, cv.LINE_AA, 0);
           }
         }
       }
@@ -118,7 +118,7 @@ class Refiner extends CVRunner {
     if (this.debug) {
       // draw centroids
       polygons.forEach(({ center }) => {
-        cv.circle(img, center, 10, new cv.Scalar(255, 0, 0), -1);
+        cv.circle(img, center, 10, new cv.Scalar(255, 0, 0, 255), -1);
       });
     }
 
@@ -138,7 +138,7 @@ class Refiner extends CVRunner {
 
     if (this.debug) {
       // draw centroids
-      cv.circle(img, frame.center, 10, new cv.Scalar(255, 0, 0), -1);
+      cv.circle(img, frame.center, 10, new cv.Scalar(255, 0, 0, 255), -1);
     }
 
     return {
@@ -170,7 +170,7 @@ class Refiner extends CVRunner {
       0, Math.max(0, size.height - image.rows),
       0, Math.max(0, size.width - image.cols),
       cv.BORDER_CONSTANT,
-      new cv.Scalar(255, 255, 255),
+      new cv.Scalar(255, 255, 255, 255),
     );
 
     const { center, angle } = this.calcRotation(mode, padded, ROI);
@@ -186,7 +186,7 @@ class Refiner extends CVRunner {
 
     cv.warpAffine(
       padded, result, M, size,
-      cv.INTER_LINEAR, cv.BORDER_CONSTANT, new cv.Scalar(255, 255, 255),
+      cv.INTER_LINEAR, cv.BORDER_CONSTANT, new cv.Scalar(255, 255, 255, 255),
     );
 
     // clear
