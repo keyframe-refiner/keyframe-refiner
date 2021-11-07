@@ -3,6 +3,12 @@ import { Point } from './record-factory';
 import { ImageCanvas } from './image-canvas';
 import type { Rect } from './record-factory';
 import type { MODE } from '../constants';
+import type {
+  RequestType,
+  RequestBodies,
+  RespondMessageEvent,
+  ResponseResults,
+} from '../../shared/types';
 
 function createWorker(scriptURL?: URL | string) {
   if (scriptURL) {
@@ -85,8 +91,8 @@ export class CVWorker {
     pivot: Point,
     onProcessed: (index: number, result: ImageCanvas | Error, progress: number) => void,
   ) {
-    await this.#broadcast('set-config', {
-      config: {
+    await this.#broadcast('set-configs', {
+      configs: {
         mode,
         refImage: this.#createImageBuffer(refImage.getImageData()),
         ROI: {
@@ -180,7 +186,10 @@ export class CVWorker {
     }
   }
 
-  async #broadcast(request: string, body?: any) {
+  async #broadcast<R extends RequestType>(
+    request: R,
+    body?: RequestBodies[R],
+  ) {
     const promises = this.#workers.map(
       worker => this.#sendOnce(worker, request, body),
     );
@@ -188,7 +197,12 @@ export class CVWorker {
     return Promise.all(promises);
   }
 
-  async #sendOnce(worker: Worker, request: string, body?: any, transfer?: Transferable[]) {
+  async #sendOnce<R extends RequestType>(
+    worker: Worker,
+    request: R,
+    body?: RequestBodies[R],
+    transfer?: Transferable[],
+  ): Promise<ResponseResults[R]> {
     const defer = new Defer<any>();
 
     const removeListener = this.#send(worker, request, body, transfer, ({ data }) => {
@@ -204,17 +218,17 @@ export class CVWorker {
     return defer.promise;
   }
 
-  #send(
+  #send<R extends RequestType>(
     worker: Worker,
-    request: string,
-    body?: any,
+    request: R,
+    body?: RequestBodies[R],
     transfer?: Transferable[],
-    onMessage?: (e: MessageEvent) => void,
+    onMessage?: (e: RespondMessageEvent<R>) => void,
   ) {
     const id = this.#messageID;
     this.#messageID++;
 
-    function handler(e: MessageEvent) {
+    function handler(e: RespondMessageEvent<R>) {
       if (e.data.respondTo === request && e.data.id === id) {
         onMessage?.(e);
       }

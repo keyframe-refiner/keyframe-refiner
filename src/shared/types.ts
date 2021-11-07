@@ -1,0 +1,80 @@
+import type { MODE } from './mode';
+
+export type PivotAsObject = {
+  x: number;
+  y: number;
+};
+
+export type ROIAsObject = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+
+export type ImageBuffer = {
+  width: number;
+  height: number;
+  buffer: ArrayBufferLike;
+};
+
+export type RequestType =
+  'ping' |
+  'set-debug' |
+  'set-configs' |
+  'clean' |
+  'request-pivot' |
+  'request-processing';
+
+export type RequestBodies = {
+  ping: undefined,
+  clean: undefined,
+  'set-debug': {
+    debug: boolean;
+  },
+  'set-configs': {
+    configs: {
+      mode: MODE,
+      refImage: ImageBuffer,
+      ROI: ROIAsObject,
+      pivot: PivotAsObject,
+    },
+  },
+  'request-pivot': {
+    mode: MODE,
+    image: ImageBuffer,
+    ROI: ROIAsObject,
+  },
+  'request-processing': {
+    image: ImageBuffer,
+  },
+};
+
+export type ResponseResults = {
+  ping: undefined,
+  clean: undefined,
+  'set-debug': undefined,
+  'set-configs': undefined,
+  'request-pivot': {
+    pivot: PivotAsObject,
+  },
+  'request-processing': {
+    image: ImageBuffer,
+  },
+};
+
+export type RequestMessage<K extends keyof RequestBodies> = {
+  id: number;
+  request: K;
+  body: RequestBodies[K];
+};
+
+export type RespondMessage<K extends keyof ResponseResults> = {
+  id: number;
+  respondTo: K;
+  result?: ResponseResults[K];
+  error?: any;
+};
+
+export type RequestMessageEvent<K extends keyof RequestBodies> = MessageEvent<RequestMessage<K>>;
+export type RespondMessageEvent<K extends keyof ResponseResults> = MessageEvent<RespondMessage<K>>;
