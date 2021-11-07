@@ -4,6 +4,17 @@ import { ImageCanvas } from './image-canvas';
 import type { Rect } from './record-factory';
 import type { MODE } from '../constants';
 
+function createWorker(scriptURL?: URL | string) {
+  if (scriptURL) {
+    return new Worker(scriptURL);
+  }
+
+  return new Worker(
+    /* webpackChunkName: "refiner.worker" */
+    new URL('../../worker/cv-runner.ts', import.meta.url),
+  );
+}
+
 export class CVWorker {
   readonly #workers: Worker[];
   readonly #readyDefer = new Defer<null>();
@@ -12,14 +23,15 @@ export class CVWorker {
   #messageID = 0;
 
   constructor(
-    scriptURL: string,
-    debugMode = false,
+    scriptURL?: URL | string,
+    debugMode = __DEBUG__,
     workerCount = navigator.hardwareConcurrency || 4,
   ) {
     this.#workers = [];
 
     for (let i = 0; i < workerCount; i++) {
-      const worker = new Worker(scriptURL);
+      const worker = createWorker(scriptURL);
+
       this.#workers.push(worker);
 
       // TODO: add error handling

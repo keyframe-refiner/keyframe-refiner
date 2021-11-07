@@ -7,8 +7,6 @@ import { CVWorker } from './utils/cv-worker';
 import { writable, derived } from 'svelte/store';
 import type { ImageCanvas } from './utils/image-canvas';
 
-declare const __DEBUG__: boolean;
-
 export const debugMode = writable(__DEBUG__);
 
 export const inputList = writable(List<ImageCanvas>());
@@ -30,18 +28,11 @@ export const refImage = writable<ImageCanvas | undefined>();
 
 export const pivotPoint = writable(new Point());
 
-export const ROI = writable(new Rect({
-  x1: 0,
-  y1: 0,
-  x2: 0,
-  y2: 0,
-}));
+export const ROI = writable(new Rect());
 
 export const stepManager = new StepManager(defaultSteps);
 
-export const cvWorker = writable(
-  new CVWorker('./worker/refiner.js', __DEBUG__),
-);
+export const cvWorker = writable(new CVWorker());
 
 // states
 export const calculatingPivot = writable(false);

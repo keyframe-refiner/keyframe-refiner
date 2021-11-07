@@ -1,9 +1,6 @@
 import { List } from 'immutable';
 
-export enum MODE {
-  PEG_HOLE = 'PEG_HOLE',
-  FRAME = 'FRAME',
-}
+export { MODE } from '../shared/mode';
 
 // steps
 export enum STEP {

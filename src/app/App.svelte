@@ -1,5 +1,4 @@
 <script lang="ts" context="module">
-  declare const __VERSION__: string;
   const version = __VERSION__;
   /* eslint-disable no-multiple-empty-lines */
 </script>
