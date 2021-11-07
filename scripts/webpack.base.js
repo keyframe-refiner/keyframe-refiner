@@ -39,6 +39,20 @@ export function createSvelteConfig(include, dev, immutable) {
   };
 }
 
+export function createTsloaderConfig(project) {
+  return {
+    test: /\.ts$/,
+    include: [fromRootTo(`src/${project}`)],
+    use: [{
+      loader: 'ts-loader',
+      options: {
+        instance: project,
+        configFile: fromRootTo(`src/${project}/tsconfig.json`),
+      },
+    }],
+  };
+}
+
 export function createBaseConfig(dev = false) {
   return {
     entry: fromRootTo('src/app/index.ts'),
@@ -54,12 +68,10 @@ export function createBaseConfig(dev = false) {
         // FIXME: immutable breaks @smui/dialog
         createSvelteConfig(fromRootTo('src'), dev, true),
         createSvelteConfig(fromRootTo('node_modules'), dev, false),
+        createTsloaderConfig('app'),
+        createTsloaderConfig('worker'),
+        createTsloaderConfig('shared'),
         {
-          test: /\.ts$/,
-          use: [{
-            loader: 'ts-loader',
-          }],
-        }, {
           test: /\.s[ac]ss$/i,
           use: [
             'style-loader',
