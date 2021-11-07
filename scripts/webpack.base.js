@@ -41,7 +41,7 @@ export function createSvelteConfig(include, dev, immutable) {
 
 export function createBaseConfig(dev = false) {
   return {
-    entry: fromRootTo('src/index.ts'),
+    entry: fromRootTo('src/app/index.ts'),
     resolve: {
       extensions: ['.ts', '.js', '.mjs', '.svelte'],
       mainFields: ['svelte', 'browser', 'module', 'main'],
@@ -72,7 +72,7 @@ export function createBaseConfig(dev = false) {
                 sassOptions: {
                   quietDeps: true,
                   includePaths: [
-                    fromRootTo('src/theme'),
+                    fromRootTo('src/app/theme'),
                     fromRootTo('node_modules'),
                   ],
                 },
