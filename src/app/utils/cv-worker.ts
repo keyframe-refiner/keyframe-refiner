@@ -16,8 +16,8 @@ function createWorker(scriptURL?: URL | string) {
   }
 
   return new Worker(
-    /* webpackChunkName: "refiner.worker" */
-    new URL('../../worker/cv-runner.ts', import.meta.url),
+    /* webpackChunkName: "refiner" */
+    new URL('../../worker/refiner.ts', import.meta.url),
   );
 }
 
