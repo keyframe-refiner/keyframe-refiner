@@ -27,8 +27,8 @@ export type RequestType =
   'request-processing';
 
 export type RequestBodies = {
-  ping: undefined,
-  clean: undefined,
+  ping: void,
+  clean: void,
   'set-debug': {
     debug: boolean;
   },
@@ -51,10 +51,10 @@ export type RequestBodies = {
 };
 
 export type ResponseResults = {
-  ping: undefined,
-  clean: undefined,
-  'set-debug': undefined,
-  'set-configs': undefined,
+  ping: void,
+  clean: void,
+  'set-debug': void,
+  'set-configs': void,
   'request-pivot': {
     pivot: PivotAsObject,
   },
