@@ -22,10 +22,13 @@ export default merge(createBaseConfig(false), {
     minimize: true,
     splitChunks: {
       cacheGroups: {
-        vendor: {
-          name: 'vendors',
+        vendors: {
           test: /[\\/]node_modules[\\/]/,
           chunks: 'all',
+          name(module) {
+            const isOpenCV = module.context.includes('opencv-ts');
+            return isOpenCV ? 'opencv' : 'vendors';
+          },
         },
       },
     },
