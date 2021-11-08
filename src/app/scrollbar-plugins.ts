@@ -7,9 +7,9 @@ type Delta = {
 }
 
 class DisableKeyboardPlugin extends ScrollbarPlugin {
-  static pluginName = 'disableKeyboard';
+  static override pluginName = 'disableKeyboard';
 
-  transformDelta(delta: Delta, fromEvent: Event) {
+  override transformDelta(delta: Delta, fromEvent: Event) {
     if (fromEvent.type.startsWith('key')) {
       return { x: 0, y: 0 };
     }
@@ -19,9 +19,9 @@ class DisableKeyboardPlugin extends ScrollbarPlugin {
 }
 
 class PreventZoomScrollingPlugin extends ScrollbarPlugin {
-  static pluginName = 'preventZoomScrolling';
+  static override pluginName = 'preventZoomScrolling';
 
-  transformDelta(delta: Delta, fromEvent: Event) {
+  override transformDelta(delta: Delta, fromEvent: Event) {
     if (fromEvent.type.match(/wheel/) && (fromEvent as WheelEvent).ctrlKey) {
       return { x: 0, y: 0 };
     }
@@ -31,14 +31,14 @@ class PreventZoomScrollingPlugin extends ScrollbarPlugin {
 }
 
 class EdgeEasingPlugin extends ScrollbarPlugin {
-  static pluginName = 'edgeEasing';
+  static override pluginName = 'edgeEasing';
 
   private _remainMomentum = {
     x: 0,
     y: 0,
   };
 
-  transformDelta(delta) {
+  override transformDelta(delta) {
     const {
       limit,
       offset,
@@ -56,14 +56,14 @@ class EdgeEasingPlugin extends ScrollbarPlugin {
     return { x: 0, y: 0 };
   }
 
-  onRender(remainMomentum) {
+  override onRender(remainMomentum) {
     Object.assign(this._remainMomentum, remainMomentum);
   }
 }
 
 // adapted from https://github.com/idiotWu/smooth-scrollbar/blob/develop/src/events/select.ts
 class PannablePlugin extends ScrollbarPlugin {
-  static pluginName = 'pannable';
+  static override pluginName = 'pannable';
 
   #xAxisTrackHeight: number;
   #yAxisTrackWidth: number;
@@ -103,16 +103,16 @@ class PannablePlugin extends ScrollbarPlugin {
     );
   }
 
-  onInit() {
+  override onInit() {
     this.scrollbar.containerEl.addEventListener('pan-move', this.#onPanMove);
   }
 
-  onUpdate() {
+  override onUpdate() {
     this.#yAxisTrackWidth = this.scrollbar.track.yAxis.element.clientWidth;
     this.#xAxisTrackHeight = this.scrollbar.track.xAxis.element.clientHeight;
   }
 
-  onDestroy() {
+  override onDestroy() {
     this.scrollbar.containerEl.removeEventListener('pan-move', this.#onPanMove);
   }
 }
