@@ -1,4 +1,4 @@
-## [1.0.0-beta.1](https://github.com/idiotWu/smooth-scrollbar/compare/v1.0.0-beta.0...v1.0.0-beta.1) (2021-11-08)
+## [1.0.0-beta.1](https://github.com/keyframe-refiner/keyframe-refiner/compare/v1.0.0-beta.0...v1.0.0-beta.1) (2021-11-08)
 
 ### Features
 
