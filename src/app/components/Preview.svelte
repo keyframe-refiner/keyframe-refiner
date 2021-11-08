@@ -37,4 +37,4 @@
   afterUpdate(repaint);
 </script>
 
-<canvas bind:this={canvas}></canvas>
+<canvas bind:this={canvas} title={image?.filename}></canvas>
