@@ -35,6 +35,7 @@ export type RequestBodies = {
   'set-configs': {
     configs: {
       mode: MODE,
+      fitFrame: boolean,
       refImage: ImageBuffer,
       ROI: ROIAsObject,
       pivot: PivotAsObject,

@@ -22,6 +22,7 @@ export class CVRunner {
   // configs
   configs: {
     mode: MODE,
+    fitFrame: boolean,
     refImage: Mat,
     pivot: Point,
     ROI: Rect,
@@ -122,10 +123,11 @@ export class CVRunner {
   }
 
   setConfigs(evt: RequestMessageEvent<'set-configs'>) {
-    const { mode, refImage, ROI, pivot } = evt.data.body.configs;
+    const { mode, fitFrame, refImage, ROI, pivot } = evt.data.body.configs;
 
     this.configs = {
-      mode: mode,
+      mode,
+      fitFrame,
       refImage: this.createImageMat(refImage),
       pivot: new cv.Point(pivot.x, pivot.y),
       ROI: new cv.Rect(ROI.x, ROI.y, ROI.width, ROI.height),

@@ -85,6 +85,7 @@ export class CVWorker {
 
   async requestProcessing(
     mode: MODE,
+    fitFrame: boolean,
     inputs: ImageCanvas[],
     refImage: ImageCanvas,
     ROI: Rect,
@@ -94,6 +95,7 @@ export class CVWorker {
     await this.#broadcast('set-configs', {
       configs: {
         mode,
+        fitFrame,
         refImage: this.#createImageBuffer(refImage.getImageData()),
         ROI: {
           x: ROI.x1,

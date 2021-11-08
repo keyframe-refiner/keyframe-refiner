@@ -3,6 +3,7 @@ import { MODE } from '../shared/mode';
 import { CVRunner } from './cv-runner';
 
 import type { Mat, Point, Rect, RotatedRect, Size } from 'opencv-ts';
+import type { RequestMessageEvent } from '../shared/types';
 
 type RotatedRectFixed = RotatedRect & {
   size: Size,
@@ -14,12 +15,31 @@ type Polygon = {
   area: number,
   extent: number,
   angle: number,
+  rectSize: Size,
   center: Point,
 };
 
 const HOLE_COUNT = 3;
 
+// multiply two 3*3 matrices which are represented as 1D array
+function matmul(a: number[], b: number[]): number[] {
+  const result: number[] = [];
+
+  for (let i = 0; i < 3; i++) {
+    for (let j = 0; j < 3; j++) {
+      let sum = 0;
+      for (let k = 0; k < 3; k++) {
+        sum += a[i * 3 + k] * b[k * 3 + j];
+      }
+      result[i * 3 + j] = sum;
+    }
+  }
+  return result;
+}
+
 class Refiner extends CVRunner {
+  baseSize: Size | null = null;
+
   findPolygons(
     img: Mat,
     ROI: Rect,
@@ -30,7 +50,7 @@ class Refiner extends CVRunner {
     // conver to binary image
     const cutImg = img.roi(ROI);
     const bwImg = new cv.Mat();
-    cv.medianBlur(cutImg, bwImg, 5);
+    // cv.medianBlur(cutImg, bwImg, 5);
     cv.cvtColor(cutImg, bwImg, cv.COLOR_RGBA2GRAY, 0);
     cv.threshold(bwImg, bwImg, 100, 255, cv.THRESH_BINARY_INV);
 
@@ -61,6 +81,10 @@ class Refiner extends CVRunner {
         polygons.push({
           area,
           extent,
+          rectSize: new cv.Size(
+            Math.max(width, height),
+            Math.min(width, height),
+          ),
           center: new cv.Point(
             ROI.x + rect.center.x,
             ROI.y + rect.center.y,
@@ -124,7 +148,7 @@ class Refiner extends CVRunner {
 
     const angle = Math.atan2(c2.y - c1.y, c2.x - c1.x) * 180 / Math.PI;
 
-    return { center, angle };
+    return { center, angle, rectSize: polygons[0].rectSize };
   }
 
   frameRotation(img: Mat, ROI: Rect) {
@@ -144,6 +168,7 @@ class Refiner extends CVRunner {
     return {
       center: frame.center,
       angle: frame.angle,
+      rectSize: frame.rectSize,
     };
   }
 
@@ -153,13 +178,87 @@ class Refiner extends CVRunner {
       : this.frameRotation(img, ROI);
   }
 
-  async onRequestPivot(mode: MODE, img: Mat, ROI: Rect) {
+  getRotationMatrix(
+    center: Point,
+    angle: number,
+    tx: number,
+    ty: number,
+    sx: number,
+    sy: number,
+  ) {
+    // translation matrix
+    const T = [
+      1, 0, tx,
+      0, 1, ty,
+      0, 0, 1,
+    ];
+
+    // origin transformation matrix
+    const O = [
+      1, 0, center.x,
+      0, 1, center.y,
+      0, 0, 1,
+    ];
+
+    // rotation matrix
+    const rad = -angle * Math.PI / 180;
+    const cosA = Math.cos(rad);
+    const sinA = Math.sin(rad);
+    const R = [
+      cosA, -sinA, 0,
+      sinA, cosA, 0,
+      0, 0, 1,
+    ];
+
+    // scale matrix
+    const S = [
+      sx, 0, 0,
+      0, sy, 0,
+      0, 0, 1,
+    ];
+
+    // inverse origin translation
+    const Oinv = [
+      1, 0, -center.x,
+      0, 1, -center.y,
+      0, 0, 1,
+    ];
+
+    const transformations = [T, O, R, S, Oinv];
+
+    // calculate the transformation matrix
+    const M = transformations.reduce((acc, cur) => {
+      return matmul(acc, cur);
+    });
+
+    const M_CV = cv.matFromArray(2, 3, cv.CV_64FC1, M.slice(0, 6));
+
+    return M_CV;
+  }
+
+  override setConfigs(evt: RequestMessageEvent<'set-configs'>) {
+    super.setConfigs(evt);
+
+    const { mode, refImage, ROI } = this.configs!;
+
+    const { rectSize } = this.calcRotation(mode, refImage, ROI);
+
+    this.baseSize = rectSize;
+  }
+
+  override clean(evt: RequestMessageEvent<'clean'>) {
+    super.clean(evt);
+
+    this.baseSize = null;
+  }
+
+  override async onRequestPivot(mode: MODE, img: Mat, ROI: Rect) {
     const { center } = this.calcRotation(mode, img, ROI);
 
     return center;
   }
 
-  async onRequestProcessing(mode: MODE, image: Mat, refImage: Mat, ROI: Rect, pivot: Point) {
+  override async onRequestProcessing(mode: MODE, image: Mat, refImage: Mat, ROI: Rect, pivot: Point) {
     const size = new cv.Size(refImage.cols, refImage.rows);
 
     const padded = new cv.Mat();
@@ -173,14 +272,19 @@ class Refiner extends CVRunner {
       new cv.Scalar(255, 255, 255, 255),
     );
 
-    const { center, angle } = this.calcRotation(mode, padded, ROI);
+    const { center, angle, rectSize } = this.calcRotation(mode, padded, ROI);
+    const tx = pivot.x - center.x;
+    const ty = pivot.y - center.y;
 
-    // M = T*R
-    // get the rotation matrix R
-    const M = cv.getRotationMatrix2D(center, angle, 1);
-    // apply translation T
-    M.data64F[2] += pivot.x - center.x;
-    M.data64F[5] += pivot.y - center.y;
+    let sx = 1;
+    let sy = 1;
+
+    if (mode === MODE.FRAME && this.configs!.fitFrame) {
+      sx = this.baseSize!.width / rectSize.width;
+      sy = this.baseSize!.height / rectSize.height;
+    }
+
+    const M = this.getRotationMatrix(center, angle, tx, ty, sx, sy);
 
     const result = new cv.Mat();
 

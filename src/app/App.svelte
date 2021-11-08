@@ -1,16 +1,7 @@
-<script lang="ts" context="module">
-  const version = __VERSION__;
-  /* eslint-disable no-multiple-empty-lines */
-</script>
-
 <script lang="ts">
-  /* eslint-enable no-multiple-empty-lines */
   import { fade } from 'svelte/transition';
   import {
     mdiImageMultiple,
-    mdiGithub,
-    mdiBugOutline,
-    mdiBugCheckOutline,
   } from '@mdi/js';
 
   import DnD from './components/DnD.svelte';
@@ -19,26 +10,26 @@
   import ImageViewer from './views/ImageViewer.svelte';
   import Settings from './views/Settings.svelte';
   import Property from './views/Property.svelte';
-  import { selectedInput, stepManager, cvWorker, debugMode } from './store';
-  import { STEP, stepDescription } from './constants';
   import Stepper from './components/Stepper.svelte';
+  import { STEP, stepDescription } from './constants';
+  import {
+    selectedInput,
+    stepManager,
+    cvWorker,
+  } from './store';
 
+  const version = __VERSION__;
   const { allSteps, currentIndex, currentStep } = stepManager;
 
   let loadingWorker = true;
-  let openSettings = false;
+  let openModeDialog = false;
 
   $cvWorker.ready.then(() => {
     loadingWorker = false;
-    openSettings = true;
+    openModeDialog = true;
   }).catch(e => {
     alert(e?.message || e);
   });
-
-  function toggleDebug() {
-    $debugMode = !$debugMode;
-    $cvWorker.setDebugMode($debugMode);
-  }
 </script>
 
 <main>
@@ -57,23 +48,9 @@
       currentIndex={$currentIndex}
     />
 
-
-    <span id="controls">
-      <Settings open={openSettings} />
-
-      <span
-        id="toggle-debug"
-        class:enabled={$debugMode}
-        on:click={toggleDebug}
-        title="デバッグモード切替"
-      >
-        <SVGIcon icon={$debugMode ? mdiBugCheckOutline : mdiBugOutline} />
-      </span>
-
-      <a id="github" href="https://github.com/textcunma/keyframe-refiner" target="_blank">
-        <SVGIcon icon={mdiGithub} />
-      </a>
-    </span>
+    <div id="controls">
+      <Settings openDialog={openModeDialog} />
+    </div>
   </header>
 
   <article id="gallery">
@@ -155,29 +132,6 @@
     flex: 1;
     padding-right: 10px;
     text-align: right;
-  }
-
-  #github,
-  #toggle-debug {
-    display: inline-block;
-    width: 32px;
-    height: 32px;
-    margin-left: 10px;
-    color: #d1c4e9;
-    cursor: pointer;
-    transition: transform .3s easeOutBack;
-
-    &:hover {
-      transform: scale(1.1);
-    }
-  }
-
-  #toggle-debug {
-    color: var(--placeholder);
-
-    &.enabled {
-      color: #f0f4c3;
-    }
   }
 
   #gallery {

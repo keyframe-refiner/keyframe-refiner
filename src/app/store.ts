@@ -23,6 +23,7 @@ export const selectedOutput = derived(
 );
 
 export const detectMode = writable(MODE.PEG_HOLE);
+export const fitFrame = writable(false);
 
 export const refImage = writable<ImageCanvas | undefined>();
 
