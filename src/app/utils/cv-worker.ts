@@ -6,7 +6,7 @@ import type { MODE } from '../constants';
 import type {
   RequestType,
   RequestBodies,
-  RespondMessageEvent,
+  ResponseMessageEvent,
   ResponseResults,
 } from '../../shared/types';
 
@@ -223,12 +223,12 @@ export class CVWorker {
     request: R,
     body?: RequestBodies[R],
     transfer?: Transferable[],
-    onMessage?: (e: RespondMessageEvent<R>) => void,
+    onMessage?: (e: ResponseMessageEvent<R>) => void,
   ) {
     const id = this.#messageID;
     this.#messageID++;
 
-    function handler(e: RespondMessageEvent<R>) {
+    function handler(e: ResponseMessageEvent<R>) {
       if (e.data.respondTo === request && e.data.id === id) {
         onMessage?.(e);
       }

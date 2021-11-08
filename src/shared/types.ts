@@ -69,7 +69,7 @@ export type RequestMessage<K extends keyof RequestBodies> = {
   body: RequestBodies[K];
 };
 
-export type RespondMessage<K extends keyof ResponseResults> = {
+export type ResponseMessage<K extends keyof ResponseResults> = {
   id: number;
   respondTo: K;
   result?: ResponseResults[K];
@@ -77,4 +77,4 @@ export type RespondMessage<K extends keyof ResponseResults> = {
 };
 
 export type RequestMessageEvent<K extends keyof RequestBodies> = MessageEvent<RequestMessage<K>>;
-export type RespondMessageEvent<K extends keyof ResponseResults> = MessageEvent<RespondMessage<K>>;
+export type ResponseMessageEvent<K extends keyof ResponseResults> = MessageEvent<ResponseMessage<K>>;
