@@ -186,17 +186,17 @@ class Refiner extends CVRunner {
     sx: number,
     sy: number,
   ) {
+    // origin(center) translation matrix
+    const O = [
+      1, 0, center.x,
+      0, 1, center.y,
+      0, 0, 1,
+    ];
+
     // translation matrix
     const T = [
       1, 0, tx,
       0, 1, ty,
-      0, 0, 1,
-    ];
-
-    // origin transformation matrix
-    const O = [
-      1, 0, center.x,
-      0, 1, center.y,
       0, 0, 1,
     ];
 
@@ -224,7 +224,7 @@ class Refiner extends CVRunner {
       0, 0, 1,
     ];
 
-    const transformations = [T, O, R, S, Oinv];
+    const transformations = [O, T, R, S, Oinv];
 
     // calculate the transformation matrix
     const M = transformations.reduce((acc, cur) => {
