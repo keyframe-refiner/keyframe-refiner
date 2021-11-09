@@ -63,10 +63,10 @@ class Refiner extends CVRunner {
   findPolygons(
     img: Mat,
     ROI: Rect,
-    minArea = 100,
-    minExtent = 0.75,
-    topN = HOLE_COUNT,
-    adaptive = false,
+    minArea: number,
+    minExtent: number,
+    topN: number,
+    adaptive: boolean,
   ) {
     // conver to binary image
     const cutImg = img.roi(ROI);
@@ -160,13 +160,13 @@ class Refiner extends CVRunner {
   findPolygonsWithTries(
     img: Mat,
     ROI: Rect,
-    minArea?: number,
-    minExtent?: number,
-    topN?: number,
+    minArea = 100,
+    minExtent = 0.75,
+    topN = HOLE_COUNT,
   ) {
     const p1 = this.findPolygons(img, ROI, minArea, minExtent, topN, false);
 
-    if (p1.length > 0) {
+    if (p1.length === topN) {
       return p1;
     }
 
