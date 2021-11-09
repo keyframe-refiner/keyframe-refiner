@@ -39,7 +39,7 @@
 
   <header id="header">
     <h1 id="logo">
-      原画位置合わせ
+      Keyframe Refiner
       <span id="version">v{version}</span>
     </h1>
 
@@ -118,9 +118,8 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    font-size: 24px;
+    font-size: 20px;
     padding-left: 10px;
-    user-select: none;
   }
 
   #version {
