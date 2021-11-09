@@ -1,7 +1,7 @@
 {
   "name": "Keyframe Refiner",
   "short_name": "Keyframe Refiner",
-  "description": "自動原画位置合わせ / Automatically adjust keyframes' position.",
+  "description": "自動原画位置合わせ / Keyframe stabilization done right.",
   "dir": "auto",
   "lang": "ja-JP",
   "display": "standalone",

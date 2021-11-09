@@ -1,7 +1,7 @@
 {
   "version": "1.0.0-beta.2",
   "name": "Keyframe Refiner",
-  "description": "自動原画位置合わせ / Automatically adjust keyframes' position.",
+  "description": "自動原画位置合わせ / Keyframe stabilization done right.",
   "icons": {
     "60": "firefox_app_60x60.png",
     "128": "firefox_app_128x128.png",
