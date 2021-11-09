@@ -1,6 +1,6 @@
 {
-  "name": "原画位置合わせ",
-  "short_name": "原画位置合わせ",
+  "name": "Keyframe Refiner",
+  "short_name": "Keyframe Refiner",
   "description": "自動原画位置合わせ / Automatically adjust keyframes' position.",
   "dir": "auto",
   "lang": "ja-JP",
