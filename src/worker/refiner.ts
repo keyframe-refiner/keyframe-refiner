@@ -21,11 +21,11 @@ type Polygon = {
 
 const HOLE_COUNT = 3;
 
-// multiply two 3*3 matrices which are represented as 1D array
-function matmul(a: number[], b: number[]): number[] {
+// multiply two 3*3 transformation matrices which are represented as 1D array
+function transformMatMul(a: number[], b: number[]): number[] {
   const result: number[] = [];
 
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 2; i++) {
     for (let j = 0; j < 3; j++) {
       let sum = 0;
       for (let k = 0; k < 3; k++) {
@@ -34,6 +34,10 @@ function matmul(a: number[], b: number[]): number[] {
       result[i * 3 + j] = sum;
     }
   }
+
+  // the last row stays [0, 0, 1]
+  result.push(0, 0, 1);
+
   return result;
 }
 
@@ -279,7 +283,7 @@ class Refiner extends CVRunner {
 
     // calculate the transformation matrix
     const M = transformations.reduce((acc, cur) => {
-      return matmul(acc, cur);
+      return transformMatMul(acc, cur);
     });
 
     const M_CV = cv.matFromArray(2, 3, cv.CV_64FC1, M.slice(0, 6));
