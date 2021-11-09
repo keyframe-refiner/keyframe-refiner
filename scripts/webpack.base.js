@@ -114,12 +114,12 @@ export function createBaseConfig(dev = false) {
         logo: fromRootTo('assets/logo.png'),
         favicons: {
           lang: 'ja-JP',
-          appName: '原画位置合わせ',
-          appShortName: '原画位置合わせ',
+          appName: 'Keyframe Refiner',
+          appShortName: 'Keyframe Refiner',
         },
       }),
       new HtmlWebpackPlugin({
-        title: '原画位置合わせ',
+        title: 'Keyframe Refiner - 原画位置合わせ',
         meta: {
           viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no',
         },
