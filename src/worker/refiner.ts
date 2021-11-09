@@ -37,6 +37,26 @@ function matmul(a: number[], b: number[]): number[] {
   return result;
 }
 
+// dedup close polygons
+function dedupPolygons(polygons: Polygon[], minDist: number = 10) {
+  let count = polygons.length;
+
+  for (let i = 0; i < count; i++) {
+    const p1 = polygons[i];
+    for (let j = i + 1; j < count; j++) {
+      const p2 = polygons[j];
+      if (
+        Math.abs(p1.center.x - p2.center.x) < minDist &&
+        Math.abs(p1.center.y - p2.center.y) < minDist
+      ) {
+        polygons.splice(j, 1);
+        j--;
+        count--;
+      }
+    }
+  }
+}
+
 class Refiner extends CVRunner {
   baseSize: Size | null = null;
 
@@ -46,13 +66,21 @@ class Refiner extends CVRunner {
     minArea = 100,
     minExtent = 0.75,
     topN = HOLE_COUNT,
+    adaptive = false,
   ) {
     // conver to binary image
     const cutImg = img.roi(ROI);
     const bwImg = new cv.Mat();
-    // cv.medianBlur(cutImg, bwImg, 5);
     cv.cvtColor(cutImg, bwImg, cv.COLOR_RGBA2GRAY, 0);
-    cv.threshold(bwImg, bwImg, 100, 255, cv.THRESH_BINARY_INV);
+
+    if (adaptive) {
+      cv.adaptiveThreshold(bwImg, bwImg, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY_INV, 11, 2);
+    } else {
+      cv.threshold(bwImg, bwImg, 100, 255, cv.THRESH_BINARY_INV);
+    }
+
+    // remove noise
+    cv.medianBlur(bwImg, bwImg, 3);
 
     // find contours
     const contours = new cv.MatVector();
@@ -114,6 +142,9 @@ class Refiner extends CVRunner {
     bwImg.delete();
     cutImg.delete();
 
+    // remove close polygons
+    dedupPolygons(polygons);
+
     // sort polygons by area...
     polygons.sort((a, b) => b.area - a.area);
 
@@ -126,8 +157,28 @@ class Refiner extends CVRunner {
     return result;
   }
 
+  findPolygonsWithTries(
+    img: Mat,
+    ROI: Rect,
+    minArea?: number,
+    minExtent?: number,
+    topN?: number,
+  ) {
+    const p1 = this.findPolygons(img, ROI, minArea, minExtent, topN, false);
+
+    if (p1.length > 0) {
+      return p1;
+    }
+
+    if (this.debug) {
+      console.log('%c[worker] non-adaptive threshold failed, trying adaptive...', 'color: #f60');
+    }
+
+    return this.findPolygons(img, ROI, minArea, minExtent, topN, true);
+  }
+
   pegHoleRotation(img: Mat, ROI: Rect) {
-    const polygons = this.findPolygons(img, ROI);
+    const polygons = this.findPolygonsWithTries(img, ROI);
 
     if (polygons.length < HOLE_COUNT) {
       throw new Error('タップ穴を検出できませんでした');
@@ -154,7 +205,7 @@ class Refiner extends CVRunner {
   frameRotation(img: Mat, ROI: Rect) {
     const imgSize = img.cols * img.rows;
 
-    const frame = this.findPolygons(img, ROI, imgSize * 0.5, 0, 1)[0];
+    const frame = this.findPolygonsWithTries(img, ROI, imgSize * 0.5, 0, 1)[0];
 
     if (!frame) {
       throw new Error('フレームを検出できませんでした');
