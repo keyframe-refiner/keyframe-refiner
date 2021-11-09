@@ -2,7 +2,7 @@
   "name": "keyframe-refiner",
   "type": "module",
   "version": "1.0.0-beta.2",
-  "description": "自動原画位置合わせ / Automatically adjust keyframes' position.",
+  "description": "自動原画位置合わせ / Keyframe stabilization done right.",
   "main": "dist/index.js",
   "keywords": [
     "OpenCV",
