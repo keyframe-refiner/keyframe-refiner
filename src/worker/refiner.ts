@@ -314,7 +314,11 @@ class Refiner extends CVRunner {
   }
 
   override async onRequestProcessing(mode: MODE, image: Mat, refImage: Mat, ROI: Rect, pivot: Point) {
-    const size = new cv.Size(refImage.cols, refImage.rows);
+    // ensure even size, see https://github.com/keyframe-refiner/keyframe-refiner/issues/1
+    const size = new cv.Size(
+      refImage.cols % 2 === 0 ? refImage.cols : refImage.cols + 1,
+      refImage.rows % 2 === 0 ? refImage.rows : refImage.rows + 1,
+    );
 
     const padded = new cv.Mat();
 
