@@ -1,7 +1,7 @@
 {
   "name": "keyframe-refiner",
   "type": "module",
-  "version": "1.0.0-beta.2",
+  "version": "1.0.0-beta.3",
   "description": "自動原画位置合わせ / Keyframe stabilization done right.",
   "main": "dist/index.js",
   "keywords": [
