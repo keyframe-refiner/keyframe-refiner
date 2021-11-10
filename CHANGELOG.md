@@ -1,3 +1,10 @@
+## [1.0.0-beta.3](https://github.com/keyframe-refiner/keyframe-refiner/compare/v1.0.0-beta.2...v1.0.0-beta.3) (2021-11-11)
+
+### Feature
+
+- **CV**: 基準画像のサイズが奇数の場合に `+1` で修正しました。([#1](https://github.com/keyframe-refiner/keyframe-refiner/issues/1))
+
+
 ## [1.0.0-beta.2](https://github.com/keyframe-refiner/keyframe-refiner/compare/v1.0.0-beta.1...v1.0.0-beta.2) (2021-11-09)
 
 ### Fixes
