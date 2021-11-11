@@ -19,7 +19,23 @@ type Polygon = {
   center: Point,
 };
 
+type DetectOptions = {
+  minArea: number,
+  minExtent: number,
+  minVertexCount: number,
+  topN: number,
+  adaptive: boolean,
+};
+
 const HOLE_COUNT = 3;
+
+const defaultOptions: DetectOptions = {
+  minArea: 100,
+  minExtent: 0.75,
+  minVertexCount: 4,
+  topN: HOLE_COUNT,
+  adaptive: false,
+};
 
 // multiply two 3*3 transformation matrices which are represented as 1D array
 function transformMatMul(a: number[], b: number[]): number[] {
@@ -67,10 +83,13 @@ class Refiner extends CVRunner {
   findPolygons(
     img: Mat,
     ROI: Rect,
-    minArea: number,
-    minExtent: number,
-    topN: number,
-    adaptive: boolean,
+    {
+      minArea,
+      minExtent,
+      minVertexCount,
+      topN,
+      adaptive,
+    }: DetectOptions,
   ) {
     // conver to binary image
     const cutImg = img.roi(ROI);
@@ -101,7 +120,7 @@ class Refiner extends CVRunner {
       const approx = new cv.Mat();
       cv.approxPolyDP(contour, approx, 0.02 * arcLength, true);
 
-      if (approx.rows >= 4 && area > minArea && cv.isContourConvex(approx)) {
+      if (approx.rows >= minVertexCount && area > minArea && cv.isContourConvex(approx)) {
         const rect = cv.minAreaRect(approx) as RotatedRectFixed;
         const { width, height } = rect.size;
         const extent = area / (width * height);
@@ -164,13 +183,17 @@ class Refiner extends CVRunner {
   findPolygonsWithTries(
     img: Mat,
     ROI: Rect,
-    minArea = 100,
-    minExtent = 0.75,
-    topN = HOLE_COUNT,
+    options: Partial<DetectOptions> = defaultOptions,
   ) {
-    const p1 = this.findPolygons(img, ROI, minArea, minExtent, topN, false);
+    const opts: DetectOptions = {
+      ...defaultOptions,
+      ...options,
+      adaptive: false,
+    };
 
-    if (p1.length === topN) {
+    const p1 = this.findPolygons(img, ROI, opts);
+
+    if (p1.length === opts.topN) {
       return p1;
     }
 
@@ -178,11 +201,16 @@ class Refiner extends CVRunner {
       console.log('%c[worker] non-adaptive threshold failed, trying adaptive...', 'color: #f60');
     }
 
-    return this.findPolygons(img, ROI, minArea, minExtent, topN, true);
+    return this.findPolygons(img, ROI, {
+      ...opts,
+      adaptive: true,
+    });
   }
 
   pegHoleRotation(img: Mat, ROI: Rect) {
-    const polygons = this.findPolygonsWithTries(img, ROI);
+    const polygons = this.findPolygonsWithTries(img, ROI, {
+      minVertexCount: 6,
+    });
 
     if (polygons.length < HOLE_COUNT) {
       throw new Error('タップ穴を検出できませんでした');
@@ -209,7 +237,12 @@ class Refiner extends CVRunner {
   frameRotation(img: Mat, ROI: Rect) {
     const imgSize = img.cols * img.rows;
 
-    const frame = this.findPolygonsWithTries(img, ROI, imgSize * 0.5, 0, 1)[0];
+    const frame = this.findPolygonsWithTries(img, ROI, {
+      minArea: 0.5 * imgSize,
+      minExtent: 0,
+      minVertexCount: 4,
+      topN: 1,
+    })[0];
 
     if (!frame) {
       throw new Error('フレームを検出できませんでした');
