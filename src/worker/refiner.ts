@@ -97,7 +97,7 @@ class Refiner extends CVRunner {
     cv.cvtColor(cutImg, bwImg, cv.COLOR_RGBA2GRAY, 0);
 
     if (adaptive) {
-      cv.adaptiveThreshold(bwImg, bwImg, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY_INV, 11, 2);
+      cv.adaptiveThreshold(bwImg, bwImg, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY_INV, 51, 4);
     } else {
       cv.threshold(bwImg, bwImg, 100, 255, cv.THRESH_BINARY_INV);
     }
