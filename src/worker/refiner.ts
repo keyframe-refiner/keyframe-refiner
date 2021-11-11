@@ -83,8 +83,8 @@ class Refiner extends CVRunner {
       cv.threshold(bwImg, bwImg, 100, 255, cv.THRESH_BINARY_INV);
     }
 
-    // remove noise
-    cv.medianBlur(bwImg, bwImg, 3);
+    // remove noise (TODO: not needed?)
+    // cv.medianBlur(bwImg, bwImg, 3);
 
     // find contours
     const contours = new cv.MatVector();
@@ -330,6 +330,8 @@ class Refiner extends CVRunner {
       cv.BORDER_CONSTANT,
       new cv.Scalar(255, 255, 255, 255),
     );
+
+    // cv.resize(image, padded, size);
 
     const { center, angle, rectSize } = this.calcRotation(mode, padded, ROI);
     const tx = pivot.x - center.x;
