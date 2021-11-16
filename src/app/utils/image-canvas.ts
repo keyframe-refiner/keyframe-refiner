@@ -152,8 +152,8 @@ export class ImageCanvas {
     const dataURL = piexif.insert(exif, this.canvas.toDataURL(this.filetype));
     const decoded = decodeDataURL(dataURL);
 
-    const buffer = Array.from(removeJFIF(decoded), char => char.charCodeAt(0));
-    return new Blob([new Uint8Array(buffer)], {
+    const buffer = Uint8Array.from(removeJFIF(decoded), char => char.charCodeAt(0));
+    return new Blob([buffer], {
       type: this.filetype,
     });
   }
