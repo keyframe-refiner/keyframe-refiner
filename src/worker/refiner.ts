@@ -19,6 +19,7 @@ type DetectOptions = {
   minVertexCount: number,
   topN: number,
   adaptive: boolean,
+  useOtsu: boolean,
 };
 
 const HOLE_COUNT = 3;
@@ -29,6 +30,7 @@ const defaultOptions: DetectOptions = {
   minVertexCount: 4,
   topN: HOLE_COUNT,
   adaptive: false,
+  useOtsu: false,
 };
 
 // multiply two 3*3 transformation matrices which are represented as 1D array
@@ -83,6 +85,7 @@ class Refiner extends CVRunner {
       minVertexCount,
       topN,
       adaptive,
+      useOtsu,
     }: DetectOptions,
   ) {
     // conver to binary image
@@ -93,11 +96,21 @@ class Refiner extends CVRunner {
     if (adaptive) {
       cv.adaptiveThreshold(bwImg, bwImg, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY_INV, 21, 2);
     } else {
-      cv.threshold(bwImg, bwImg, 100, 255, cv.THRESH_BINARY_INV);
+      let thresholdType = cv.THRESH_BINARY_INV;
+
+      if (useOtsu) {
+        thresholdType |= cv.THRESH_OTSU;
+      }
+
+      cv.threshold(bwImg, bwImg, 100, 255, thresholdType);
     }
 
     // remove noise (TODO: not needed?)
     // cv.medianBlur(bwImg, bwImg, 3);
+
+    // the full area may be detected as a contour when using otsu
+    // so we need to set a maxima area to filter out it
+    const maxArea = useOtsu ? ROI.width * ROI.height * 0.9 : Infinity;
 
     // find contours
     const contours = new cv.MatVector();
@@ -114,7 +127,11 @@ class Refiner extends CVRunner {
       const approx = new cv.Mat();
       cv.approxPolyDP(contour, approx, 0.02 * arcLength, true);
 
-      if (approx.rows >= minVertexCount && area > minArea && cv.isContourConvex(approx)) {
+      if (
+        approx.rows >= minVertexCount &&
+        area > minArea && area < maxArea &&
+        cv.isContourConvex(approx)
+      ) {
         const rect = cv.minAreaRect(approx);
         const { width, height } = rect.size;
         const extent = area / (width * height);
@@ -203,7 +220,8 @@ class Refiner extends CVRunner {
 
   pegHoleRotation(img: Mat, ROI: Rect) {
     const polygons = this.findPolygonsWithTries(img, ROI, {
-      minVertexCount: 6,
+      useOtsu: true,
+      minVertexCount: 5, // TODO: find a better way to filter out the outer rects
     });
 
     if (polygons.length < HOLE_COUNT) {
