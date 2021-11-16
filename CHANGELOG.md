@@ -1,3 +1,9 @@
+## [1.0.0-beta.4](https://github.com/keyframe-refiner/keyframe-refiner/compare/v1.0.0-beta.3...v1.0.0-beta.4) (2021-11-16)
+
+### Fixes
+
+- **CV**: 大津の二値化を採用し、タップ穴の色と背景色が近い場合にもある程度対応しました。
+
 ## [1.0.0-beta.3](https://github.com/keyframe-refiner/keyframe-refiner/compare/v1.0.0-beta.2...v1.0.0-beta.3) (2021-11-11)
 
 ### Feature
