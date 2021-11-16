@@ -2,14 +2,8 @@ import cv from 'opencv-ts';
 import { MODE } from '../shared/mode';
 import { CVRunner } from './cv-runner';
 
-import type { Mat, Point, Rect, RotatedRect, Size } from 'opencv-ts';
+import type { Mat, Point, Rect, Size } from 'opencv-ts';
 import type { RequestMessageEvent } from '../shared/types';
-
-type RotatedRectFixed = RotatedRect & {
-  size: Size,
-  center: Point,
-  angle: number,
-};
 
 type Polygon = {
   area: number,
@@ -121,7 +115,7 @@ class Refiner extends CVRunner {
       cv.approxPolyDP(contour, approx, 0.02 * arcLength, true);
 
       if (approx.rows >= minVertexCount && area > minArea && cv.isContourConvex(approx)) {
-        const rect = cv.minAreaRect(approx) as RotatedRectFixed;
+        const rect = cv.minAreaRect(approx);
         const { width, height } = rect.size;
         const extent = area / (width * height);
 
