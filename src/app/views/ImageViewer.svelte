@@ -155,7 +155,7 @@
 
   // normalize wheel delta
   function wheelDelta(deltaY: number, deltaMode: number) {
-    return deltaY * ([1, 0.05, 0.002][deltaMode] || 1);
+    return -deltaY * ([0.01, 0.05, 1][deltaMode] || 0.01);
   }
 
   function wheelZoom(e: WheelEvent) {
@@ -167,8 +167,8 @@
     e.preventDefault();
 
     // deltaY > 0 => zoomIn, deltaY < 0 => zoomOut
-    const delta = wheelDelta(e.deltaY, e.deltaMode) / -100;
-    zoomAt(scale + delta, e.clientX, e.clientY);
+    const delta = Math.E ** wheelDelta(e.deltaY, e.deltaMode);
+    zoomAt(scale * delta, e.clientX, e.clientY);
   }
 
   function localToReal(p: Point) {
