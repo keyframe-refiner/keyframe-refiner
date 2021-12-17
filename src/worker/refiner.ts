@@ -229,10 +229,13 @@ class Refiner extends CVRunner {
     }
 
     const { center: c1 } = polygons[0];
-    const { center: c2 } = polygons[1];
+    const { center: c3 } = polygons[2];
 
-    // use the circular hole (the middle one) as pivot
-    const center = new cv.Point(c2.x, c2.y);
+    // use the center of the left and right hole as pivot
+    const center = new cv.Point(
+      (c1.x + c3.x) / 2,
+      (c1.y + c3.y) / 2,
+    );
 
     if (this.debug) {
       // draw centroids
@@ -241,7 +244,7 @@ class Refiner extends CVRunner {
       });
     }
 
-    const angle = Math.atan2(c2.y - c1.y, c2.x - c1.x) * 180 / Math.PI;
+    const angle = Math.atan2(c3.y - c1.y, c3.x - c1.x) * 180 / Math.PI;
 
     return { center, angle, rectSize: polygons[0].rectSize };
   }
