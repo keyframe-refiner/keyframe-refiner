@@ -22,13 +22,11 @@ type DetectOptions = {
   useOtsu: boolean,
 };
 
-const HOLE_COUNT = 3;
-
 const defaultOptions: DetectOptions = {
+  topN: 3,
   minArea: 100,
   minExtent: 0.75,
   minVertexCount: 4,
-  topN: HOLE_COUNT,
   adaptive: false,
   useOtsu: false,
 };
@@ -212,10 +210,16 @@ class Refiner extends CVRunner {
       console.log('%c[worker] non-adaptive threshold failed, trying adaptive...', 'color: #f60');
     }
 
-    return this.findPolygons(img, ROI, {
+    const p2 = this.findPolygons(img, ROI, {
       ...opts,
       adaptive: true,
     });
+
+    if (p2.length === opts.topN) {
+      return p2;
+    }
+
+    throw new Error('タップ穴を検出できませんでした');
   }
 
   pegHoleRotation(img: Mat, ROI: Rect) {
@@ -223,10 +227,6 @@ class Refiner extends CVRunner {
       useOtsu: true,
       minVertexCount: 5, // TODO: find a better way to filter out the outer rects
     });
-
-    if (polygons.length < HOLE_COUNT) {
-      throw new Error('タップ穴を検出できませんでした');
-    }
 
     const { center: c1 } = polygons[0];
     const { center: c3 } = polygons[2];
