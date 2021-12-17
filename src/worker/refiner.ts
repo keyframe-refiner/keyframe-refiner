@@ -396,7 +396,7 @@ class Refiner extends CVRunner {
 
     cv.warpAffine(
       padded, result, M, size,
-      cv.INTER_LINEAR, cv.BORDER_CONSTANT, new cv.Scalar(255, 255, 255, 255),
+      cv.INTER_CUBIC, cv.BORDER_CONSTANT, new cv.Scalar(255, 255, 255, 255),
     );
 
     // clear
