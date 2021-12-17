@@ -219,7 +219,7 @@ class Refiner extends CVRunner {
       return p2;
     }
 
-    throw new Error('タップ穴を検出できませんでした');
+    throw new Error('対象を検出できませんでした');
   }
 
   pegHoleRotation(img: Mat, ROI: Rect) {
@@ -253,15 +253,11 @@ class Refiner extends CVRunner {
     const imgSize = img.cols * img.rows;
 
     const frame = this.findPolygonsWithTries(img, ROI, {
+      topN: 1,
       minArea: 0.5 * imgSize,
       minExtent: 0,
       minVertexCount: 4,
-      topN: 1,
     })[0];
-
-    if (!frame) {
-      throw new Error('フレームを検出できませんでした');
-    }
 
     if (this.debug) {
       // draw centroids
