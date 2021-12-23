@@ -341,9 +341,10 @@ class Refiner extends CVRunner {
 
     const { mode, refImage, ROI } = this.configs!;
 
-    const { rectSize } = this.calcRotation(mode, refImage, ROI);
-
-    this.baseSize = rectSize;
+    if (mode === MODE.FRAME) {
+      const { rectSize } = this.calcRotation(mode, refImage, ROI);
+      this.baseSize = rectSize;
+    }
   }
 
   override clean(evt: RequestMessageEvent<'clean'>) {
