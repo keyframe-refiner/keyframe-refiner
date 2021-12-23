@@ -229,12 +229,13 @@ class Refiner extends CVRunner {
     });
 
     const { center: c1 } = polygons[0];
+    const { center: c2 } = polygons[1];
     const { center: c3 } = polygons[2];
 
-    // use the center of the left and right hole as pivot
+    // use the center of the three holes as the pivot
     const center = new cv.Point(
-      (c1.x + c3.x) / 2,
-      (c1.y + c3.y) / 2,
+      (c1.x + c2.x + c3.x) / 3,
+      (c1.y + c2.y + c3.y) / 3,
     );
 
     if (this.debug) {
@@ -387,6 +388,16 @@ class Refiner extends CVRunner {
     if (mode === MODE.FRAME && this.configs!.fitFrame) {
       sx = this.baseSize!.width / rectSize.width;
       sy = this.baseSize!.height / rectSize.height;
+    }
+
+    if (this.debug) {
+      console.log([
+        `tx: ${tx}`,
+        `ty: ${ty}`,
+        `sx: ${sx}`,
+        `sy: ${sy}`,
+        `angle: ${angle}`,
+      ].join('\n'));
     }
 
     const M = this.getRotationMatrix(center, angle, tx, ty, sx, sy);
