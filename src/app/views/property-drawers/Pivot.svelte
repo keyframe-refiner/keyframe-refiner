@@ -48,12 +48,12 @@
       <tbody>
         <tr>
           <td>x</td>
-          <td>{Math.round($pivotPoint.x)}</td>
+          <td class="ellipsis">{$pivotPoint.x}</td>
         </tr>
 
         <tr>
           <td>y</td>
-          <td>{Math.round($pivotPoint.y)}</td>
+          <td class="ellipsis">{$pivotPoint.y}</td>
         </tr>
       </tbody>
     </table>
@@ -78,6 +78,16 @@
 
     &:not(:disabled) {
       background-color: theme.$blue-grey-500;
+    }
+  }
+
+  .ellipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    &:hover {
+      white-space: inherit;
     }
   }
 </style>
