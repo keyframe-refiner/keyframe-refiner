@@ -358,7 +358,9 @@ class Refiner extends CVRunner {
     return center;
   }
 
-  override async onRequestProcessing(mode: MODE, image: Mat, refImage: Mat, ROI: Rect, pivot: Point) {
+  override async onRequestProcessing(image: Mat, filename: string) {
+    const { mode, refImage, ROI, pivot } = this.configs!;
+
     // ensure even size, see https://github.com/keyframe-refiner/keyframe-refiner/issues/1
     const size = new cv.Size(
       refImage.cols % 2 === 0 ? refImage.cols : refImage.cols + 1,
@@ -392,6 +394,7 @@ class Refiner extends CVRunner {
 
     if (this.debug) {
       console.log([
+        `filename: ${filename}`,
         `tx: ${tx}`,
         `ty: ${ty}`,
         `sx: ${sx}`,

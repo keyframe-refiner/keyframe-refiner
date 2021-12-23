@@ -48,6 +48,7 @@ export type RequestBodies = {
   },
   'request-processing': {
     image: ImageBuffer,
+    filename: string,
   },
 };
 

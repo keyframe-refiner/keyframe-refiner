@@ -48,15 +48,12 @@ export class CVRunner {
   /**
    * Default handler that is called when the main page requests to process an image
    *
-   * @param mode     detection mode
    * @param image    input image
-   * @param refImage reference image
-   * @param ROI      region of interest
-   * @param pivot    pivot point
+   * @param filename filename of the input image
    *
    * @return the result
    */
-  async onRequestProcessing(_mode: MODE, image: Mat, _refImage: Mat, _ROI: Rect, _pivot: Point): Promise<Mat> {
+  async onRequestProcessing(image: Mat, _filename: string): Promise<Mat> {
     return image.clone();
   }
 
@@ -95,12 +92,10 @@ export class CVRunner {
   }
 
   async requestProcessing(evt: RequestMessageEvent<'request-processing'>) {
-    const { mode, refImage, ROI, pivot } = this.configs!;
-
     const mat = this.createImageMat(evt.data.body.image);
 
     try {
-      const result = await this.onRequestProcessing(mode, mat, refImage, ROI, pivot);
+      const result = await this.onRequestProcessing(mat, evt.data.body.filename);
       const { buffer } = new Uint8ClampedArray(result.data);
 
       this.respond(evt, {

@@ -133,6 +133,7 @@ export class CVWorker {
       try {
         const { image } = await this.#sendOnce(worker, 'request-processing', {
           image: imageBuffer,
+          filename: inputs[jobIndex].filename,
         }, [imageBuffer.buffer]);
 
         const { filename, filetype, exif } = inputs[jobIndex];
