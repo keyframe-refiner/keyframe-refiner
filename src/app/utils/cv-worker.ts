@@ -78,8 +78,8 @@ export class CVWorker {
     );
 
     return new Point({
-      x: Math.round(pivot.x),
-      y: Math.round(pivot.y),
+      x: pivot.x,
+      y: pivot.y,
     });
   }
 

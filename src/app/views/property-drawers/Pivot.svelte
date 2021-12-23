@@ -48,12 +48,12 @@
       <tbody>
         <tr>
           <td>x</td>
-          <td>{$pivotPoint.x}</td>
+          <td>{Math.round($pivotPoint.x)}</td>
         </tr>
 
         <tr>
           <td>y</td>
-          <td>{$pivotPoint.y}</td>
+          <td>{Math.round($pivotPoint.y)}</td>
         </tr>
       </tbody>
     </table>
