@@ -3,6 +3,7 @@
   import {
     mdiImageMultiple,
   } from '@mdi/js';
+  import { GoogleAnalytics } from '@beyonk/svelte-google-analytics';
 
   import DnD from './components/DnD.svelte';
   import SVGIcon from './components/SVGIcon.svelte';
@@ -77,6 +78,8 @@
 </main>
 
 <div id="modal"></div>
+
+<GoogleAnalytics properties={['G-N11KZ2H6B9']} />
 
 <style lang="scss">
   main {
