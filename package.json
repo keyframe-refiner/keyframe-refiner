@@ -26,6 +26,7 @@
     "defaults"
   ],
   "dependencies": {
+    "@beyonk/svelte-google-analytics": "^2.2.0",
     "@mdi/js": "^6.2.95",
     "@smui/button": "^4.2.0",
     "@smui/circular-progress": "^4.2.0",
