@@ -377,15 +377,15 @@ class Refiner extends CVRunner {
     const padded = new cv.Mat();
 
     // add padding to image to fit the reference image
-    // cv.copyMakeBorder(
-    //   image, padded,
-    //   0, Math.max(0, size.height - image.rows),
-    //   0, Math.max(0, size.width - image.cols),
-    //   cv.BORDER_CONSTANT,
-    //   new cv.Scalar(255, 255, 255, 255),
-    // );
+    cv.copyMakeBorder(
+      image, padded,
+      0, Math.max(0, size.height - image.rows),
+      0, Math.max(0, size.width - image.cols),
+      cv.BORDER_CONSTANT,
+      new cv.Scalar(255, 255, 255, 255),
+    );
 
-    cv.resize(image, padded, size);
+    // cv.resize(image, padded, size);
 
     const { center, angle, rectSize } = this.calcRotation(mode, padded, ROI);
     const tx = pivot.x - center.x;
