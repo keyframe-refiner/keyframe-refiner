@@ -1,0 +1,36 @@
+name: "\U0001F41B Bug Report"
+description: File a bug report
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting an issue.
+
+        Please fill out the following form as detailed as possible to help us fix the bug.
+  - type: input
+    attributes:
+      label: OS
+  - type: input
+    attributes:
+      label: Browser
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: Description
+      description: Describe the bug and the expected behavior.
+      placeholder: |
+        **Summary**
+        ...
+
+        **Expected Behavior**
+        ...
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: Steps to Reproduce
+      description: Tell us how to reproduce it.
+      placeholder: |
+        1. ...
+        2. ...
