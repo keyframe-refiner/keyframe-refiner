@@ -159,8 +159,8 @@ class Refiner extends CVRunner {
           // draw rotated rect
           const vertices = cv.rotatedRectPoints(rect);
 
-          for (let i = 0; i < 4; i++) {
-            cv.line(cutImg, vertices[i], vertices[(i + 1) % 4], new cv.Scalar(0, 0, 255, 255), 3, cv.LINE_AA, 0);
+          for (let j = 0; j < 4; j++) {
+            cv.line(cutImg, vertices[j], vertices[(j + 1) % 4], new cv.Scalar(0, 0, 255, 255), 3, cv.LINE_AA, 0);
           }
         }
       }
@@ -194,6 +194,8 @@ class Refiner extends CVRunner {
     ROI: Rect,
     options: Partial<DetectOptions> = defaultOptions,
   ) {
+    const clone = img.clone(); // TODO: remove clone
+
     const opts: DetectOptions = {
       ...defaultOptions,
       ...options,
@@ -203,6 +205,7 @@ class Refiner extends CVRunner {
     const p1 = this.findPolygons(img, ROI, opts);
 
     if (p1.length === opts.topN) {
+      clone.delete();
       return p1;
     }
 
@@ -210,16 +213,20 @@ class Refiner extends CVRunner {
       console.log('%c[worker] non-adaptive threshold failed, trying adaptive...', 'color: #f60');
     }
 
+    // restore the original image
+    clone.copyTo(img);
+    clone.delete();
+
     const p2 = this.findPolygons(img, ROI, {
       ...opts,
       adaptive: true,
     });
 
-    if (p2.length === opts.topN) {
-      return p2;
+    if (p2.length !== opts.topN) {
+      throw new Error('対象を検出できませんでした');
     }
 
-    throw new Error('対象を検出できませんでした');
+    return p2;
   }
 
   pegHoleRotation(img: Mat, ROI: Rect) {
