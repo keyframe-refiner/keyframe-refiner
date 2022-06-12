@@ -8,6 +8,7 @@
 
   import { ImageState, getImageState } from '../utils/image-state';
   import { VariableTracker } from '../utils/variable-tracker';
+  import { createSignal } from '../utils/signal';
   import SVGIcon from '../components/SVGIcon.svelte';
   import Uploader from '../components/Uploader.svelte';
   import RootDialog from '../components/RootDialog.svelte';
@@ -33,12 +34,17 @@
   $: thumbHeight = thumbSize + thumbSpacing;
   $: allowEdit = $currentStep !== STEP.RUN_CV;
 
+  // delete image
+  let deleteFilename: string;
+  const deleteSignal = createSignal();
+  const deleteSignalActivated = deleteSignal.activated;
+
+  // clear image
+  const clearSignal = createSignal();
+  const clearSignalActivated = clearSignal.activated;
+
   let uploader: Uploader;
   let scrollbar: Scrollbar;
-  let deleteIndex: number;
-  let deleteFilename: string | undefined;
-  let openDeleteConfirm = false;
-  let openClearConfirm = false;
   let fileInput: HTMLInputElement;
 
   let startIndex = 0;
@@ -108,7 +114,7 @@
   }
 
   async function navigate(delta: number) {
-    if (openDeleteConfirm || openClearConfirm) {
+    if ($deleteSignalActivated || $clearSignalActivated) {
       return;
     }
 
@@ -146,7 +152,7 @@
 
     switch (e.key) {
       case 'Delete':
-        requestDelete($selectedIndex);
+        deleteImage($selectedIndex);
         break;
 
       case 'ArrowUp':
@@ -161,11 +167,24 @@
     }
   }
 
-  async function deleteImage() {
-    const image = $inputList.get(deleteIndex)!;
-    $inputList = $inputList.remove(deleteIndex);
+  async function deleteImage(index: number) {
+    const image = $inputList.get(index)!;
 
-    if (deleteIndex === $selectedIndex) {
+    deleteFilename = image.filename;
+
+    if (image === $refImage) {
+      deleteFilename += '（基準画像）';
+    }
+
+    const confirmed = await deleteSignal.init();
+
+    if (!confirmed) {
+      return;
+    }
+
+    $inputList = $inputList.remove(index);
+
+    if (index === $selectedIndex) {
       $selectedIndex = clamp($selectedIndex, 0, $inputList.size - 1);
     }
 
@@ -175,27 +194,17 @@
     }
   }
 
-  function requestDelete(index: number) {
-    const image = $inputList.get(index)!;
-
-    deleteIndex = index;
-    openDeleteConfirm = true;
-    deleteFilename = image.filename;
-
-    if (image === $refImage) {
-      deleteFilename += '（基準画像）';
-    }
-  }
-
   async function clearAll() {
+    const confirmed = await clearSignal.init();
+
+    if (!confirmed) {
+      return;
+    }
+
     $inputList = $inputList.clear();
     $selectedIndex = 0;
     $refImage = undefined;
     stepManager.reset();
-  }
-
-  function requestClear() {
-    openClearConfirm = true;
   }
 
   function upload() {
@@ -239,7 +248,7 @@
         {/if}
 
         {#if allowEdit}
-          <span class="delete-icon" title="この画像を削除" on:click|stopPropagation={() => requestDelete(index)}>
+          <span class="delete-icon" title="この画像を削除" on:click|stopPropagation={() => deleteImage(index)}>
             <SVGIcon icon={mdiTrashCanOutline} />
           </span>
         {/if}
@@ -271,7 +280,7 @@
 
 {#if allowEdit && $inputList.size !== 0}
   <Portal target="body">
-    <div class="clear-all" on:click={requestClear}>
+    <div class="clear-all" on:click={clearAll}>
       <span>すべての画像を削除</span>
       <SVGIcon icon={mdiDeleteSweep} />
     </div>
@@ -281,26 +290,26 @@
 <RootDialog
   scrimClickAction=""
   escapeKeyAction=""
-  bind:open={openDeleteConfirm}
+  bind:open={$deleteSignalActivated}
 >
   <Title>画像の削除</Title>
   <Content>“{deleteFilename}”を削除しますか？</Content>
   <Actions>
-    <Button>キャンセル</Button>
-    <Button color="secondary" on:click={deleteImage}>削除</Button>
+    <Button on:click={deleteSignal.cancel}>キャンセル</Button>
+    <Button color="secondary" on:click={deleteSignal.ok}>削除</Button>
   </Actions>
 </RootDialog>
 
 <RootDialog
   scrimClickAction=""
   escapeKeyAction=""
-  bind:open={openClearConfirm}
+  bind:open={$clearSignalActivated}
 >
   <Title>画像の削除</Title>
   <Content>すべての画像を削除しますか？</Content>
   <Actions>
-    <Button>キャンセル</Button>
-    <Button color="secondary" on:click={clearAll}>削除</Button>
+    <Button on:click={clearSignal.cancel}>キャンセル</Button>
+    <Button color="secondary" on:click={clearSignal.ok}>削除</Button>
   </Actions>
 </RootDialog>
 
