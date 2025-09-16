@@ -25,6 +25,7 @@
     fitFrame,
   } from '../../store';
   import { mimeToExt } from '../../utils/mime-to-ext';
+  import { MIMETYPE } from "../../../shared/mimetype";
 
   const { currentStep } = stepManager;
   const targetStep = STEP.RUN_CV;
@@ -80,12 +81,13 @@
       .map((image: ImageCanvas, index) => async () => {
         // remove extension from filename
         const filename = image.filename.replace(/\.[^/.]+$/, '');
+        const filetype = $outputMIME === MIMETYPE.AS_IS ? image.filetype : $outputMIME;
 
         await zipWriter.add(
           $filenameTemplate
             .replace('{filename}', filename)
-            .replace('{index}', String(index + 1)) + '.' + mimeToExt($outputMIME),
-          new BlobReader(await image.toBlob()),
+            .replace('{index}', String(index + 1)) + '.' + mimeToExt(filetype),
+          new BlobReader(await image.toBlob(filetype)),
           { bufferedWrite: true },
         );
       });

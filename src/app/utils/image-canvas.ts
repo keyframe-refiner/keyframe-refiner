@@ -142,19 +142,21 @@ export class ImageCanvas {
     return new ImageCanvas(canvas, filename, filetype, exif);
   }
 
-  async toBlob(): Promise<Blob> {
-    if (this.filetype !== MIME_JPEG) {
-      return canvasToBlob(this.canvas, this.filetype);
+  async toBlob(filetype?: string): Promise<Blob> {
+    const outputFiletype = filetype || this.filetype;
+
+    if (outputFiletype !== MIME_JPEG || !this.exif) {
+      return canvasToBlob(this.canvas, outputFiletype);
     }
 
     // add resolution data
     const exif = piexif.dump(this.exif);
-    const dataURL = piexif.insert(exif, this.canvas.toDataURL(this.filetype, 1.0));
+    const dataURL = piexif.insert(exif, this.canvas.toDataURL(outputFiletype, 1.0));
     const decoded = decodeDataURL(dataURL);
 
     const buffer = Uint8Array.from(removeJFIF(decoded), char => char.charCodeAt(0));
     return new Blob([buffer], {
-      type: this.filetype,
+      type: outputFiletype,
     });
   }
 
