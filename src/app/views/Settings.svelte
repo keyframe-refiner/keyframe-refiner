@@ -117,6 +117,7 @@
         <Option value={MIMETYPE.PNG}>PNG (透過対応)</Option>
         <Option value={MIMETYPE.JPEG}>JPEG (非透過, 高圧縮)</Option>
         <Option value={MIMETYPE.WEBP}>WebP (透過対応, 高圧縮)</Option>
+        <Option value={MIMETYPE.TGA}>TGA (透過対応, 非圧縮)</Option>
       </Select>
     </div>
 

@@ -8,7 +8,11 @@ export function mimeToExt(mime: string) {
       return 'jpg';
     case MIMETYPE.WEBP:
       return 'webp';
-    default:
+    case MIMETYPE.TGA:
+      return 'tga';
+    case MIMETYPE.AS_IS:
       return '{as_is}';
+    default:
+      return 'unknown';
   }
 }

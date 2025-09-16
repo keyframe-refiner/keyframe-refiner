@@ -1,6 +1,8 @@
 import piexif, { ImageIFD, ExifIFD } from 'piexifjs';
+// import { encodeTga, decodeTga } from 't-tga-codec';
 
-const MIME_JPEG = 'image/jpeg';
+import { MIMETYPE } from '../../shared/mimetype';
+
 const DEFAULT_DPI = [96, 96, 2]; // [x, y, unit]
 const JFIF_MARKER = String.fromCharCode(0xFF) + String.fromCharCode(0xE0);
 
@@ -100,13 +102,26 @@ export class ImageCanvas {
   }
 
   static async fromFile(file: File): Promise<ImageCanvas> {
-    const img = document.createElement('img');
     const canvas = document.createElement('canvas');
+
+    if (file.type === MIMETYPE.TGA) {
+      const { decodeTga } = await import('t-tga-codec');
+      const decoded = await decodeTga(new Uint8Array(await file.arrayBuffer()));
+      const imageData = new ImageData(
+        new Uint8ClampedArray(decoded.image.data),
+        decoded.image.width,
+        decoded.image.height,
+      );
+
+      return ImageCanvas.fromImageData(imageData, file.name, file.type);
+    }
+
+    const img = document.createElement('img');
     const url = URL.createObjectURL(file);
 
     let exif: any;
 
-    if (file.type === MIME_JPEG) {
+    if (file.type === MIMETYPE.JPEG) {
       exif = await getEXIF(file);
     }
 
@@ -145,7 +160,21 @@ export class ImageCanvas {
   async toBlob(filetype?: string): Promise<Blob> {
     const outputFiletype = filetype || this.filetype;
 
-    if (outputFiletype !== MIME_JPEG || !this.exif) {
+    if (outputFiletype === MIMETYPE.TGA) {
+      const { encodeTga } = await import('t-tga-codec');
+      const imageData = this.getImageData();
+      const tgaData = await encodeTga({
+        width: imageData.width,
+        height: imageData.height,
+        data: new Uint8Array(imageData.data.buffer),
+      });
+
+      return new Blob([new Uint8Array(tgaData.data)], {
+        type: outputFiletype,
+      });
+    }
+
+    if (outputFiletype !== MIMETYPE.JPEG || !this.exif) {
       return canvasToBlob(this.canvas, outputFiletype);
     }
 

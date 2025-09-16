@@ -51,6 +51,7 @@
     "piexifjs": "^1.0.6",
     "smooth-scrollbar": "^8.6.3",
     "svelte-portal": "^2.1.2",
+    "t-tga-codec": "^0.1.0",
     "tslib": "^2.1.0"
   },
   "devDependencies": {
