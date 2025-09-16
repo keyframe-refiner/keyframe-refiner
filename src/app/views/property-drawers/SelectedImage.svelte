@@ -11,7 +11,7 @@
     inputList,
     outputList,
   } from '../../store';
-  import { STEP } from "../../constants";
+  import { STEP } from '../../constants';
   const { currentStep } = stepManager;
 
   $: image = getImageState($selectedInput!, $selectedOutput, $refImage, $currentStep).image;

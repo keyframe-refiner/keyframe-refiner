@@ -236,7 +236,7 @@
         class:dimmed
         class:error
         class:selected={$selectedIndex === index}
-        title={image.filename}
+        title={image?.filename}
         on:click={() => { $selectedIndex = index; }}
       >
         <Preview {image} />

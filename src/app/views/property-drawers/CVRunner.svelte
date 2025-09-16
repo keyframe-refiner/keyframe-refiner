@@ -1,5 +1,6 @@
 <script lang="ts">
   import pAll from 'p-all';
+  import { onMount } from 'svelte';
   import { ZipWriter, BlobWriter, BlobReader } from '@zip.js/zip.js';
   import { mdiPackageDown, mdiSpaceInvaders } from '@mdi/js';
   import Portal from 'svelte-portal';
@@ -38,6 +39,47 @@
     progress = 0;
   });
 
+  function formatName(image: ImageCanvas, index: number) {
+    // remove extension from filename
+    const filename = image.filename.replace(/\.[^/.]+$/, '');
+    const filetype = $outputMIME === MIMETYPE.AS_IS ? image.filetype : $outputMIME;
+
+    const newName = $filenameTemplate
+      .replace('{filename}', filename)
+      .replace('{index}', String(index + 1)) + '.' + mimeToExt(filetype);
+
+    return image.rename(newName).changeFiletype(filetype);
+  }
+
+  onMount(() => {
+    function renameAllOutputImages() {
+      $outputList = $outputList.map((image, i) => {
+        if (image instanceof ImageCanvas) {
+          const originalName = $inputList.get(i)?.filename;
+          return formatName(originalName ? image.rename(originalName) : image, i);
+        }
+
+        return image;
+      });
+    }
+
+    const unlisten = [
+      filenameTemplate.subscribe(() => {
+        renameAllOutputImages();
+      }),
+      outputMIME.subscribe(mime => {
+        if (mime === MIMETYPE.AS_IS) {
+          return;
+        }
+        renameAllOutputImages();
+      }),
+    ];
+
+    return () => {
+      unlisten.forEach(fn => fn());
+    };
+  });
+
   async function runCV() {
     if (!$refImage) {
       return;
@@ -52,15 +94,7 @@
         if (res instanceof Error) {
           $outputList = $outputList.set(idx, res);
         } else {
-          // remove extension from filename
-          const filename = res.filename.replace(/\.[^/.]+$/, '');
-          const filetype = $outputMIME === MIMETYPE.AS_IS ? res.filetype : $outputMIME;
-
-          const newName = $filenameTemplate
-            .replace('{filename}', filename)
-            .replace('{index}', String(idx + 1)) + '.' + mimeToExt(filetype);
-
-          $outputList = $outputList.set(idx, res.rename(newName).changeFiletype(filetype));
+          $outputList = $outputList.set(idx, formatName(res, idx));
         }
 
         progress = prg;

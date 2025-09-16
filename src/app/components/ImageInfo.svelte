@@ -103,7 +103,7 @@
     gap: 0.25em;
 
     input {
-      width: 100px;
+      width: 90px;
       background: var(--placeholder);
       border: none;
       outline: none;
