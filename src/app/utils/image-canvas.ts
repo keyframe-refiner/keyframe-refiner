@@ -1,7 +1,9 @@
 import piexif, { ImageIFD, ExifIFD } from 'piexifjs';
-// import { encodeTga, decodeTga } from 't-tga-codec';
+import type { IDecodedTga, IEncodeTgaOptions } from 't-tga-codec';
 
 import { MIMETYPE } from '../../shared/mimetype';
+
+type TGAMeta = IDecodedTga['details']
 
 const DEFAULT_DPI = [96, 96, 2]; // [x, y, unit]
 const JFIF_MARKER = String.fromCharCode(0xFF) + String.fromCharCode(0xE0);
@@ -94,6 +96,7 @@ export class ImageCanvas {
     readonly filename: string,
     readonly filetype: string,
     readonly exif?: any,
+    readonly tgaMeta?: TGAMeta,
   ) {
     this.width = canvas.width;
     this.height = canvas.height;
@@ -107,13 +110,14 @@ export class ImageCanvas {
     if (file.type === MIMETYPE.TGA) {
       const { decodeTga } = await import('t-tga-codec');
       const decoded = await decodeTga(new Uint8Array(await file.arrayBuffer()));
+
       const imageData = new ImageData(
         new Uint8ClampedArray(decoded.image.data),
         decoded.image.width,
         decoded.image.height,
       );
 
-      return ImageCanvas.fromImageData(imageData, file.name, file.type);
+      return ImageCanvas.fromImageData(imageData, file.name, file.type, undefined, decoded.details);
     }
 
     const img = document.createElement('img');
@@ -145,7 +149,7 @@ export class ImageCanvas {
     });
   }
 
-  static fromImageData(imageData: ImageData, filename: string, filetype: string, exif?: any) {
+  static fromImageData(imageData: ImageData, filename: string, filetype: string, exif?: any, tgaMeta?: TGAMeta) {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d')!;
 
@@ -154,7 +158,7 @@ export class ImageCanvas {
 
     ctx.putImageData(imageData, 0, 0);
 
-    return new ImageCanvas(canvas, filename, filetype, exif);
+    return new ImageCanvas(canvas, filename, filetype, exif, tgaMeta);
   }
 
   async toBlob(filetype?: string): Promise<Blob> {
@@ -163,11 +167,21 @@ export class ImageCanvas {
     if (outputFiletype === MIMETYPE.TGA) {
       const { encodeTga } = await import('t-tga-codec');
       const imageData = this.getImageData();
+      const options: IEncodeTgaOptions = {};
+
+      if (this.tgaMeta) {
+        options.bitDepth = this.tgaMeta.header.bitDepth;
+        options.imageId = this.tgaMeta.imageId;
+        options.imageType = this.tgaMeta.header.imageType;
+        options.origin = this.tgaMeta.header.origin;
+        options.screenOrigin = this.tgaMeta.header.screenOrigin;
+      }
+
       const tgaData = await encodeTga({
         width: imageData.width,
         height: imageData.height,
         data: new Uint8Array(imageData.data.buffer),
-      });
+      }, options);
 
       return new Blob([new Uint8Array(tgaData.data)], {
         type: outputFiletype,

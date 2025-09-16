@@ -77,7 +77,15 @@
     const zipWriter = new ZipWriter(new BlobWriter('application/zip'));
 
     const actions = [...$outputList]
-      .filter(res => res instanceof ImageCanvas)
+      // .filter(res => res instanceof ImageCanvas)
+      .map((res, i) => {
+        if (res instanceof ImageCanvas) {
+          return res;
+        }
+
+        // fallback to input image
+        return $inputList.get(0);
+      })
       .map((image: ImageCanvas, index) => async () => {
         // remove extension from filename
         const filename = image.filename.replace(/\.[^/.]+$/, '');
