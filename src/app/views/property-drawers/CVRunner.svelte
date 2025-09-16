@@ -55,8 +55,13 @@
     function renameAllOutputImages() {
       $outputList = $outputList.map((image, i) => {
         if (image instanceof ImageCanvas) {
-          const originalName = $inputList.get(i)?.filename;
-          return formatName(originalName ? image.rename(originalName) : image, i);
+          const originalFile = $inputList.get(i);
+          return formatName(
+            originalFile
+              ? image.rename(originalFile.filename).changeFiletype(originalFile.filetype)
+              : image,
+            i,
+          );
         }
 
         return image;

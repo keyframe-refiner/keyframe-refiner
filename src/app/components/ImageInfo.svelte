@@ -99,7 +99,6 @@
   .rename {
     display: flex;
     align-items: baseline;
-    justify-content: space-between;
     gap: 0.25em;
 
     input {
