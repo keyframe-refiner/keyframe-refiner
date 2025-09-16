@@ -40,7 +40,7 @@
                 <span>{image.filename}</span>
               {:else}
                 <div class="rename">
-                  <input type="text" bind:value={filename} on:input={e => handleRename(e.target.value)} />
+                  <input type="text" bind:value={filename} on:input={e => handleRename(e.target.value)} on:keydown|stopPropagation />
                   <span>.{extName}</span>
                 </div>
               {/if}
