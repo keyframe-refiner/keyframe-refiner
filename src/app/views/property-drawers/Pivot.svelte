@@ -1,7 +1,7 @@
 <script lang="ts">
   import Button from '@smui/button/styled';
   import ParamDrawer from '../../components/ParamDrawer.svelte';
-  import { STEP } from '../../constants';
+  import { STEP, MODE } from '../../constants';
   import {
     pivotPoint,
     refImage,
@@ -38,7 +38,7 @@
 
 <ParamDrawer
   {targetStep}
-  title="基準位置"
+  title={'基準位置' + ($detectMode === MODE.PEG_HOLE ? '（タップ穴）' : '（フレーム）')}
   buttonLabel="基準位置を設定"
   bind:visible={$showPivot}
   on:next={() => { $showROI = true; $showPivot = true; }}
