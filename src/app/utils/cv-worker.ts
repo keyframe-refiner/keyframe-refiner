@@ -146,7 +146,8 @@ export class CVWorker {
 
         result = ImageCanvas.fromImageData(
           imageData,
-          filename.replace(/(?=\.\w+$)/, '_out'),
+          // filename.replace(/(?=\.\w+$)/, '_out'),
+          filename,
           filetype,
           exif,
         );

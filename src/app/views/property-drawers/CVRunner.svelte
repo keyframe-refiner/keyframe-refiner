@@ -20,8 +20,11 @@
     cvWorker,
     stepManager,
     detectMode,
+    outputMIME,
+    filenameTemplate,
     fitFrame,
   } from '../../store';
+  import { mimeToExt } from '../../utils/mime-to-ext';
 
   const { currentStep } = stepManager;
   const targetStep = STEP.RUN_CV;
@@ -74,11 +77,18 @@
 
     const actions = [...$outputList]
       .filter(res => res instanceof ImageCanvas)
-      .map((image: ImageCanvas) => async () => zipWriter.add(
-        image.filename,
-        new BlobReader(await image.toBlob()),
-        { bufferedWrite: true },
-      ));
+      .map((image: ImageCanvas, index) => async () => {
+        // remove extension from filename
+        const filename = image.filename.replace(/\.[^/.]+$/, '');
+
+        await zipWriter.add(
+          $filenameTemplate
+            .replace('{filename}', filename)
+            .replace('{index}', String(index + 1)) + '.' + mimeToExt($outputMIME),
+          new BlobReader(await image.toBlob()),
+          { bufferedWrite: true },
+        );
+      });
 
     // HACK: image.toBlob() is a time-consuming task and will freeze the UI for seconds,
     // so wait for UI updating here...

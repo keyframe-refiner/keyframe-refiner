@@ -1,14 +1,16 @@
 <script lang="ts">
-  import Radio from '@smui/radio/styled';
   import Button from '@smui/button/styled';
-  import List, { Item, Graphic, Text } from '@smui/list/styled';
-  import { Title, Content, Actions, InitialFocus } from '@smui/dialog/styled';
+  import { Title, Content, Actions } from '@smui/dialog/styled';
+  import Select, { Option } from '@smui/select/styled';
+  import HelperText from '@smui/textfield/helper-text/styled';
+  import Textfield from '@smui/textfield/styled';
   import {
     mdiAlphaHCircleOutline,
     mdiAlphaFBoxOutline,
     mdiGithub,
     mdiBugCheckOutline,
     mdiFitToPageOutline,
+    mdiCog,
   } from '@mdi/js';
 
   import SVGIcon from '../components/SVGIcon.svelte';
@@ -25,17 +27,25 @@
     showPivot,
     showROI,
     cvWorker,
+    outputMIME,
+    filenameTemplate,
   } from '../store';
+  import { MIMETYPE } from '../../shared/mimetype';
+  import { mimeToExt } from "../utils/mime-to-ext";
 
   export let openDialog = false;
 
   const { currentStep } = stepManager;
 
-  let selection = $detectMode;
+  let internalDetectMoe = $detectMode;
+  let internalFilenameTemplate = $filenameTemplate;
+  let internalOutputMIME = $outputMIME;
 
   function openModeDialog() {
     openDialog = true;
-    selection = $detectMode;
+    internalDetectMoe = $detectMode;
+    internalFilenameTemplate = $filenameTemplate;
+    internalOutputMIME = $outputMIME;
   }
 
   function adjustStep() {
@@ -46,16 +56,20 @@
     }
   }
 
-  function changeMode() {
-    if (selection === $detectMode) {
+  function saveSettings() {
+    $filenameTemplate = internalFilenameTemplate;
+    $outputMIME = internalOutputMIME;
+
+    // only reset step when mode changed
+    if (internalDetectMoe === $detectMode) {
       return;
     }
 
-    if (selection === MODE.PEG_HOLE) {
+    if (internalDetectMoe === MODE.PEG_HOLE) {
       $fitFrame = false;
     }
 
-    $detectMode = selection;
+    $detectMode = internalDetectMoe;
     $showRefImage = false;
     $showPivot = false;
     $showROI = false;
@@ -76,44 +90,66 @@
   }
 </script>
 
-<RootDialog id="mode-dialog" bind:open={openDialog} on:MDCDialog:closed={() => { selection = $detectMode; }}>
-  <Title>位置合わせ方式</Title>
+<RootDialog id="mode-dialog" bind:open={openDialog} on:MDCDialog:closed={() => { internalDetectMoe = $detectMode; }}>
+  <Title>各種設定</Title>
   <Content>
-    <List radioList>
-      <Item use={[InitialFocus]}>
-        <Graphic>
-          <Radio bind:group={selection} value={MODE.PEG_HOLE} />
-        </Graphic>
-        <Text>
-          <SVGIcon icon={mdiAlphaHCircleOutline} />
-          タップ穴を基準にする
-        </Text>
-      </Item>
-      <Item>
-        <Graphic>
-          <Radio bind:group={selection} value={MODE.FRAME} />
-        </Graphic>
-        <Text>
-          <SVGIcon icon={mdiAlphaFBoxOutline} />
-          フレームを基準にする
-        </Text>
-      </Item>
-    </List>
+    <div class="section">
+      <Select bind:value={internalDetectMoe} label="位置合わせ方式" variant="outlined">
+      <SVGIcon
+        class="mdc-select__icon"
+        icon={internalDetectMoe === MODE.PEG_HOLE ? mdiAlphaHCircleOutline : mdiAlphaFBoxOutline}
+        slot="leadingIcon"
+      />
+      <Option value={MODE.PEG_HOLE}>
+        <SVGIcon icon={mdiAlphaHCircleOutline} />
+        タップ穴を基準にする
+      </Option>
+      <Option value={MODE.FRAME}>
+        <SVGIcon icon={mdiAlphaFBoxOutline} />
+        フレームを基準にする
+      </Option>
+    </Select>
+    </div>
+
+    <div class="section">
+      <Select bind:value={internalOutputMIME} label="出力ファイル形式" variant="outlined">
+        <Option value={MIMETYPE.AS_IS}>元ファイルと同じ形式</Option>
+        <Option value={MIMETYPE.PNG}>PNG (透過対応)</Option>
+        <Option value={MIMETYPE.JPEG}>JPEG (非透過, 高圧縮)</Option>
+        <Option value={MIMETYPE.WEBP}>WebP (透過対応, 高圧縮)</Option>
+      </Select>
+    </div>
+
+    <div class="section filename-section">
+      <div class="filename-input">
+        <Textfield
+          style="width: 100%;"
+          bind:value={internalFilenameTemplate}
+          label="出力ファイル名テンプレート"
+          variant="outlined"
+        >
+          <HelperText slot="helper" persistent>
+            {'{filename} - 元ファイル名, {index} - 連番'}
+          </HelperText>
+        </Textfield>
+      </div>
+      <span>.{mimeToExt(internalOutputMIME)}</span>
+    </div>
   </Content>
 
   <Actions>
     <Button>閉じる</Button>
-    <Button on:click={changeMode}>適用</Button>
+    <Button on:click={saveSettings}>適用</Button>
   </Actions>
 </RootDialog>
 
 <div class="settings">
   <span
     class="icon change-mode"
-    title="位置合わせ方式を変更"
+    title="各種設定"
     on:click={openModeDialog}
   >
-    <SVGIcon icon={$detectMode === MODE.PEG_HOLE ? mdiAlphaHCircleOutline : mdiAlphaFBoxOutline} />
+    <SVGIcon icon={mdiCog} />
   </span>
 
   {#if $detectMode === MODE.FRAME}
@@ -159,6 +195,29 @@
     }
   }
 
+  .section {
+    margin-bottom: 2em;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .filename-section {
+    display: flex;
+    align-items: flex-end;
+
+    span {
+      font-size: 12px;
+      margin-left: 0.5em;
+      margin-bottom: 20px;
+    }
+  }
+
+  .filename-input {
+    flex: 1;
+  }
+
   .change-mode {
     color: #ffccbc;
   }
@@ -178,34 +237,28 @@
   :global {
     #mode-dialog {
       .mdc-dialog__content {
-        padding: 0;
+        padding: 1em;
+        min-height: 200px;
+        min-width: 350px;
+        overflow: visible;
       }
 
-      .mdc-deprecated-list {
-        color: var(--placeholder);
-        padding: 10px 0px !important;
+      .mdc-select {
+        width: 100%;
       }
 
-      .mdc-deprecated-list-item {
-        --mdc-theme-secondary: var(--mdc-theme-primary);
-
-        padding: 0 25px !important;
-
-        &:focus ::before {
-          opacity: 0;
-        }
+      .smui-select--standard.mdc-select--with-leading-icon .mdc-select__icon {
+        margin-left: 6px;
+        margin-right: -30px;
       }
 
-      .mdc-deprecated-list-item__graphic {
-        margin-right: 5px;
-      }
-
-      .mdc-deprecated-list-item__text {
-        display: inline-flex;
-
-        .icon {
-          color: var(--placeholder);
-        }
+      .mdc-select__menu {
+        position: fixed;
+        width: 320px;
+        margin-top: 50px;
+        left: auto !important;
+        top: auto !important;
+        z-index: 999999 !important;
       }
     }
   }
