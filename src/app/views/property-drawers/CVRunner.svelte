@@ -25,7 +25,7 @@
     fitFrame,
   } from '../../store';
   import { mimeToExt } from '../../utils/mime-to-ext';
-  import { MIMETYPE } from "../../../shared/mimetype";
+  import { MIMETYPE } from '../../../shared/mimetype';
 
   const { currentStep } = stepManager;
   const targetStep = STEP.RUN_CV;
@@ -58,7 +58,7 @@
 
           const newName = $filenameTemplate
             .replace('{filename}', filename)
-            .replace('{index}', String(idx + 1));
+            .replace('{index}', String(idx + 1)) + '.' + mimeToExt(filetype);
 
           $outputList = $outputList.set(idx, res.rename(newName).changeFiletype(filetype));
         }
