@@ -73,9 +73,6 @@
         renameAllOutputImages();
       }),
       outputMIME.subscribe(mime => {
-        if (mime === MIMETYPE.AS_IS) {
-          return;
-        }
         renameAllOutputImages();
       }),
     ];
