@@ -2,6 +2,7 @@ import piexif, { ImageIFD, ExifIFD } from 'piexifjs';
 import type { IDecodedTga, IEncodeTgaOptions } from 't-tga-codec';
 
 import { MIMETYPE } from '../../shared/mimetype';
+import { mimeToExt } from '../utils/mime-to-ext';
 
 type TGAMeta = IDecodedTga['details']
 
@@ -94,7 +95,7 @@ export class ImageCanvas {
   constructor(
     readonly canvas: HTMLCanvasElement,
     readonly filename: string,
-    readonly filetype: string,
+    readonly filetype: MIMETYPE,
     readonly exif?: any,
     readonly tgaMeta?: TGAMeta,
   ) {
@@ -137,7 +138,7 @@ export class ImageCanvas {
         ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight);
 
         URL.revokeObjectURL(img.src);
-        resolve(new ImageCanvas(canvas, file.name, file.type, exif));
+        resolve(new ImageCanvas(canvas, file.name, file.type as MIMETYPE, exif));
       };
 
       img.onerror = e => {
@@ -149,7 +150,7 @@ export class ImageCanvas {
     });
   }
 
-  static fromImageData(imageData: ImageData, filename: string, filetype: string, exif?: any, tgaMeta?: TGAMeta) {
+  static fromImageData(imageData: ImageData, filename: string, filetype: MIMETYPE, exif?: any, tgaMeta?: TGAMeta) {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d')!;
 
@@ -206,6 +207,21 @@ export class ImageCanvas {
   getImageData(): ImageData {
     const ctx = this.canvas.getContext('2d')!;
     return ctx.getImageData(0, 0, this.width, this.height);
+  }
+
+  rename(newName: string) {
+    return new ImageCanvas(this.canvas, newName, this.filetype, this.exif, this.tgaMeta);
+  }
+
+  changeFiletype(newFiletype: MIMETYPE) {
+    if (newFiletype === this.filetype || newFiletype === MIMETYPE.AS_IS) {
+      return this;
+    }
+
+    const filename = this.filename.replace(/\.[^/.]+$/, '');
+    const ext = mimeToExt(newFiletype);
+
+    return new ImageCanvas(this.canvas, `${filename}.${ext}`, newFiletype, this.exif, this.tgaMeta);
   }
 
   private fixExif() {

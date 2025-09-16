@@ -49,7 +49,20 @@
     await $cvWorker.requestProcessing(
       $detectMode, $fitFrame, [...$inputList], $refImage, $ROI, $pivotPoint,
       (idx, res, prg) => {
-        $outputList = $outputList.set(idx, res);
+        if (res instanceof Error) {
+          $outputList = $outputList.set(idx, res);
+        } else {
+          // remove extension from filename
+          const filename = res.filename.replace(/\.[^/.]+$/, '');
+          const filetype = $outputMIME === MIMETYPE.AS_IS ? res.filetype : $outputMIME;
+
+          const newName = $filenameTemplate
+            .replace('{filename}', filename)
+            .replace('{index}', String(idx + 1));
+
+          $outputList = $outputList.set(idx, res.rename(newName).changeFiletype(filetype));
+        }
+
         progress = prg;
       },
     );
@@ -84,18 +97,19 @@
         }
 
         // fallback to input image
-        return $inputList.get(0);
-      })
-      .map((image: ImageCanvas, index) => async () => {
-        // remove extension from filename
-        const filename = image.filename.replace(/\.[^/.]+$/, '');
-        const filetype = $outputMIME === MIMETYPE.AS_IS ? image.filetype : $outputMIME;
+        const fallback = $inputList.get(i);
 
+        if (fallback) {
+          return fallback.rename(`failed-${fallback.filename}`).changeFiletype($outputMIME);
+        }
+
+        return null;
+      })
+      .filter((image) => image !== null)
+      .map((image: ImageCanvas) => async () => {
         await zipWriter.add(
-          $filenameTemplate
-            .replace('{filename}', filename)
-            .replace('{index}', String(index + 1)) + '.' + mimeToExt(filetype),
-          new BlobReader(await image.toBlob(filetype)),
+          image.filename,
+          new BlobReader(await image.toBlob()),
           { bufferedWrite: true },
         );
       });

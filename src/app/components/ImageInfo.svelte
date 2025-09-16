@@ -6,9 +6,22 @@
   export let preview = false;
   export let allowEmpty = false;
   export let image: ImageCanvas | undefined;
+  export let readonly: boolean = true;
+  export let onRename: ((newName: string) => void) | undefined;
+
+  $: filename = image?.filename.replace(/\.[^/.]+$/, '') || '';
+  $: extName = image?.filename.split('.').pop()?.toLowerCase();
 
   $: xRes = image?.exif?.['0th'][piexif.ImageIFD.XResolution];
   $: yRes = image?.exif?.['0th'][piexif.ImageIFD.XResolution];
+
+  function handleRename(newName: string) {
+    if (readonly) {
+      return;
+    }
+
+    onRename?.(newName ? `${newName}.${extName}` : image?.filename || '');
+  }
 </script>
 
 <div class="image-info">
@@ -21,7 +34,20 @@
       <tbody>
         <tr>
           <td>ファイル名</td>
-          <td>{image?.filename || 'N/A'}</td>
+          <td>
+            {#if image}
+              {#if readonly}
+                <span>{image.filename}</span>
+              {:else}
+                <div class="rename">
+                  <input type="text" bind:value={filename} on:input={e => handleRename(e.target.value)} />
+                  <span>.{extName}</span>
+                </div>
+              {/if}
+            {:else}
+              N/A
+            {/if}
+          </td>
         </tr>
 
         <tr>
@@ -68,5 +94,29 @@
 
   table {
     text-align: left;
+  }
+
+  .rename {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.25em;
+
+    input {
+      width: 100px;
+      background: var(--placeholder);
+      border: none;
+      outline: none;
+      color: white;
+      padding: 2px 4px;
+
+      &:focus {
+        outline: 2px solid var(--background-dimmed);
+      }
+    }
+
+    span {
+      flex-shrink: 0;
+    }
   }
 </style>
