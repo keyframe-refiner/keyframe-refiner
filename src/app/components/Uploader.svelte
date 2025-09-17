@@ -51,7 +51,7 @@
     const unsup: File[] = [];
 
     for (const f of files) {
-      if (f.type.startsWith('image/')) {
+      if (f.name.endsWith('.tga') || f.type.startsWith('image/')) {
         result.push(f);
       } else {
         unsup.push(f);
