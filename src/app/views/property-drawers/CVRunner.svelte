@@ -32,7 +32,7 @@
   const targetStep = STEP.RUN_CV;
   let progress = 0;
   let cvRunning = false;
-  let creatingZip = false;
+  let isDownloading = false;
 
   // reset progress when step changed
   currentStep.subscribe(() => {
@@ -72,7 +72,7 @@
       filenameTemplate.subscribe(() => {
         renameAllOutputImages();
       }),
-      outputMIME.subscribe(mime => {
+      outputMIME.subscribe(() => {
         renameAllOutputImages();
       }),
     ];
@@ -120,12 +120,8 @@
     return `${year}${month}${day}_${hour}${minute}${second}`;
   }
 
-  async function download() {
-    creatingZip = true;
-
-    const zipWriter = new ZipWriter(new BlobWriter('application/zip'));
-
-    const actions = [...$outputList]
+  function getOutputImages() {
+    return [...$outputList]
       // .filter(res => res instanceof ImageCanvas)
       .map((res, i) => {
         if (res instanceof ImageCanvas) {
@@ -141,8 +137,14 @@
 
         return null;
       })
-      .filter((image) => image !== null)
-      .map((image: ImageCanvas) => async () => {
+      .filter((image) => image !== null);
+  }
+
+  async function downloadZip() {
+    const zipWriter = new ZipWriter(new BlobWriter('application/zip'));
+
+    const actions = getOutputImages()
+      .map((image) => async () => {
         await zipWriter.add(
           image.filename,
           new BlobReader(await image.toBlob()),
@@ -162,8 +164,42 @@
     link.href = URL.createObjectURL(await zipWriter.close());
     link.download = `result-${getDateString()}.zip`;
     link.click();
+  }
 
-    creatingZip = false;
+  async function downloadFs() {
+    const dirHandle = await (window as any).showDirectoryPicker({ id: 'keyframe-refiner-output', mode: 'readwrite' });
+    const saveDirHandle = await dirHandle.getDirectoryHandle(`result-${getDateString()}`, { create: true });
+
+    const actions = getOutputImages()
+      .map((image) => async () => {
+        const fileHandle = await saveDirHandle.getFileHandle(image.filename, { create: true });
+        const writable = await fileHandle.createWritable();
+        await writable.write(await image.toBlob());
+        await writable.close();
+      });
+
+    // HACK: image.toBlob() is a time-consuming task and will freeze the UI for seconds,
+    // so wait for UI updating here...
+    await new Promise(resolve => setTimeout(resolve));
+
+    await pAll(actions, {
+      concurrency: navigator.hardwareConcurrency || 4,
+    });
+
+    alert(`${actions.length} 枚の画像を ${saveDirHandle.name} フォルダに保存しました`);
+  }
+
+  async function download() {
+    try {
+      isDownloading = true;
+      if ('showDirectoryPicker' in window) {
+        await downloadFs();
+      } else {
+        await downloadZip();
+      }
+    } finally {
+      isDownloading = false;
+    }
   }
 </script>
 
@@ -187,7 +223,7 @@
 {#if cvRunning || progress === 1}
   <Portal target="body">
     <div class="download-btn" style={`--progress: ${progress * 100}%`}>
-      <Fab disabled={progress !== 1 || creatingZip} on:click={download} title="zip ファイルをダウンロード">
+      <Fab disabled={progress !== 1 || isDownloading} on:click={download} title="処理結果をダウンロード">
         <SVGIcon icon={cvRunning ? mdiSpaceInvaders : mdiPackageDown} />
       </Fab>
 
@@ -195,7 +231,7 @@
         <CircularProgress class="progress" {progress} />
       {/if}
 
-      {#if creatingZip}
+      {#if isDownloading}
         <CircularProgress class="progress four-colors" indeterminate fourColor />
       {/if}
     </div>
