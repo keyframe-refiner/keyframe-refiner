@@ -108,7 +108,7 @@ export class ImageCanvas {
   static async fromFile(file: File): Promise<ImageCanvas> {
     const canvas = document.createElement('canvas');
 
-    if (file.type === MIMETYPE.TGA) {
+    if (file.type === MIMETYPE.TGA || file.name.endsWith('.tga')) {
       const { decodeTga } = await import('t-tga-codec');
       const decoded = await decodeTga(new Uint8Array(await file.arrayBuffer()));
 
@@ -118,7 +118,7 @@ export class ImageCanvas {
         decoded.image.height,
       );
 
-      return ImageCanvas.fromImageData(imageData, file.name, file.type, undefined, decoded.details);
+      return ImageCanvas.fromImageData(imageData, file.name, MIMETYPE.TGA, undefined, decoded.details);
     }
 
     const img = document.createElement('img');
